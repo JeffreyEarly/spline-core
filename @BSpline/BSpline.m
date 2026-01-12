@@ -33,6 +33,11 @@ classdef BSpline < handle
         %
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         function self = BSpline(K,t_knot,m)
+            arguments
+                K (1,1) double {mustBeInteger,mustBeGreaterThanOrEqual(K,1)}
+                t_knot (:,1) double {mustBeNumeric,mustBeReal}
+                m (:,1) double = zeros(length(t_knot)-K,1)
+            end
             self.K = K;   
             self.t_knot = t_knot;
             self.m = m;            
