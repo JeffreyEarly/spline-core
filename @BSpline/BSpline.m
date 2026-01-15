@@ -90,7 +90,7 @@ classdef BSpline < handle
             if ~exist('NumDerivatives','var')
                 NumDerivatives = 0;
             end
-            x_out = BSpline.EvaluateFromPPCoefficients(t,self.C,self.t_pp,NumDerivatives);
+            x_out = BSpline.evaluateFromPPCoefficients_anyOrder(t,self.C,self.t_pp,NumDerivatives);
             if ~isempty(self.x_std)
                 x_out = self.x_std*x_out;
             end
@@ -185,7 +185,48 @@ classdef BSpline < handle
             
             
         end
-        
+     
+        function f = evaluateFromPPCoefficients_anyOrder(t,C,tpp,D)
+            % ChatGPT altered version... does appear to be better.
+            % Same behavior as original, but accepts unsorted t by sorting internally.
+
+            K = size(C,2);
+            f = zeros(size(t), 'like', t);
+
+            if nargin < 4
+                D = 0;
+            elseif D > K-1
+                return;
+            end
+
+            scale   = factorial((K-1-D):-1:0);
+            indices = 1:(K-D);
+
+            % Work on a sorted copy, remember how to undo it.
+            [tSorted, p] = sort(t(:), 'ascend');   % p maps sorted positions -> original linear index
+
+            t_pp_bin = discretize(tSorted, [-Inf; tpp(2:end-1); Inf]);
+
+            fSorted = zeros(size(tSorted), 'like', tSorted);
+
+            startIndex = 1;
+            while startIndex <= numel(tSorted)
+                iBin = t_pp_bin(startIndex);
+                % last index of THIS contiguous run:
+                endIndex = startIndex + find(t_pp_bin(startIndex:end) ~= iBin, 1, 'first') - 2;
+                if isempty(endIndex)
+                    endIndex = numel(tSorted);
+                end
+                fSorted(startIndex:endIndex) = polyval(C(iBin,indices)./scale, tSorted(startIndex:endIndex) - tpp(iBin));
+                startIndex = endIndex + 1;
+            end
+
+            % Unsort back into original shape
+            fFlat = zeros(numel(t), 1, 'like', t);
+            fFlat(p) = fSorted;
+            f = reshape(fFlat, size(t));
+        end
+
         function f = EvaluateFromPPCoefficients(t,C,t_pp, D)
             %% EvaluateFromPPCoefficients
             %
@@ -202,7 +243,7 @@ classdef BSpline < handle
                 t = flip(t);
                 didFlip = 1;
             else
-                error('Not sorted')
+                % error('Not sorted')
                 [t,I] = sort(t);
                 d = 1:length(t);
                 returnIndices = d(I);
