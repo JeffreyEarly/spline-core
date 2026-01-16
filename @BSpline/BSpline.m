@@ -90,7 +90,7 @@ classdef BSpline < handle
             if ~exist('NumDerivatives','var')
                 NumDerivatives = 0;
             end
-            x_out = BSpline.evaluateFromPPCoefficients_anyOrder(t,self.C,self.t_pp,NumDerivatives);
+            x_out = BSpline.EvaluateFromPPCoefficients(t,self.C,self.t_pp,NumDerivatives);
             if ~isempty(self.x_std)
                 x_out = self.x_std*x_out;
             end
@@ -186,7 +186,7 @@ classdef BSpline < handle
             
         end
      
-        function f = evaluateFromPPCoefficients_anyOrder(t,C,tpp,D)
+        function f = EvaluateFromPPCoefficients(t,C,tpp,D)
             % ChatGPT altered version... does appear to be better.
             % Same behavior as original, but accepts unsorted t by sorting internally.
 
@@ -225,76 +225,6 @@ classdef BSpline < handle
             fFlat = zeros(numel(t), 1, 'like', t);
             fFlat(p) = fSorted;
             f = reshape(fFlat, size(t));
-        end
-
-        function f = EvaluateFromPPCoefficients(t,C,t_pp, D)
-            %% EvaluateFromPPCoefficients
-            %
-            % Returns the value of the function with derivative D
-            % represented by PP coefficients C at locations t. t_pp
-            % contains the intervals.
-            %
-            % The returned array f is the same size as t.
-            %
-            %
-            if issorted(t,'ascend')
-                didFlip = 0;
-            elseif issorted(t,'descend')
-                t = flip(t);
-                didFlip = 1;
-            else
-                % error('Not sorted')
-                [t,I] = sort(t);
-                d = 1:length(t);
-                returnIndices = d(I);
-                didFlip = 2;
-            end
-            
-            K = size(C,2);
-            f = zeros(size(t));
-            
-            if nargin < 4
-                D = 0;
-            elseif D > K-1
-                % By construction the splines are zero for K or more derivs
-                return;
-            end
-            
-            scale = factorial((K-1-D):-1:0);
-            indices = 1:(K-D);
-            
-            % startIndex and endIndex are indices into t/f
-%             startIndex = 1;
-%             for i=2:length(t_pp)
-%                 endIndex = find(t <= t_pp(i),1,'last');
-%                 f(startIndex:endIndex) = polyval(C(i-1,indices)./scale,t(startIndex:endIndex)-t_pp(i-1));
-%                 startIndex = endIndex+1;
-%             end
-%             f(startIndex:end) = polyval(C(i-1,indices)./scale,t(startIndex:end)-t_pp(i-1));
-            
-% The above implementation is faster, but doesn't actually work in some
-% cases, like evaluating a single point. The discretize function is slow.
-            t_pp_bin = discretize(t,[-Inf; t_pp(2:end-1); Inf]);
-            startIndex = 1;
-            while startIndex <= length(t)
-                iBin = t_pp_bin(startIndex);
-                endIndex = find( t_pp_bin == iBin, 1, 'last');
-                f(startIndex:endIndex) = polyval(C(iBin,indices)./scale,t(startIndex:endIndex)-t_pp(iBin));
-                startIndex = endIndex+1;
-            end
-            
-            % include an extrapolated points past the end.
-            if startIndex <= length(t)
-                f(startIndex:end) = polyval(C(iBin,indices)./scale,t(startIndex:end)-t_pp(iBin));
-            end
-            
-            if didFlip == 0
-                return;
-            elseif didFlip == 1
-                f = flip(f);
-            else
-                f = f(returnIndices);
-            end
         end
         
         function B = Spline( t, t_knot, K, D )
