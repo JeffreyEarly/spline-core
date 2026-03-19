@@ -140,6 +140,32 @@ classdef BSplineUnitTests < matlab.unittest.TestCase
             testCase.assertThat(intspline(t), IsEqualTo(g(t)-g(t(1)), 'Within', AbsoluteTolerance(10*eps)))
         end
 
+        function powerWithExponentOneReturnsOriginalSpline(testCase)
+            import matlab.unittest.constraints.IsEqualTo
+            import matlab.unittest.constraints.AbsoluteTolerance
+
+            t = linspace(0,1,11)';
+            x = sin(2*pi*t);
+            spline = InterpolatingSpline(t,x,K=4);
+
+            powered = power(spline,1);
+
+            testCase.assertThat(powered(t), IsEqualTo(spline(t), 'Within', AbsoluteTolerance(10*eps)))
+        end
+
+        function sqrtMatchesPositiveSplineOnSupport(testCase)
+            import matlab.unittest.constraints.IsEqualTo
+            import matlab.unittest.constraints.AbsoluteTolerance
+
+            t = linspace(0,1,11)';
+            x = (t + 1).^2;
+            spline = InterpolatingSpline(t,x,K=4);
+
+            rooted = sqrt(spline);
+
+            testCase.assertThat(rooted(t), IsEqualTo(t + 1, 'Within', AbsoluteTolerance(1e-8)))
+        end
+
         function matrixAndPPFormsAgree(testCase)
             import matlab.unittest.constraints.IsEqualTo
             import matlab.unittest.constraints.AbsoluteTolerance

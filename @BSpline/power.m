@@ -1,26 +1,29 @@
-function splineb = power(spline,b,constraints)
+function poweredSpline = power(spline,exponent,constraints)
 % power (.^)
 %
 % - Topic: Operations
 arguments
     spline (1,1) BSpline
-    b (1,1) double
+    exponent (1,1) double {mustBeReal,mustBeFinite}
     constraints = []
 end
-if b == 1
-    splineb = spline;
+if exponent == 1
+    poweredSpline = spline;
+    return;
+end
+
+supportPoints = BSpline.pointsOfSupport(spline.tKnot,spline.K,0);
+values = spline.valueAtPoints(supportPoints);
+values(abs(values) < 2*eps) = 0;
+
+poweredOrder = ceil(exponent*spline.K);
+tKnot = BSpline.knotPointsForDataPoints(supportPoints,K=poweredOrder);
+poweredValues = values.^exponent;
+
+if ~isempty(constraints)
+    poweredSpline = ConstrainedSpline(supportPoints,poweredValues,poweredOrder,tKnot,[],constraints);
 else
-    ts = BSpline.pointsOfSupport(spline.tKnot,spline.K,0);
-    g = spline.valueAtPoints(ts);
-    g(abs(2*eps)>g) = 0;
-    K = ceil(b*spline.K);
-    tKnot = BSpline.knotPointsForDataPoints(ts,K=K);
-    if ~isempty(constraints)
-        splineb = ConstrainedSpline(ts,(g.^b),K,tKnot,[],constraints);
-    else
-        X = BSpline.matrix(ts,tKnot,K);
-        xi = X\(g.^b);
-        splineb = BSpline(K,tKnot,xi);
-    end
-    
+    X = BSpline.matrix(supportPoints,tKnot,poweredOrder);
+    xi = X\poweredValues;
+    poweredSpline = BSpline(poweredOrder,tKnot,xi);
 end
