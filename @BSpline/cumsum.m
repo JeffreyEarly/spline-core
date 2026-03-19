@@ -9,9 +9,9 @@ tKnot = spline.tKnot;
 M = length(xi);
 
 if abs(spline.x_mean) > 0 || abs(spline.x_std - 1) > 0
-%     X = spline.B(:,:,1);
+%     X = spline.Xtpp(:,:,1);
 %     if isempty(X)
-%         X = BSpline.Spline( spline.t_pp, tKnot, K );
+%         X = BSpline.matrix( spline.t_pp, tKnot, K );
 %     end
     t = BSpline.pointsOfSupport(spline.tKnot,spline.K);
     X = BSpline.matrix(t,spline.tKnot,spline.K);

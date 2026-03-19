@@ -39,7 +39,7 @@ classdef BSpline < handle
     
     properties (Access=public)
         x_mean = 0 % if set, these will be used to scale the output
-        x_std = 1 % x_out = x_std*(X*m)+x_mean;
+        x_std = 1 % x_out = x_std*(X*xi)+x_mean;
     end
 
     properties (Dependent)
@@ -95,27 +95,27 @@ classdef BSpline < handle
         % Initialization
         %
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-        function self = BSpline(K,tKnot,m,options)
+        function self = BSpline(K,tKnot,xi,options)
             % create a new BSpline instance
             %
             % Creates a new instance of BSpline
             %
             % - Topic: Initialization
-            % - Declaration: spline = BSpline(K,tKnot,m)
+            % - Declaration: spline = BSpline(K,tKnot,xi)
             % - Parameter K: spline order (degree S=K-1)
             % - Parameter tKnot: knot points
-            % - Parameter m: (optional) spline coefficients
+            % - Parameter xi: (optional) spline coefficients
             arguments
                 K (1,1) double {mustBeInteger,mustBeGreaterThanOrEqual(K,1)}
                 tKnot (:,1) double {mustBeNumeric,mustBeReal}
-                m (:,1) double = zeros(length(tKnot)-K,1)
+                xi (:,1) double = zeros(length(tKnot)-K,1)
                 options.Xtpp (:,:,:) double
                 options.x_mean = 0
                 options.x_std = 1
             end
             self.K = K;   
             self.tKnot = tKnot;
-            self.xi = m;
+            self.xi = xi;
             self.x_mean = options.x_mean;
             self.x_std = options.x_std;
             if isfield(options,'Xtpp')
@@ -170,11 +170,10 @@ classdef BSpline < handle
     end
     
     methods (Static)
-        t_knot = knotPointsForDataPoints( t, options)
+        tKnot = knotPointsForDataPoints( t, options)
         t = pointsOfSupport(tKnot,K,D)
-        [C,tpp,Xtpp] = ppCoefficientsFromSplineCoefficients( m, tKnot, K, options )
+        [C,tpp,Xtpp] = ppCoefficientsFromSplineCoefficients( xi, tKnot, K, options )
         f = evaluateFromPPCoefficients(t,C,tpp, D)
         B = matrix( t, tKnot, K, options )
     end
 end
-

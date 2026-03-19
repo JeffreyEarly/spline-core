@@ -1,12 +1,12 @@
-function t_knot = knotPointsForDataPoints( t, options)
+function tKnot = knotPointsForDataPoints( t, options)
 % create knot points appropriate for observation times t
 %
 % - Topic: Methodology (Static methods)
-% - Declaration: t_knot = knotPointsForDataPoints( t, options)
+% - Declaration: tKnot = knotPointsForDataPoints( t, options)
 % - Parameter t: observation times (N)
 % - Parameter K: (optional) spline order
 % - Parameter M: (optional) number of splines (M<=N)
-% - Returns t_knot: vector of knot point locations
+% - Returns tKnot: vector of knot point locations
 arguments
     t (:,1) double
     options.K (1,1) double {mustBePositive,mustBeInteger,mustBeGreaterThanOrEqual(options.K,1)} = 4
@@ -24,21 +24,21 @@ if mod(K,2) == 1
     dt = diff(t_pseudo);
 
     % This gives us N+1 knot points
-    t_knot = [t_pseudo(1); t_pseudo(1:end-1)+dt/2; t_pseudo(end)];
+    tKnot = [t_pseudo(1); t_pseudo(1:end-1)+dt/2; t_pseudo(end)];
 
     % Now remove start and end knots
     for i=1:((K-1)/2)
-        t_knot(2) = [];
-        t_knot(end-1) = [];
+        tKnot(2) = [];
+        tKnot(end-1) = [];
     end
 
 else
-    t_knot = t_pseudo;
+    tKnot = t_pseudo;
 
     % Now remove start and end knots
     for i=1:((K-2)/2)
-        t_knot(2) = [];
-        t_knot(end-1) = [];
+        tKnot(2) = [];
+        tKnot(end-1) = [];
     end
 
 end
@@ -46,5 +46,5 @@ end
 % Now we increase the multiplicity of the knot points at the beginning and
 % the end of the interval so that the splines do not extend past the end
 % points.
-t_knot = [repmat(t_knot(1),K-1,1); t_knot; repmat(t_knot(end),K-1,1)];
+tKnot = [repmat(tKnot(1),K-1,1); tKnot; repmat(tKnot(end),K-1,1)];
 end

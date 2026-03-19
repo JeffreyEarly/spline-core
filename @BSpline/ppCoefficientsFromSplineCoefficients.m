@@ -1,9 +1,9 @@
-function [C,tpp,Xtpp] = ppCoefficientsFromSplineCoefficients( m, tKnot, K, options )
-% Returns the piecewise polynomial coefficients in matrix C from spline coefficients in vector m.
+function [C,tpp,Xtpp] = ppCoefficientsFromSplineCoefficients( xi, tKnot, K, options )
+% Returns the piecewise polynomial coefficients in matrix C from spline coefficients in vector xi.
 %
 % - Topic: Spline evalutation
-% - Declaration: ppCoefficientsFromSplineCoefficients( m, tKnot, K, B )
-% - Parameter m: spline coefficients
+% - Declaration: ppCoefficientsFromSplineCoefficients( xi, tKnot, K, Xtpp )
+% - Parameter xi: spline coefficients
 % - Parameter tKnot: spline knot points
 % - Parameter K: spline order (degree S=K-1)
 % - Parameter Xtpp: (optional) splines at the points tpp
@@ -11,7 +11,7 @@ function [C,tpp,Xtpp] = ppCoefficientsFromSplineCoefficients( m, tKnot, K, optio
 % - Returns tpp: piece-wise polynomial intervals, size(tpp) = length(tKnot) - 2*K + 1
 % - Returns Xtpp: splines at the points tpp
 arguments
-    m (:,1) double
+    xi (:,1) double
     tKnot (:,1) double {mustBeNumeric,mustBeReal}
     K (1,1) double {mustBePositive,mustBeInteger,mustBeGreaterThanOrEqual(K,1)}
     options.Xtpp (:,:,:) double
@@ -28,7 +28,7 @@ end
 % Build an array of coefficients for polyval, highest order first.
 C = zeros(length(tpp)-1,K);
 for i=1:K
-    C(:,K-i+1) = Xtpp(1:end-1,:,i)*m;
+    C(:,K-i+1) = Xtpp(1:end-1,:,i)*xi;
 end
 
 end

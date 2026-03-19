@@ -13,6 +13,32 @@ classdef BSplineUnitTests < matlab.unittest.TestCase
             testCase.assertThat(spline(t), IsEqualTo(f(t), 'Within', AbsoluteTolerance(10*eps)))
         end
 
+        function plusAddsScalarOffset(testCase)
+            import matlab.unittest.constraints.IsEqualTo
+            import matlab.unittest.constraints.AbsoluteTolerance
+
+            f = @(x) x;
+            t = linspace(-1,1,11)';
+            spline = InterpolatingSpline(t,f(t),2);
+
+            shifted = spline + 1;
+
+            testCase.assertThat(shifted(t), IsEqualTo(f(t)+1, 'Within', AbsoluteTolerance(2*eps)))
+        end
+
+        function mtimesScalesSpline(testCase)
+            import matlab.unittest.constraints.IsEqualTo
+            import matlab.unittest.constraints.AbsoluteTolerance
+
+            f = @(x) x;
+            t = linspace(-1,1,11)';
+            spline = InterpolatingSpline(t,f(t),2);
+
+            scaled = -2*spline;
+
+            testCase.assertThat(scaled(t), IsEqualTo(-2*f(t), 'Within', AbsoluteTolerance(2*eps)))
+        end
+
         function interpolatingSplineDerivativeMatchesCubic(testCase)
             import matlab.unittest.constraints.IsEqualTo
             import matlab.unittest.constraints.RelativeTolerance
@@ -24,6 +50,34 @@ classdef BSplineUnitTests < matlab.unittest.TestCase
             spline = InterpolatingSpline(t,f(t),4);
 
             testCase.assertThat(spline(t,1), IsEqualTo(df(t), 'Within', RelativeTolerance(100*eps)))
+        end
+
+        function diffOperatorMatchesDerivative(testCase)
+            import matlab.unittest.constraints.IsEqualTo
+            import matlab.unittest.constraints.RelativeTolerance
+
+            f = @(x) -x.^3 + x.^2 - 2*x + 1;
+            df = @(x) -3*x.^2 + 2*x - 2;
+            t = linspace(-1,1,11)';
+
+            spline = InterpolatingSpline(t,f(t),4);
+            dspline = diff(spline);
+
+            testCase.assertThat(dspline(t), IsEqualTo(df(t), 'Within', RelativeTolerance(100*eps)))
+        end
+
+        function cumsumOperatorMatchesIntegral(testCase)
+            import matlab.unittest.constraints.IsEqualTo
+            import matlab.unittest.constraints.AbsoluteTolerance
+
+            f = @(x) x + ones(size(x));
+            g = @(x) 0.5*x.^2 + x;
+            t = linspace(-1,1,11)';
+
+            spline = InterpolatingSpline(t,f(t),4);
+            intspline = cumsum(spline);
+
+            testCase.assertThat(intspline(t), IsEqualTo(g(t)-g(t(1)), 'Within', AbsoluteTolerance(10*eps)))
         end
 
         function matrixAndPPFormsAgree(testCase)
