@@ -9,7 +9,7 @@ if ( ~isa(f, 'BSpline') )
 elseif ( isempty(g) )          % BSpline * []
     f = [];
 elseif ( isnumeric(g) && isscalar(g) )
-    h = BSpline(f.K,f.tKnot,f.m);
+    h = BSpline(f.K,f.tKnot,f.xi);
     h.x_std = g*f.x_std;
     h.x_mean = g*f.x_mean;
     f = h;

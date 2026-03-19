@@ -5,7 +5,7 @@ function splineb = power(spline,b,constraints)
 if b == 1
     splineb = spline;
 else
-    ts = BSpline.PointsOfSupport(spline.tKnot,spline.K,0);
+    ts = BSpline.pointsOfSupport(spline.tKnot,spline.K,0);
     g = spline.valueAtPoints(ts);
     g(abs(2*eps)>g) = 0;
 %         splineb = InterpolatingSpline(ts,(g.^b),ceil(b*spline.K));
@@ -15,10 +15,9 @@ else
     if exist('constraints','var') && ~isempty(constraints)
         splineb = ConstrainedSpline(ts,(g.^b),K,tKnot,[],constraints);
     else
-        X = BSpline.Spline(ts,tKnot,K);
-        m = X\(g.^b);
-        splineb = BSpline(K,tKnot,m);
+        X = BSpline.matrix(ts,tKnot,K);
+        xi = X\(g.^b);
+        splineb = BSpline(K,tKnot,xi);
     end
     
 end
-

@@ -10,20 +10,16 @@ end
 if n == 0
     dspline = spline;
 elseif n >= spline.K
-    dspline = BSpline(spline.K,spline.tKnot,zeros(size(spline.m)));
-    n = spline.K-1;
-    dspline.K = spline.K-n;
-    dspline.B = spline.B(:,:,1:(spline.K-n));
-    dspline.C = zeros(size(spline.C(:,1:(spline.K-n))));
+    dspline = BSpline(1,reshape(spline.domain,[],1),0);
 elseif ( ( n > 0 ) && ( round(n) == n ) )   % Positive integer
     D = n;
-    m = spline.m;
+    xi = spline.xi;
     K = spline.K;
     tKnot = spline.tKnot;
-    M = length(m);
+    M = length(xi);
     
-    alpha = zeros(length(m),D+1);
-    alpha(:,1) = m; % first column is the existing coefficients
+    alpha = zeros(length(xi),D+1);
+    alpha(:,1) = xi; % first column is the existing coefficients
     
     for d=1:D
         dm = diff(alpha(:,d));
@@ -36,4 +32,3 @@ elseif ( ( n > 0 ) && ( round(n) == n ) )   % Positive integer
 else
     error('Can only differentiate with positive integers');
 end
-
