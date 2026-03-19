@@ -16,7 +16,7 @@ arguments
     t (:,1) double {mustBeNumeric,mustBeReal}
     tKnot (:,1) double {mustBeNumeric,mustBeReal}
     K (1,1) double {mustBeInteger,mustBeGreaterThanOrEqual(K,1)}
-    options.D (1,1) double {mustBeInteger} = 0 %,mustBeLessThanOrEqual(options.D,K-1)
+    options.D (1,1) double {mustBeInteger,mustBeNonnegative} = 0 %,mustBeLessThanOrEqual(options.D,K-1)
 end
 
 if any(diff(tKnot)<0)

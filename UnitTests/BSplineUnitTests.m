@@ -39,6 +39,16 @@ classdef BSplineUnitTests < matlab.unittest.TestCase
             testCase.assertThat(scaled(t), IsEqualTo(-2*f(t), 'Within', AbsoluteTolerance(2*eps)))
         end
 
+        function plusRejectsNonScalarNumeric(testCase)
+            spline = InterpolatingSpline((0:2)',(0:2)',2);
+            testCase.verifyError(@() plus(spline,[1 2]), 'BSpline:plus:UnsupportedOperand')
+        end
+
+        function mtimesRejectsNonScalarNumeric(testCase)
+            spline = InterpolatingSpline((0:2)',(0:2)',2);
+            testCase.verifyError(@() mtimes(spline,[1 2]), 'BSpline:mtimes:UnsupportedOperand')
+        end
+
         function interpolatingSplineDerivativeMatchesCubic(testCase)
             import matlab.unittest.constraints.IsEqualTo
             import matlab.unittest.constraints.RelativeTolerance
@@ -64,6 +74,11 @@ classdef BSplineUnitTests < matlab.unittest.TestCase
             dspline = diff(spline);
 
             testCase.assertThat(dspline(t), IsEqualTo(df(t), 'Within', RelativeTolerance(100*eps)))
+        end
+
+        function diffRejectsNegativeOrder(testCase)
+            spline = InterpolatingSpline((0:2)',(0:2)',2);
+            testCase.verifyError(@() diff(spline,-1), 'MATLAB:validators:mustBeNonnegative')
         end
 
         function cumsumOperatorMatchesIntegral(testCase)
@@ -120,6 +135,11 @@ classdef BSplineUnitTests < matlab.unittest.TestCase
             actual = BSpline.evaluateFromPPCoefficients(tqUnsorted,C,tpp);
 
             testCase.assertThat(actual, IsEqualTo(expected, 'Within', AbsoluteTolerance(1e-10)))
+        end
+
+        function valueAtPointsRejectsNegativeDerivativeOrder(testCase)
+            spline = InterpolatingSpline((0:2)',(0:2)',2);
+            testCase.verifyError(@() spline.valueAtPoints((0:2)',-1), 'MATLAB:validators:mustBeNonnegative')
         end
 
         function rootsStayWithinSplineDomain(testCase)

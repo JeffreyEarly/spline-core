@@ -2,17 +2,20 @@ function splineb = power(spline,b,constraints)
 % power (.^)
 %
 % - Topic: Operations
+arguments
+    spline (1,1) BSpline
+    b (1,1) double
+    constraints = []
+end
 if b == 1
     splineb = spline;
 else
     ts = BSpline.pointsOfSupport(spline.tKnot,spline.K,0);
     g = spline.valueAtPoints(ts);
     g(abs(2*eps)>g) = 0;
-%         splineb = InterpolatingSpline(ts,(g.^b),ceil(b*spline.K));
-        K = ceil(b*spline.K);
-%     K = spline.K;
+    K = ceil(b*spline.K);
     tKnot = InterpolatingSpline.KnotPointsForPoints(ts,K);
-    if exist('constraints','var') && ~isempty(constraints)
+    if ~isempty(constraints)
         splineb = ConstrainedSpline(ts,(g.^b),K,tKnot,[],constraints);
     else
         X = BSpline.matrix(ts,tKnot,K);

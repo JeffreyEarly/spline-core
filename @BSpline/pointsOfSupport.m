@@ -3,6 +3,11 @@ function t = pointsOfSupport(tKnot,K,D)
 % boundary with repeat knot points.
 %
 % - Topic: Utility
+arguments
+    tKnot (:,1) double {mustBeNumeric,mustBeReal}
+    K (1,1) double {mustBeInteger,mustBeGreaterThanOrEqual(K,1)}
+    D = []
+end
 interior_knots = tKnot(K+1:end-K);
 
 if isempty(interior_knots)

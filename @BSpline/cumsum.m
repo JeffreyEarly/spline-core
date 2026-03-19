@@ -2,6 +2,9 @@ function intspline = cumsum(spline)
 % indefinite integral of a BSpline
 %
 % - Topic: Operations
+arguments
+    spline (1,1) BSpline
+end
 
 xi = spline.xi;
 K = spline.K;
@@ -18,12 +21,8 @@ if abs(spline.x_mean) > 0 || abs(spline.x_std - 1) > 0
     xi = spline.x_std*spline.xi + X\(spline.x_mean*ones(length(t),1));
 end
 
-
 dt = (tKnot(1+K:M+K)-tKnot(1:M))/K;
-beta = zeros(length(xi)+1,1);
-for i=2:length(beta)
-   beta(i) = beta(i-1) + xi(i-1)*dt(i-1); 
-end
+beta = [0; cumsum(xi.*dt)];
 
 tKnot = cat(1,spline.tKnot(1),spline.tKnot,spline.tKnot(end));
 intspline = BSpline(spline.K+1,tKnot,beta);

@@ -2,6 +2,10 @@ function f = plus(f,g)
 % addition (+)
 %
 % - Topic: Operations
+arguments
+    f
+    g
+end
 if ( ~isa(f, 'BSpline') )
     % Ensure BSpline is the first input:
     f = plus(g, f);
@@ -16,5 +20,5 @@ elseif ( isnumeric(g) && isscalar(g) )
     h.x_mean = f.x_mean+g;
     f = h;
 else
-    error('This case is not handled!')
+    error('BSpline:plus:UnsupportedOperand', 'Only scalar numeric offsets are supported.');
 end

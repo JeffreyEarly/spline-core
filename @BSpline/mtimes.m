@@ -2,6 +2,10 @@ function f = mtimes(f,g)
 % multiplication (.*)
 %
 % - Topic: Operations
+arguments
+    f
+    g
+end
 
 if ( ~isa(f, 'BSpline') )
     % Ensure BSpline is the first input:
@@ -14,5 +18,5 @@ elseif ( isnumeric(g) && isscalar(g) )
     h.x_mean = g*f.x_mean;
     f = h;
 else
-    error('This case is not handled!')
+    error('BSpline:mtimes:UnsupportedOperand', 'Only scalar numeric multiplication is supported.');
 end

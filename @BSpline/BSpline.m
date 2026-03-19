@@ -139,8 +139,14 @@ classdef BSpline < handle
             % evaluate the spline (and its derivatives) at arbitrary points t
             %
             % - Topic: Operations
-            if ~exist('NumDerivatives','var')
-                NumDerivatives = 0;
+            arguments
+                self (1,1) BSpline
+                t {mustBeNumeric,mustBeReal}
+                NumDerivatives (1,1) double {mustBeInteger,mustBeNonnegative} = 0
+            end
+            if NumDerivatives > self.K-1
+                x_out = zeros(size(t), 'like', t);
+                return;
             end
             x_out = BSpline.evaluateFromPPCoefficients(t,self.C,self.t_pp,NumDerivatives);
             if ~isempty(self.x_std)

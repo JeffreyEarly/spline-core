@@ -2,16 +2,16 @@ function dspline = diff(spline,n)
 % differentiation of a BSpline
 %
 % - Topic: Operations
-
-if nargin < 2
-    n = 1;
+arguments
+    spline (1,1) BSpline
+    n (1,1) double {mustBeInteger,mustBeNonnegative} = 1
 end
 
 if n == 0
     dspline = spline;
 elseif n >= spline.K
     dspline = BSpline(1,reshape(spline.domain,[],1),0);
-elseif ( ( n > 0 ) && ( round(n) == n ) )   % Positive integer
+else
     D = n;
     xi = spline.xi;
     K = spline.K;
@@ -29,6 +29,4 @@ elseif ( ( n > 0 ) && ( round(n) == n ) )   % Positive integer
     
     dspline = BSpline(K-D,tKnot((1+D):(end-D)),alpha(1:end-D,D+1));
     dspline.x_std = spline.x_std;   
-else
-    error('Can only differentiate with positive integers');
 end

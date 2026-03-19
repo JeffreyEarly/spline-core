@@ -8,13 +8,17 @@ function f = evaluateFromPPCoefficients(t,C,tpp, D)
 % - Parameter tpp: piece-wise polynomial intervals, size(tpp) = length(tKnot) - 2*K + 1
 % - Parameter D: number of derivatives
 % - Returns f: vector the same size as t
+arguments
+    t {mustBeNumeric,mustBeReal}
+    C (:,:) double
+    tpp (:,1) double {mustBeNumeric,mustBeReal}
+    D (1,1) double {mustBeInteger,mustBeNonnegative} = 0
+end
 
 K = size(C,2);
 f = zeros(size(t), 'like', t);
 
-if nargin < 4
-    D = 0;
-elseif D > K-1
+if D > K-1
     % By construction the splines are zero for K or more derivs
     return;
 end
