@@ -3,7 +3,7 @@ f = @(x) sin(2*pi*x/10);
 K = 3; % order of spline
 D = K-1; % number of derivates to return
 t = (0:10)'; % observation points
-t_knot = InterpolatingSpline.KnotPointsForPoints(t,K);
+t_knot = BSpline.knotPointsForDataPoints(t,K=K);
 
 B = BSpline.matrix( t, t_knot, K, D=D );
 

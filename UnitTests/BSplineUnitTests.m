@@ -147,7 +147,7 @@ classdef BSplineUnitTests < matlab.unittest.TestCase
             f = @(x) cos(2*pi*x/3);
             K = 4;
             t = linspace(0,3,13)';
-            tKnot = InterpolatingSpline.KnotPointsForPoints(t,K);
+            tKnot = BSpline.knotPointsForDataPoints(t,K=K);
 
             X = BSpline.matrix(t,tKnot,K);
             xi = X\f(t);
@@ -160,6 +160,18 @@ classdef BSplineUnitTests < matlab.unittest.TestCase
             testCase.assertThat(valuesFromPP, IsEqualTo(valuesFromMatrix, 'Within', AbsoluteTolerance(1e-10)))
         end
 
+        function splineDOFMatchesDerivedDataDOF(testCase)
+            t = linspace(0,3,13)';
+            K = 4;
+            splineDOF = 5;
+            derivedDataDOF = ceil(numel(t)/max(splineDOF,K));
+
+            fromSplineDOF = BSpline.knotPointsForDataPoints(t,K=K,splineDOF=splineDOF);
+            fromDataDOF = BSpline.knotPointsForDataPoints(t,K=K,dataDOF=derivedDataDOF);
+
+            testCase.verifyEqual(fromSplineDOF, fromDataDOF)
+        end
+
         function ppEvaluationHandlesUnsortedInputs(testCase)
             import matlab.unittest.constraints.IsEqualTo
             import matlab.unittest.constraints.AbsoluteTolerance
@@ -167,7 +179,7 @@ classdef BSplineUnitTests < matlab.unittest.TestCase
             f = @(x) sin(2*pi*x/3);
             K = 4;
             t = linspace(0,3,13)';
-            tKnot = InterpolatingSpline.KnotPointsForPoints(t,K);
+            tKnot = BSpline.knotPointsForDataPoints(t,K=K);
 
             X = BSpline.matrix(t,tKnot,K);
             xi = X\f(t);

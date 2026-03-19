@@ -14,7 +14,7 @@ else
     g = spline.valueAtPoints(ts);
     g(abs(2*eps)>g) = 0;
     K = ceil(b*spline.K);
-    tKnot = InterpolatingSpline.KnotPointsForPoints(ts,K);
+    tKnot = BSpline.knotPointsForDataPoints(ts,K=K);
     if ~isempty(constraints)
         splineb = ConstrainedSpline(ts,(g.^b),K,tKnot,[],constraints);
     else

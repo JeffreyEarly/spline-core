@@ -3,7 +3,7 @@
 % boundary.
 K = 3;
 t = linspace(0,20,21)';
-t_knot = InterpolatingSpline.KnotPointsForPoints( t, K );
+t_knot = BSpline.knotPointsForDataPoints( t, K=K );
 
 % t_knot(end-2*K-1:end-K-1) = [];
 % t_knot(K+1:2*K+1) = [];

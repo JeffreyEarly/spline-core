@@ -5,21 +5,39 @@ function tKnot = knotPointsForDataPoints( t, options)
 % - Declaration: tKnot = knotPointsForDataPoints( t, options)
 % - Parameter t: observation times (N)
 % - Parameter K: (optional) spline order
-% - Parameter M: (optional) number of splines (M<=N)
+% - Parameter dataDOF: (optional) stride used to subsample sorted data points before knot placement
+% - Parameter splineDOF: (optional) approximate target number of splines, converted to dataDOF internally
 % - Returns tKnot: vector of knot point locations
 arguments
     t (:,1) double
     options.K (1,1) double {mustBePositive,mustBeInteger,mustBeGreaterThanOrEqual(options.K,1)} = 4
-    options.M (1,1) double {mustBePositive,mustBeInteger} = length(t)
+    options.dataDOF (1,1) double {mustBePositive,mustBeInteger} = 1
+    options.splineDOF (1,1) double = NaN
 end
-if any(diff(t) < 0)
-    error('BSpline:knotPointsForDataPoints:UnsortedDataPoints', 't must be sorted in ascending order.');
-end
-mustBeGreaterThanOrEqual(options.M,options.K);
-mustBeLessThanOrEqual(options.M,length(t));
 
-N = length(t);
-t_pseudo = interp1((0:N-1)',t,linspace(0,N-1,options.M).');
+if ~isnan(options.splineDOF)
+    mustBePositive(options.splineDOF);
+    mustBeInteger(options.splineDOF);
+end
+
+if ~isnan(options.splineDOF)
+    if options.dataDOF ~= 1
+        error('BSpline:knotPointsForDataPoints:ConflictingDegreeOfFreedomOptions', ...
+            'Specify either dataDOF or splineDOF, but not both.');
+    end
+    targetSplines = max(options.splineDOF, options.K);
+    dataDOF = ceil(numel(t)/targetSplines);
+else
+    dataDOF = options.dataDOF;
+end
+
+tData = sort(t);
+tData = [tData(1); tData(1+dataDOF:dataDOF:end-dataDOF); tData(end)];
+M = numel(tData);
+mustBeGreaterThanOrEqual(M, options.K);
+
+N = length(tData);
+t_pseudo = interp1((0:N-1)',tData,linspace(0,N-1,M).');
 K = options.K;
 
 if mod(K,2) == 1
@@ -45,7 +63,6 @@ else
     end
 
 end
-
 % Now we increase the multiplicity of the knot points at the beginning and
 % the end of the interval so that the splines do not extend past the end
 % points.

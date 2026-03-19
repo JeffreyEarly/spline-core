@@ -24,7 +24,7 @@ classdef InterpolatingSpline < BSpline
             end
 
             K = InterpolatingSpline.splineOrderFromOptions(options);
-            tKnot = InterpolatingSpline.KnotPointsForPoints(t,K);
+            tKnot = BSpline.knotPointsForDataPoints(t,K=K);
 
             xMean = mean(x);
             x = x - xMean;
@@ -44,31 +44,6 @@ classdef InterpolatingSpline < BSpline
     end
 
     methods (Static)
-        function tKnot = KnotPointsForPoints(t, K, DF)
-            % Return canonical knot points for interpolation support points t.
-            arguments
-                t {mustBeNumeric,mustBeReal,mustBeFinite}
-                K (1,1) double {mustBePositive,mustBeInteger,mustBeGreaterThanOrEqual(K,1)}
-                DF (1,1) double {mustBePositive,mustBeInteger} = 1
-            end
-
-            t = sort(reshape(t,[],1));
-            t = [t(1); t(1+DF:DF:end-DF); t(end)];
-            tKnot = BSpline.knotPointsForDataPoints(t, K=K, M=numel(t));
-        end
-
-        function tKnot = KnotPointsForSplines(t, K, nSplines)
-            % Create knot points that target approximately nSplines basis functions.
-            arguments
-                t {mustBeNumeric,mustBeReal,mustBeFinite}
-                K (1,1) double {mustBePositive,mustBeInteger,mustBeGreaterThanOrEqual(K,1)}
-                nSplines (1,1) double {mustBePositive,mustBeInteger}
-            end
-
-            nSplines = max(nSplines,K);
-            tKnot = InterpolatingSpline.KnotPointsForPoints(t,K,ceil(numel(t)/nSplines));
-        end
-
         function K = splineOrderFromOptions(options)
             arguments
                 options struct
