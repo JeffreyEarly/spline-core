@@ -8,9 +8,28 @@ classdef BSplineUnitTests < matlab.unittest.TestCase
             f = @(x) sin(2*pi*x);
             t = linspace(0,1,11)';
 
-            spline = InterpolatingSpline(t,f(t),4);
+            spline = InterpolatingSpline(t,f(t),K=4);
 
             testCase.assertThat(spline(t), IsEqualTo(f(t), 'Within', AbsoluteTolerance(10*eps)))
+        end
+
+        function interpolatingSplineSupportsNamedOrderArguments(testCase)
+            t = linspace(0,1,11)';
+            x = sin(2*pi*t);
+
+            splineFromK = InterpolatingSpline(t,x,K=4);
+            splineFromS = InterpolatingSpline(t,x,S=3);
+
+            testCase.verifyEqual(splineFromK.K,4)
+            testCase.verifyEqual(splineFromS.K,4)
+            testCase.verifyEqual(splineFromK(t), splineFromS(t), AbsTol=10*eps)
+        end
+
+        function interpolatingSplineRejectsConflictingOrderOptions(testCase)
+            t = linspace(0,1,11)';
+            x = sin(2*pi*t);
+
+            testCase.verifyError(@() InterpolatingSpline(t,x,K=5,S=3), 'InterpolatingSpline:ConflictingSplineOrder')
         end
 
         function plusAddsScalarOffset(testCase)
@@ -19,7 +38,7 @@ classdef BSplineUnitTests < matlab.unittest.TestCase
 
             f = @(x) x;
             t = linspace(-1,1,11)';
-            spline = InterpolatingSpline(t,f(t),2);
+            spline = InterpolatingSpline(t,f(t),K=2);
 
             shifted = spline + 1;
 
@@ -32,7 +51,7 @@ classdef BSplineUnitTests < matlab.unittest.TestCase
 
             f = @(x) x;
             t = linspace(-1,1,11)';
-            spline = InterpolatingSpline(t,f(t),2);
+            spline = InterpolatingSpline(t,f(t),K=2);
 
             shifted = 1 + spline;
 
@@ -45,7 +64,7 @@ classdef BSplineUnitTests < matlab.unittest.TestCase
 
             f = @(x) x;
             t = linspace(-1,1,11)';
-            spline = InterpolatingSpline(t,f(t),2);
+            spline = InterpolatingSpline(t,f(t),K=2);
 
             scaled = -2*spline;
 
@@ -58,7 +77,7 @@ classdef BSplineUnitTests < matlab.unittest.TestCase
 
             f = @(x) x;
             t = linspace(-1,1,11)';
-            spline = InterpolatingSpline(t,f(t),2);
+            spline = InterpolatingSpline(t,f(t),K=2);
 
             scaled = spline * -2;
 
@@ -66,12 +85,12 @@ classdef BSplineUnitTests < matlab.unittest.TestCase
         end
 
         function plusRejectsNonScalarNumeric(testCase)
-            spline = InterpolatingSpline((0:2)',(0:2)',2);
+            spline = InterpolatingSpline((0:2)',(0:2)',K=2);
             testCase.verifyError(@() plus(spline,[1 2]), 'BSpline:plus:UnsupportedOperand')
         end
 
         function mtimesRejectsNonScalarNumeric(testCase)
-            spline = InterpolatingSpline((0:2)',(0:2)',2);
+            spline = InterpolatingSpline((0:2)',(0:2)',K=2);
             testCase.verifyError(@() mtimes(spline,[1 2]), 'BSpline:mtimes:UnsupportedOperand')
         end
 
@@ -83,7 +102,7 @@ classdef BSplineUnitTests < matlab.unittest.TestCase
             df = @(x) -3*x.^2 + 2*x - 2;
             t = linspace(-1,1,11)';
 
-            spline = InterpolatingSpline(t,f(t),4);
+            spline = InterpolatingSpline(t,f(t),K=4);
 
             testCase.assertThat(spline(t,1), IsEqualTo(df(t), 'Within', RelativeTolerance(100*eps)))
         end
@@ -96,14 +115,14 @@ classdef BSplineUnitTests < matlab.unittest.TestCase
             df = @(x) -3*x.^2 + 2*x - 2;
             t = linspace(-1,1,11)';
 
-            spline = InterpolatingSpline(t,f(t),4);
+            spline = InterpolatingSpline(t,f(t),K=4);
             dspline = diff(spline);
 
             testCase.assertThat(dspline(t), IsEqualTo(df(t), 'Within', RelativeTolerance(100*eps)))
         end
 
         function diffRejectsNegativeOrder(testCase)
-            spline = InterpolatingSpline((0:2)',(0:2)',2);
+            spline = InterpolatingSpline((0:2)',(0:2)',K=2);
             testCase.verifyError(@() diff(spline,-1), 'MATLAB:validators:mustBeNonnegative')
         end
 
@@ -115,7 +134,7 @@ classdef BSplineUnitTests < matlab.unittest.TestCase
             g = @(x) 0.5*x.^2 + x;
             t = linspace(-1,1,11)';
 
-            spline = InterpolatingSpline(t,f(t),4);
+            spline = InterpolatingSpline(t,f(t),K=4);
             intspline = cumsum(spline);
 
             testCase.assertThat(intspline(t), IsEqualTo(g(t)-g(t(1)), 'Within', AbsoluteTolerance(10*eps)))
@@ -164,12 +183,12 @@ classdef BSplineUnitTests < matlab.unittest.TestCase
         end
 
         function valueAtPointsRejectsNegativeDerivativeOrder(testCase)
-            spline = InterpolatingSpline((0:2)',(0:2)',2);
+            spline = InterpolatingSpline((0:2)',(0:2)',K=2);
             testCase.verifyError(@() spline.valueAtPoints((0:2)',-1), 'MATLAB:validators:mustBeNonnegative')
         end
 
         function valueAtPointsReturnsZeroAboveSplineDegree(testCase)
-            spline = InterpolatingSpline((0:2)',(0:2)',2);
+            spline = InterpolatingSpline((0:2)',(0:2)',K=2);
 
             values = spline.valueAtPoints((0:2)',2);
 
@@ -182,7 +201,7 @@ classdef BSplineUnitTests < matlab.unittest.TestCase
 
             f = @(x) mod(x,2)-0.5;
             t = linspace(0,10,11)';
-            spline = InterpolatingSpline(t,f(t),2);
+            spline = InterpolatingSpline(t,f(t),K=2);
 
             expected = (0:9)' + 0.5;
             actual = roots(spline);

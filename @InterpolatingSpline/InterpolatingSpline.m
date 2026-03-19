@@ -1,205 +1,96 @@
 classdef InterpolatingSpline < BSpline
-    %InterpolatingSpline Summary of this class goes here
-    %   2 argument initialization
-    %       f = InterpolatingSpline(t,x);
-    %   where
-    %       t       array of values for the independent axis
-    %       x       array of values for the dependent axis 
-    %       f       cubic spline interpolant
-    % 
-    %   3 argument initialization
-    %       f = InterpolatingSpline(t,x,K);
-    %   where
-    %       K       order of the spline
-    
-    
-    properties (Access = public)
+    % Interpolating spline fit through data values.
+    %
+    % Supported construction forms:
+    %   f = InterpolatingSpline(t,x)
+    %   f = InterpolatingSpline(t,x,K=K)
+    %   f = InterpolatingSpline(t,x,S=S)
 
-    end
-    
     methods
-        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-        %
-        % Initialization
-        %
-        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-        function self = InterpolatingSpline(t,x,varargin)
-            % Make sure (t,x) are the right shapes, and see how many
-            % dimensions of x we are given.
-            t = reshape(t,[],1);
-            N = length(t);
-            x = reshape(x,[],1);
-            if length(x) ~= N
-                error('x and t must have the same length.');
-            end
-            
-            if any(isnan(x)) || any(isnan(t))
-                error('Some of the data contain NaNs!')
-            end
-            
-            % Parse any extra input options.
-            nargs = length(varargin);
-            if nargs == 1
-                K = varargin{1};
-            elseif nargs == 0
-                K = 4;
-            elseif mod(nargs,2) == 0
-                for k = 1:2:length(varargin)
-                    if strcmp(varargin{k}, 'K')
-                        K = varargin{k+1};
-                    elseif strcmp(varargin{k}, 'S')
-                        K = varargin{k+1}+1;
-                    end
-                end
-            else
-                error('Arguments must be given as name/value pairs');
-            end
-            
-            % create knot points for a canonical interpolating spline
-            t_knot = InterpolatingSpline.KnotPointsForPoints(t,K);
-            
-            x_mean = mean(x);
-            x = x - x_mean;
-            
-            x_std = std(x);
-            if x_std > 0
-                x = x/x_std;
-            else
-                x_std = 1;
-            end
-            
-            % Find the spline coefficients
-            X = BSpline.matrix( t, t_knot, K );
-            m = X\x;
-            
-            self@BSpline(K,t_knot,m,x_mean=x_mean,x_std=x_std);
-        end
-
-    end
-    
-    
-    methods (Static)
-                
-        function t_knot = KnotPointsForDataPoints( t, options)
+        function self = InterpolatingSpline(t,x,options)
+            % Create an interpolating spline through samples x observed at t.
             arguments
-                t (:,1) double
+                t {mustBeNumeric,mustBeReal,mustBeFinite}
+                x {mustBeNumeric,mustBeReal,mustBeFinite}
                 options.K (1,1) double {mustBePositive,mustBeInteger,mustBeGreaterThanOrEqual(options.K,1)} = 4
-                options.M (1,1) double {mustBePositive,mustBeInteger} = length(t)
+                options.S (1,1) double {mustBeNonnegativeOrNaNInteger} = NaN
             end
-            mustBeGreaterThanOrEqual(options.M,options.K);
-            mustBeLessThanOrEqual(options.M,length(t));
 
-            N = length(t);
-            t_pseudo = interp1((0:N-1)',t,linspace(0,N-1,options.M).');
-            K = options.K;
+            t = reshape(t,[],1);
+            x = reshape(x,[],1);
 
-            if mod(K,2) == 1
-                % Odd spline order, so knots go in between points.
-                dt = diff(t_pseudo);
+            if numel(x) ~= numel(t)
+                error('InterpolatingSpline:SizeMismatch', 'x and t must have the same length.');
+            end
 
-                % This gives us N+1 knot points
-                t_knot = [t_pseudo(1); t_pseudo(1:end-1)+dt/2; t_pseudo(end)];
+            K = InterpolatingSpline.splineOrderFromOptions(options);
+            tKnot = InterpolatingSpline.KnotPointsForPoints(t,K);
 
-                % Now remove start and end knots
-                for i=1:((K-1)/2)
-                    t_knot(2) = [];
-                    t_knot(end-1) = [];
-                end
+            xMean = mean(x);
+            x = x - xMean;
 
+            xStd = std(x);
+            if xStd > 0
+                x = x/xStd;
             else
-                t_knot = t_pseudo;
-
-                % Now remove start and end knots
-                for i=1:((K-2)/2)
-                    t_knot(2) = [];
-                    t_knot(end-1) = [];
-                end
-
+                xStd = 1;
             end
-        
-            % Now we increase the multiplicity of the knot points at the beginning and
-            % the end of the interval so that the splines do not extend past the end
-            % points.
-            t_knot = [repmat(t_knot(1),K-1,1); t_knot; repmat(t_knot(end),K-1,1)];
+
+            X = BSpline.matrix(t,tKnot,K);
+            xi = X\x;
+
+            self@BSpline(K,tKnot,xi,x_mean=xMean,x_std=xStd);
         end
+    end
 
-        function t_knot = KnotPointsForPoints( t, K, DF )
-            %% KnotPointsForPoints
-            %
-            % Returns the natural knot points for splines of order K for
-            % observations at time points t. These knot points are place so
-            % that each spline has exactly enough support for a fully
-            % constrained system.
-            %
-            % It defaults to 1 degree of freedom, but you can override this
-            % by setting DF to some nonnegative integer value.
-            %
-            % This matches the definitions in interpolation with tension
-            % splines paper.
-            
-            if nargin < 3
-                DF = 1;
+    methods (Static)
+        function tKnot = KnotPointsForPoints(t, K, DF)
+            % Return canonical knot points for interpolation support points t.
+            arguments
+                t {mustBeNumeric,mustBeReal,mustBeFinite}
+                K (1,1) double {mustBePositive,mustBeInteger,mustBeGreaterThanOrEqual(K,1)}
+                DF (1,1) double {mustBePositive,mustBeInteger} = 1
             end
-            
-            if (DF < 1 || mod(DF,1) ~= 0)
-                disp('DF must be a non-negative integer');
-                return;
-            end
-            
-            t = sort(t);
-            
+
+            t = sort(reshape(t,[],1));
             t = [t(1); t(1+DF:DF:end-DF); t(end)];
-            
-            if length(t) > 2
-                if mod(K,2) == 1
-                    % Odd spline order, so knots go in between points.
-                    dt = diff(t);
+            tKnot = BSpline.knotPointsForDataPoints(t, K=K, M=numel(t));
+        end
 
-                    % This gives us N+1 knot points
-                    t_knot = [t(1); t(1:end-1)+dt/2; t(end)];
+        function tKnot = KnotPointsForSplines(t, K, nSplines)
+            % Create knot points that target approximately nSplines basis functions.
+            arguments
+                t {mustBeNumeric,mustBeReal,mustBeFinite}
+                K (1,1) double {mustBePositive,mustBeInteger,mustBeGreaterThanOrEqual(K,1)}
+                nSplines (1,1) double {mustBePositive,mustBeInteger}
+            end
 
-                    % Now remove start and end knots
-                    for i=1:((K-1)/2)
-                        t_knot(2) = [];
-                        t_knot(end-1) = [];
-                    end
+            nSplines = max(nSplines,K);
+            tKnot = InterpolatingSpline.KnotPointsForPoints(t,K,ceil(numel(t)/nSplines));
+        end
 
-                else
-                    t_knot = t;
+        function K = splineOrderFromOptions(options)
+            arguments
+                options struct
+            end
 
-                    % Now remove start and end knots
-                    for i=1:((K-2)/2)
-                        t_knot(2) = [];
-                        t_knot(end-1) = [];
-                    end
-
-                end
+            if isnan(options.S)
+                K = options.K;
             else
-                t_knot = t;
+                if options.K ~= 4
+                    error('InterpolatingSpline:ConflictingSplineOrder', 'Specify either K or S, but not both.');
+                end
+                K = options.S + 1;
             end
-            
-            % Now we increase the multiplicity of the knot points at the beginning and
-            % the end of the interval so that the splines do not extend past the end
-            % points.
-            t_knot = [repmat(t_knot(1),K-1,1); t_knot; repmat(t_knot(end),K-1,1)];
         end
-        
-        function t_knot = KnotPointsForSplines( t, K, N_splines )
-            %% KnotPointsForSplines
-            %
-            % Creates knot points for the data such that there will be
-            % N_splines, each of which have approximately the same number
-            % of observation points in support.
-            %
-            % Very crude, quick way of doing this.
-            
-            if N_splines < K
-                N_splines = K;
-            end
-            
-            t_knot = InterpolatingSpline.KnotPointsForPoints(t, K, ceil(length(t)/N_splines));
-        end
-  
     end
 end
 
+function mustBeNonnegativeOrNaNInteger(value)
+if isnan(value)
+    return;
+end
+
+mustBeNonnegative(value);
+mustBeInteger(value);
+end

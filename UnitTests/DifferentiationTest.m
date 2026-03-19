@@ -5,7 +5,7 @@ K = 4; % order of spline
 
 % first let's do a uniform grid, lower order
 x = linspace(-1,1,N)';
-spline = InterpolatingSpline(x,f(x),K);
+spline = InterpolatingSpline(x,f(x),K=K);
 
 % dense grid to plot the interpolant
 x_dense = linspace(-1,1,10*N)';

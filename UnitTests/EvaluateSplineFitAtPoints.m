@@ -52,7 +52,7 @@ end
 %
 % In this third test, we the class/object based interface.
 
-f_spline = InterpolatingSpline(t,f(t),K);
+f_spline = InterpolatingSpline(t,f(t),K=K);
 
 figure
 subplot(K,1,1)
