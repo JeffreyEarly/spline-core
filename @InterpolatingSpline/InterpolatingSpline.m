@@ -69,12 +69,10 @@ classdef InterpolatingSpline < BSpline
             end
             
             % Find the spline coefficients
-            X = BSpline.Spline( t, t_knot, K, 0 );
+            X = BSpline.matrix( t, t_knot, K );
             m = X\x;
             
-            self@BSpline(K,t_knot,m);
-            self.x_mean = x_mean;
-            self.x_std = x_std;
+            self@BSpline(K,t_knot,m,x_mean=x_mean,x_std=x_std);
         end
 
     end
@@ -204,5 +202,4 @@ classdef InterpolatingSpline < BSpline
   
     end
 end
-
 

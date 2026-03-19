@@ -1,6 +1,7 @@
 function f = plus(f,g)
-%+ BSpline addition
-
+% addition (+)
+%
+% - Topic: Operations
 if ( ~isa(f, 'BSpline') )
     % Ensure BSpline is the first input:
     f = plus(g, f);
@@ -9,8 +10,8 @@ elseif ( isempty(g) )          % BSpline * []
 elseif ( isnumeric(g) && isscalar(g) )
     %     X = f.B(:,:,1);
     %     m1 = X\ones(size(X,1),1);
-    %     f = BSpline(f.K,f.t_knot,f.m + g*m1);
-    h = BSpline(f.K,f.t_knot,f.m);
+    %     f = BSpline(f.K,f.tKnot,f.m + g*m1);
+    h = BSpline(f.K,f.tKnot,f.m);
     h.x_std = f.x_std;
     h.x_mean = f.x_mean+g;
     f = h;

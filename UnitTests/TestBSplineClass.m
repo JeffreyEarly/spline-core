@@ -21,7 +21,7 @@ subplot(2,1,1)
 for iSpline = 1:nSplines
    m = zeros(nSplines,1);
    m(iSpline) = 1;
-   B.m = m;
+   B.xi = m;
    plot(tq,B(tq),'LineWidth',2), hold on
 end
 title('b-splines')
@@ -29,7 +29,7 @@ subplot(2,1,2)
 for iSpline = 1:nSplines
    m = zeros(nSplines,1);
    m(iSpline) = 1;
-   B.m = m;
+   B.xi = m;
    plot(tq,B(tq,1),'LineWidth',2), hold on
 end
 title('1st derivative')

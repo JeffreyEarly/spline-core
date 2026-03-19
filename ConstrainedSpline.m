@@ -132,7 +132,7 @@ classdef ConstrainedSpline < BSpline
             
             if ~isfield(cachedVars,'X') || isempty(cachedVars.X)
                 % These are the splines at the points of observation
-                cachedVars.X = BSpline.Spline( t, t_knot, K, 0 ); % NxM
+                cachedVars.X = BSpline.matrix( t, t_knot, K ); % NxM
             end
             
             if ~isfield(cachedVars,'XT') || isempty(cachedVars.XT)
@@ -150,7 +150,7 @@ classdef ConstrainedSpline < BSpline
                         error('t and D must have the same length in the constraints structure.');
                     end
                     F = zeros(NC,M);
-                    Xc = BSpline.Spline( constraints.t, t_knot, K, K-1 );
+                    Xc = BSpline.matrix( constraints.t, t_knot, K, D=K-1 );
                     for i=1:NC
                         F(i,:) = squeeze(Xc(i,:,constraints.D(i)+1));
                     end
@@ -158,7 +158,7 @@ classdef ConstrainedSpline < BSpline
                 cachedVars.F = F;
             end
                         
-            if ~isempty(distribution.rho) && (~isfield(cachedVars,'rho_t') || isempty(cachedVar.rho_t))
+            if ~isempty(distribution.rho) && (~isfield(cachedVars,'rho_t') || isempty(cachedVars.rho_t))
                 cachedVars.rho_t = distribution.rho(t - t.');
             end
             
@@ -428,5 +428,3 @@ classdef ConstrainedSpline < BSpline
   
     end
 end
-
-

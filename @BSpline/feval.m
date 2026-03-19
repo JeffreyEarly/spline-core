@@ -1,4 +1,6 @@
 function values = feval(spline,x)
-%FEVAL Value of BSpline
-values = spline.ValueAtPoints(x);
+% value of BSpline
+%
+% - Topic: Operations
+values = spline.valueAtPoints(x);
 

@@ -1,6 +1,7 @@
 function values = roots(spline)
-%ROOTS Roots of BSpline for its domain
-
+% roots of BSpline for its domain
+%
+% - Topic: Operations
 values = [];
 scale = factorial((spline.K-1):-1:0);
 C = spline.x_std*spline.C;
