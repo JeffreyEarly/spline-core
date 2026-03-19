@@ -12,10 +12,6 @@ tKnot = spline.tKnot;
 M = length(xi);
 
 if abs(spline.x_mean) > 0 || abs(spline.x_std - 1) > 0
-%     X = spline.Xtpp(:,:,1);
-%     if isempty(X)
-%         X = BSpline.matrix( spline.t_pp, tKnot, K );
-%     end
     t = BSpline.pointsOfSupport(spline.tKnot,spline.K);
     X = BSpline.matrix(t,spline.tKnot,spline.K);
     xi = spline.x_std*spline.xi + X\(spline.x_mean*ones(length(t),1));
@@ -26,4 +22,3 @@ beta = [0; cumsum(xi.*dt)];
 
 tKnot = cat(1,spline.tKnot(1),spline.tKnot,spline.tKnot(end));
 intspline = BSpline(spline.K+1,tKnot,beta);
-% intspline.x_std = spline.x_std;

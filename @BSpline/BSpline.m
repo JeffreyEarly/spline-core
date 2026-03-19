@@ -7,18 +7,20 @@ classdef BSpline < handle
     % - Topic: Primary attributes
     %
     % - Declaration: classdef BSpline < handle
-    properties (SetObservable, AbortSet, Access = public)
+    properties (Access = public)
         % order of polynomial 
         % - Topic: Primary attributes
         K
+    end
 
+    properties (Access = private)
         % coefficients (Mx1) 
         % - Topic: Primary attributes
-        xi
+        xi_
 
         % knot points
         % - Topic: Primary attributes
-        tKnot
+        tKnot_
     end
 
     properties (GetAccess=public, SetAccess=protected)
@@ -51,6 +53,14 @@ classdef BSpline < handle
         % min and max value of the independent variable
         % - Topic: Primary attributes
         domain
+
+        % coefficients (Mx1)
+        % - Topic: Primary attributes
+        xi
+
+        % knot points
+        % - Topic: Primary attributes
+        tKnot
     end
     
     methods
@@ -114,17 +124,14 @@ classdef BSpline < handle
                 options.x_std = 1
             end
             self.K = K;   
-            self.tKnot = tKnot;
-            self.xi = xi;
+            self.tKnot_ = tKnot;
+            self.xi_ = xi;
             self.x_mean = options.x_mean;
             self.x_std = options.x_std;
             if isfield(options,'Xtpp')
                 self.Xtpp = options.Xtpp;
             end
-            self.splineCoefficientsDidChange([],[]);
-
-            addlistener(self,'xi','PostSet',@self.splineCoefficientsDidChange);
-            addlistener(self,'tKnot','PostSet',@self.tKnotDidChange);            
+            self.splineCoefficientsDidChange();
         end
         
         function S = get.S(self)
@@ -133,6 +140,32 @@ classdef BSpline < handle
         
         function domain = get.domain(self)
             domain = [self.tKnot(1) self.tKnot(end)];
+        end
+
+        function xi = get.xi(self)
+            xi = self.xi_;
+        end
+
+        function set.xi(self, xi)
+            arguments
+                self (1,1) BSpline
+                xi (:,1) double
+            end
+            self.xi_ = xi;
+            self.splineCoefficientsDidChange();
+        end
+
+        function tKnot = get.tKnot(self)
+            tKnot = self.tKnot_;
+        end
+
+        function set.tKnot(self, tKnot)
+            arguments
+                self (1,1) BSpline
+                tKnot (:,1) double {mustBeNumeric,mustBeReal}
+            end
+            self.tKnot_ = tKnot;
+            self.tKnotDidChange();
         end
         
         function x_out = valueAtPoints( self, t, NumDerivatives)
@@ -157,21 +190,35 @@ classdef BSpline < handle
             end
         end
         
-        function tKnotDidChange(self,~,~)
+        function tKnotDidChange(self)
             self.Xtpp = [];
             self.C = [];
             self.t_pp = [];
-            self.xi = [];
+            self.xi_ = [];
         end
         
-        function splineCoefficientsDidChange(self,~,~)
-            if isempty(self.xi)
+        function splineCoefficientsDidChange(self)
+            if isempty(self.xi_)
                 self.C = [];
                 self.t_pp = [];
                 self.Xtpp = [];
                 return;
             end
-            [self.C,self.t_pp,self.Xtpp] = BSpline.ppCoefficientsFromSplineCoefficients( self.xi, self.tKnot, self.K, Xtpp=self.Xtpp );
+            [self.C,self.t_pp,self.Xtpp] = BSpline.ppCoefficientsFromSplineCoefficients( self.xi_, self.tKnot_, self.K, Xtpp=self.Xtpp );
+        end
+    end
+
+    methods (Access = private)
+        function transformedSpline = affineOutputTransform(self, scale, offset)
+            arguments
+                self (1,1) BSpline
+                scale (1,1) double
+                offset (1,1) double
+            end
+
+            transformedSpline = BSpline(self.K,self.tKnot,self.xi);
+            transformedSpline.x_std = scale*self.x_std;
+            transformedSpline.x_mean = scale*self.x_mean + offset;
         end
     end
     

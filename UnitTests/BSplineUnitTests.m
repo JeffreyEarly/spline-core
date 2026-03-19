@@ -26,6 +26,19 @@ classdef BSplineUnitTests < matlab.unittest.TestCase
             testCase.assertThat(shifted(t), IsEqualTo(f(t)+1, 'Within', AbsoluteTolerance(2*eps)))
         end
 
+        function plusSupportsScalarOnLeft(testCase)
+            import matlab.unittest.constraints.IsEqualTo
+            import matlab.unittest.constraints.AbsoluteTolerance
+
+            f = @(x) x;
+            t = linspace(-1,1,11)';
+            spline = InterpolatingSpline(t,f(t),2);
+
+            shifted = 1 + spline;
+
+            testCase.assertThat(shifted(t), IsEqualTo(f(t)+1, 'Within', AbsoluteTolerance(2*eps)))
+        end
+
         function mtimesScalesSpline(testCase)
             import matlab.unittest.constraints.IsEqualTo
             import matlab.unittest.constraints.AbsoluteTolerance
@@ -35,6 +48,19 @@ classdef BSplineUnitTests < matlab.unittest.TestCase
             spline = InterpolatingSpline(t,f(t),2);
 
             scaled = -2*spline;
+
+            testCase.assertThat(scaled(t), IsEqualTo(-2*f(t), 'Within', AbsoluteTolerance(2*eps)))
+        end
+
+        function mtimesSupportsSplineOnLeft(testCase)
+            import matlab.unittest.constraints.IsEqualTo
+            import matlab.unittest.constraints.AbsoluteTolerance
+
+            f = @(x) x;
+            t = linspace(-1,1,11)';
+            spline = InterpolatingSpline(t,f(t),2);
+
+            scaled = spline * -2;
 
             testCase.assertThat(scaled(t), IsEqualTo(-2*f(t), 'Within', AbsoluteTolerance(2*eps)))
         end
@@ -178,6 +204,33 @@ classdef BSplineUnitTests < matlab.unittest.TestCase
 
             spline.xi = [];
 
+            testCase.verifyEmpty(spline.C)
+            testCase.verifyEmpty(spline.t_pp)
+            testCase.verifyEmpty(spline.Xtpp)
+        end
+
+        function settingCoefficientsRebuildsCachedState(testCase)
+            K = 3;
+            t = linspace(0,1,5)';
+            tKnot = [t(1)*ones(K,1); t(2:end-1); t(end)*ones(K,1)];
+            spline = BSpline(K,tKnot,[]);
+
+            spline.xi = ones(length(tKnot)-K,1);
+
+            testCase.verifyNotEmpty(spline.C)
+            testCase.verifyNotEmpty(spline.t_pp)
+            testCase.verifyNotEmpty(spline.Xtpp)
+        end
+
+        function changingKnotsInvalidatesCoefficientsAndCaches(testCase)
+            K = 3;
+            t = linspace(0,1,5)';
+            tKnot = [t(1)*ones(K,1); t(2:end-1); t(end)*ones(K,1)];
+            spline = BSpline(K,tKnot,ones(length(tKnot)-K,1));
+
+            spline.tKnot = [0; 0; 0; 0.5; 1; 1; 1];
+
+            testCase.verifyEmpty(spline.xi)
             testCase.verifyEmpty(spline.C)
             testCase.verifyEmpty(spline.t_pp)
             testCase.verifyEmpty(spline.Xtpp)

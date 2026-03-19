@@ -1,5 +1,5 @@
 function f = mtimes(f,g)
-% multiplication (.*)
+% multiplication (*)
 %
 % - Topic: Operations
 arguments
@@ -7,16 +7,16 @@ arguments
     g
 end
 
-if ( ~isa(f, 'BSpline') )
-    % Ensure BSpline is the first input:
-    f = mtimes(g, f);
-elseif ( isempty(g) )          % BSpline * []
+if ~isa(f,'BSpline')
+    [f, g] = deal(g, f);
+end
+
+if ~isa(f,'BSpline')
+    error('BSpline:mtimes:UnsupportedOperand', 'One operand must be a BSpline.');
+elseif isempty(g)
     f = [];
-elseif ( isnumeric(g) && isscalar(g) )
-    h = BSpline(f.K,f.tKnot,f.xi);
-    h.x_std = g*f.x_std;
-    h.x_mean = g*f.x_mean;
-    f = h;
+elseif isnumeric(g) && isscalar(g)
+    f = f.affineOutputTransform(g, 0);
 else
     error('BSpline:mtimes:UnsupportedOperand', 'Only scalar numeric multiplication is supported.');
 end
