@@ -153,11 +153,18 @@ classdef BSpline < handle
         
         function tKnotDidChange(self,~,~)
             self.Xtpp = [];
+            self.C = [];
             self.t_pp = [];
             self.xi = [];
         end
         
         function splineCoefficientsDidChange(self,~,~)
+            if isempty(self.xi)
+                self.C = [];
+                self.t_pp = [];
+                self.Xtpp = [];
+                return;
+            end
             [self.C,self.t_pp,self.Xtpp] = BSpline.ppCoefficientsFromSplineCoefficients( self.xi, self.tKnot, self.K, Xtpp=self.Xtpp );
         end
     end
@@ -170,5 +177,4 @@ classdef BSpline < handle
         B = matrix( t, tKnot, K, options )
     end
 end
-
 

@@ -10,7 +10,7 @@ t_pp = spline.t_pp;
 
 for iBin=1:size(spline.C,1)
     r = roots(C(iBin,:)./scale);
-    [~,I] = find( r >= 0 | r<= (t_pp(iBin+1)-t_pp(iBin)) );
+    [~,I] = find(imag(r) == 0 & real(r) >= 0 & real(r) <= (t_pp(iBin+1)-t_pp(iBin)));
     if ~isempty(I)
         values = cat(1,values,r(I)+t_pp(iBin));
     end

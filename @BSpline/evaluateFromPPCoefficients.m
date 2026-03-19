@@ -9,21 +9,8 @@ function f = evaluateFromPPCoefficients(t,C,tpp, D)
 % - Parameter D: number of derivatives
 % - Returns f: vector the same size as t
 
-if issorted(t,'ascend')
-    didFlip = 0;
-elseif issorted(t,'descend')
-    t = flip(t);
-    didFlip = 1;
-else
-    error('Not sorted')
-    [t,I] = sort(t);
-    d = 1:length(t);
-    returnIndices = d(I);
-    didFlip = 2;
-end
-
 K = size(C,2);
-f = zeros(size(t));
+f = zeros(size(t), 'like', t);
 
 if nargin < 4
     D = 0;
@@ -34,37 +21,27 @@ end
 
 scale = factorial((K-1-D):-1:0);
 indices = 1:(K-D);
+scaledC = C(:,indices)./scale;
 
-% startIndex and endIndex are indices into t/f
-%             startIndex = 1;
-%             for i=2:length(t_pp)
-%                 endIndex = find(t <= t_pp(i),1,'last');
-%                 f(startIndex:endIndex) = polyval(C(i-1,indices)./scale,t(startIndex:endIndex)-t_pp(i-1));
-%                 startIndex = endIndex+1;
-%             end
-%             f(startIndex:end) = polyval(C(i-1,indices)./scale,t(startIndex:end)-t_pp(i-1));
+% Evaluate on a sorted copy so interval bins are contiguous, then restore
+% the original ordering and shape.
+[tSorted, sortIndices] = sort(t(:), 'ascend');
+t_pp_bin = discretize(tSorted, [-Inf; tpp(2:end-1); Inf]);
+fSorted = zeros(size(tSorted), 'like', tSorted);
 
-% The above implementation is faster, but doesn't actually work in some
-% cases, like evaluating a single point. The discretize function is slow.
-t_pp_bin = discretize(t,[-Inf; tpp(2:end-1); Inf]);
 startIndex = 1;
-while startIndex <= length(t)
+while startIndex <= numel(tSorted)
     iBin = t_pp_bin(startIndex);
-    endIndex = find( t_pp_bin == iBin, 1, 'last');
-    f(startIndex:endIndex) = polyval(C(iBin,indices)./scale,t(startIndex:endIndex)-tpp(iBin));
-    startIndex = endIndex+1;
+    endIndex = startIndex + find(t_pp_bin(startIndex:end) ~= iBin, 1, 'first') - 2;
+    if isempty(endIndex)
+        endIndex = numel(tSorted);
+    end
+    coeffs = scaledC(iBin,:);
+    fSorted(startIndex:endIndex) = polyval(coeffs, tSorted(startIndex:endIndex) - tpp(iBin));
+    startIndex = endIndex + 1;
 end
 
-% include an extrapolated points past the end.
-if startIndex <= length(t)
-    f(startIndex:end) = polyval(C(iBin,indices)./scale,t(startIndex:end)-tpp(iBin));
-end
-
-if didFlip == 0
-    return;
-elseif didFlip == 1
-    f = flip(f);
-else
-    f = f(returnIndices);
-end
+fFlat = zeros(numel(t), 1, 'like', t);
+fFlat(sortIndices) = fSorted;
+f = reshape(fFlat, size(t));
 end
