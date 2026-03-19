@@ -5,13 +5,13 @@ function B = matrix( t, tKnot, K, options )
 % given knot points tKnot. If you optionally provide D,
 % then D derivatives will be returned.
 %
-% - Topic: Spline evalutation
+% - Topic: Spline evaluation
 % - Declaration: B = matrix( t, tKnot, K, options )
 % - Parameter t: points at which to evaluate the splines
 % - Parameter tKnot: spline knot points
 % - Parameter K: spline order (degree S=K-1)
 % - Parameter D: (optional) number of spline derivatives to return, max(D)=K-1
-% - Returns B: [length(t) M D] where M=length(tKnot)-K
+% - Returns B: [numel(t) M D] where M = numel(tKnot)-K
 arguments
     t (:,1) double {mustBeNumeric,mustBeReal}
     tKnot (:,1) double {mustBeNumeric,mustBeReal}
@@ -25,7 +25,7 @@ end
 
 D = options.D;
 
-% numer of knots
+% number of knots
 M = length(tKnot);
 
 nl = find(tKnot <= tKnot(1),1,'last');

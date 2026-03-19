@@ -12,6 +12,9 @@ arguments
     options.K (1,1) double {mustBePositive,mustBeInteger,mustBeGreaterThanOrEqual(options.K,1)} = 4
     options.M (1,1) double {mustBePositive,mustBeInteger} = length(t)
 end
+if any(diff(t) < 0)
+    error('BSpline:knotPointsForDataPoints:UnsortedDataPoints', 't must be sorted in ascending order.');
+end
 mustBeGreaterThanOrEqual(options.M,options.K);
 mustBeLessThanOrEqual(options.M,length(t));
 
@@ -23,7 +26,7 @@ if mod(K,2) == 1
     % Odd spline order, so knots go in between points.
     dt = diff(t_pseudo);
 
-    % This gives us N+1 knot points
+    % This gives us M+1 knot points.
     tKnot = [t_pseudo(1); t_pseudo(1:end-1)+dt/2; t_pseudo(end)];
 
     % Now remove start and end knots

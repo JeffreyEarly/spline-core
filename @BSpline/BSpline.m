@@ -25,16 +25,16 @@ classdef BSpline < handle
 
     properties (GetAccess=public, SetAccess=protected)
         % splines at the points tpp
-        % - Topic: Spline evalutation
+        % - Topic: Spline evaluation
         Xtpp = [];
 
         % piece-wise polynomial break points
-        % - Topic: Spline evalutation
+        % - Topic: Spline evaluation
         % size(t_pp) = length(tKnot) - 2*K + 1
         t_pp
 
         % piecewise polynomial coefficients
-        % - Topic: Spline evalutation
+        % - Topic: Spline evaluation
         % size(C) = [length(t_pp)-1, K]
         C       
     end
@@ -172,6 +172,7 @@ classdef BSpline < handle
             % evaluate the spline (and its derivatives) at arbitrary points t
             %
             % - Topic: Operations
+            % - Note: derivative orders above K-1 evaluate to zero.
             arguments
                 self (1,1) BSpline
                 t {mustBeNumeric,mustBeReal}

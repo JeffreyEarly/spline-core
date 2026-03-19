@@ -1,13 +1,16 @@
 function t = pointsOfSupport(tKnot,K,D)
-% this function assumes that the spline are terminated at the
-% boundary with repeat knot points.
+% support points for a terminated spline basis
+%
+% This function assumes that the splines are terminated at the
+% boundary with repeated end knots.
 %
 % - Topic: Utility
 arguments
     tKnot (:,1) double {mustBeNumeric,mustBeReal}
     K (1,1) double {mustBeInteger,mustBeGreaterThanOrEqual(K,1)}
-    D = []
+    D (1,1) double {mustBeInteger,mustBeNonnegative} = 0
 end
+% D is reserved for API compatibility.
 interior_knots = tKnot(K+1:end-K);
 
 if isempty(interior_knots)

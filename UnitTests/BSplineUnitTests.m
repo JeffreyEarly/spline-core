@@ -168,6 +168,14 @@ classdef BSplineUnitTests < matlab.unittest.TestCase
             testCase.verifyError(@() spline.valueAtPoints((0:2)',-1), 'MATLAB:validators:mustBeNonnegative')
         end
 
+        function valueAtPointsReturnsZeroAboveSplineDegree(testCase)
+            spline = InterpolatingSpline((0:2)',(0:2)',2);
+
+            values = spline.valueAtPoints((0:2)',2);
+
+            testCase.verifyEqual(values, zeros(3,1))
+        end
+
         function rootsStayWithinSplineDomain(testCase)
             import matlab.unittest.constraints.IsEqualTo
             import matlab.unittest.constraints.AbsoluteTolerance

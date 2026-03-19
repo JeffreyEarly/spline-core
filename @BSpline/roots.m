@@ -13,10 +13,10 @@ t_pp = spline.t_pp;
 
 for iBin=1:size(spline.C,1)
     localRoots = roots(C(iBin,:)./scale);
-    isValidRoot = imag(localRoots) == 0 & real(localRoots) >= 0 & real(localRoots) <= (t_pp(iBin+1)-t_pp(iBin));
-    I = find(isValidRoot);
-    if ~isempty(I)
-        values = cat(1,values,localRoots(I)+t_pp(iBin));
+    intervalWidth = t_pp(iBin+1) - t_pp(iBin);
+    isValidRoot = imag(localRoots) == 0 & real(localRoots) >= 0 & real(localRoots) <= intervalWidth;
+    if any(isValidRoot)
+        values = cat(1,values,real(localRoots(isValidRoot)) + t_pp(iBin));
     end
 end
 
