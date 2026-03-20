@@ -1,12 +1,12 @@
 function tKnot = knotPointsForDataPoints( t, options)
-% create knot points appropriate for observation times t
+% Construct a terminated knot sequence from sample locations.
 %
 % - Topic: Methodology (Static methods)
 % - Declaration: tKnot = knotPointsForDataPoints( t, options)
 % - Parameter t: observation times (N)
-% - Parameter K: (optional) spline order
-% - Parameter dataDOF: (optional) stride used to subsample sorted data points before knot placement
-% - Parameter splineDOF: (optional) approximate target number of splines, converted to dataDOF internally
+% - Parameter options.K: (optional) spline order
+% - Parameter options.dataDOF: (optional) stride used to subsample sorted data points before knot placement
+% - Parameter options.splineDOF: (optional) approximate target number of splines, converted to dataDOF internally
 % - Returns tKnot: vector of knot point locations
 arguments
     t (:,1) double

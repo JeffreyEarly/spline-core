@@ -1,5 +1,5 @@
 function B = matrix( t, tKnot, K, options )
-% returns the basis splines of order K evaluated at point t, given knot points tKnot.
+% Evaluate terminated B-spline basis functions and optional derivatives.
 %
 % Returns the basis splines of order K evaluated at point t,
 % given knot points tKnot. If you optionally provide D,
@@ -10,7 +10,7 @@ function B = matrix( t, tKnot, K, options )
 % - Parameter t: points at which to evaluate the splines
 % - Parameter tKnot: spline knot points
 % - Parameter K: spline order (degree S=K-1)
-% - Parameter D: (optional) number of spline derivatives to return, max(D)=K-1
+% - Parameter options.D: (optional) number of spline derivatives to return, max(D)=K-1
 % - Returns B: [numel(t) M D] where M = numel(tKnot)-K
 arguments
     t (:,1) double {mustBeNumeric,mustBeReal}

@@ -1,7 +1,11 @@
 function f = mtimes(f,g)
-% multiplication (*)
+% Multiply a spline output by a scalar.
 %
 % - Topic: Operations
+% - Declaration: f = mtimes(f,g)
+% - Parameter f: BSpline instance or scalar
+% - Parameter g: scalar or BSpline instance
+% - Returns f: transformed BSpline or empty when multiplying by []
 arguments
     f
     g

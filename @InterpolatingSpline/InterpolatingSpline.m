@@ -5,10 +5,26 @@ classdef InterpolatingSpline < BSpline
     %   f = InterpolatingSpline(t,x)
     %   f = InterpolatingSpline(t,x,K=K)
     %   f = InterpolatingSpline(t,x,S=S)
+    %
+    % The constructor chooses a terminated knot sequence from the supplied
+    % sample locations and solves for coefficients that interpolate the
+    % provided values exactly.
+    %
+    % - Topic: Initialization
+    % - Topic: Utility
+    % - Declaration: classdef InterpolatingSpline < BSpline
 
     methods
         function self = InterpolatingSpline(t,x,options)
             % Create an interpolating spline through samples x observed at t.
+            %
+            % - Topic: Initialization
+            % - Declaration: self = InterpolatingSpline(t,x,options)
+            % - Parameter t: sample locations
+            % - Parameter x: sample values
+            % - Parameter options.K: spline order, used when options.S is not supplied
+            % - Parameter options.S: spline degree, alternative to specifying options.K
+            % - Returns self: InterpolatingSpline instance
             arguments
                 t {mustBeNumeric,mustBeReal,mustBeFinite}
                 x {mustBeNumeric,mustBeReal,mustBeFinite}
@@ -45,6 +61,12 @@ classdef InterpolatingSpline < BSpline
 
     methods (Static)
         function K = splineOrderFromOptions(options)
+            % Resolve spline order from mutually exclusive K and S options.
+            %
+            % - Topic: Utility
+            % - Declaration: K = splineOrderFromOptions(options)
+            % - Parameter options: struct with fields K and S
+            % - Returns K: spline order
             arguments
                 options struct
             end
@@ -62,6 +84,7 @@ classdef InterpolatingSpline < BSpline
 end
 
 function mustBeNonnegativeOrNaNInteger(value)
+% Validate that a value is either NaN or a nonnegative integer.
 if isnan(value)
     return;
 end
