@@ -107,6 +107,20 @@ classdef BSplineUnitTests < matlab.unittest.TestCase
             testCase.assertThat(spline(t,1), IsEqualTo(df(t), 'Within', RelativeTolerance(100*eps)))
         end
 
+        function interpolatingSplineMatchesGriddedInterpolantSpline(testCase)
+            import matlab.unittest.constraints.IsEqualTo
+            import matlab.unittest.constraints.AbsoluteTolerance
+
+            t = [-1; -0.33; 0.33; 1];
+            x = [0; 1; 2; 0];
+            tq = linspace(t(1),t(end),401)';
+
+            spline = InterpolatingSpline(t,x,K=4);
+            interpolant = griddedInterpolant(t,x,'spline');
+
+            testCase.assertThat(spline(tq), IsEqualTo(interpolant(tq), 'Within', AbsoluteTolerance(1e-12)))
+        end
+
         function diffOperatorMatchesDerivative(testCase)
             import matlab.unittest.constraints.IsEqualTo
             import matlab.unittest.constraints.RelativeTolerance
