@@ -10,7 +10,7 @@ classdef TensorSplineUnitTests < matlab.unittest.TestCase
             [X,Y] = ndgrid(x,y);
             F = X.^2 .* Y.^3 + 2*X.*Y - 5;
 
-            spline = TensorInterpolatingSpline({x,y}, F, K=[4 4]);
+            spline = InterpolatingTensorSpline({x,y}, F, K=[4 4]);
 
             testCase.assertThat(spline({X,Y}), IsEqualTo(F, 'Within', AbsoluteTolerance(1e-10)))
         end
@@ -25,7 +25,7 @@ classdef TensorSplineUnitTests < matlab.unittest.TestCase
             F = X.^2 .* Y.^3 + 2*X.*Y - 5;
             dFdx = 2*X.*Y.^3 + 2*Y;
 
-            spline = TensorInterpolatingSpline({x,y}, F, K=[4 4]);
+            spline = InterpolatingTensorSpline({x,y}, F, K=[4 4]);
 
             testCase.assertThat(spline({X,Y}, [1 0]), IsEqualTo(dFdx, 'Within', AbsoluteTolerance(1e-9)))
         end
@@ -39,7 +39,7 @@ classdef TensorSplineUnitTests < matlab.unittest.TestCase
             [X,Y] = ndgrid(x,y);
             F = sin(pi*X) + cos(0.5*pi*Y);
 
-            spline = TensorInterpolatingSpline({x,y}, F, K=[4 4]);
+            spline = InterpolatingTensorSpline({x,y}, F, K=[4 4]);
             interpolant = griddedInterpolant({x,y}, F, 'spline');
 
             xq = linspace(x(1),x(end),21)';
@@ -61,7 +61,7 @@ classdef TensorSplineUnitTests < matlab.unittest.TestCase
             [X,Y] = ndgrid(x,y);
             F = X.^2 .* Y.^3 + 2*X.*Y - 5;
 
-            spline = TensorInterpolatingSpline({x,y}, F, K=[4 4]);
+            spline = InterpolatingTensorSpline({x,y}, F, K=[4 4]);
             queryPoints = [X(:), Y(:)];
             basisMatrix = TensorSpline.matrix(queryPoints, spline.tKnot, spline.K);
             values = reshape(basisMatrix * spline.xi(:), size(F));

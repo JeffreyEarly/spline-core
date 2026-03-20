@@ -77,3 +77,22 @@ fit = ConstrainedSpline(t,x,K,tKnot,[],constraints);
 
 The class documentation provides the full method-level reference for basis
 construction, evaluation, constrained fitting, and shape constraints.
+
+## Tensor-product splines
+
+`TensorSpline` and `InterpolatingTensorSpline` extend the same ideas to
+rectilinear grids in multiple dimensions.
+
+```matlab
+x = linspace(-1,1,6)';
+y = linspace(0,2,7)';
+[X,Y] = ndgrid(x,y);
+F = X.^2 .* Y.^3 + 2*X.*Y - 5;
+
+tensorSpline = InterpolatingTensorSpline({x,y}, F, K=[4 4]);
+Fq = tensorSpline({X,Y});
+```
+
+The tensor classes support mixed partial derivatives as well, for example
+`tensorSpline({X,Y}, [1 0])` for the derivative with respect to the first
+dimension.

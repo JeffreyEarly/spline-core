@@ -1,12 +1,33 @@
-classdef TensorInterpolatingSpline < TensorSpline
+classdef InterpolatingTensorSpline < TensorSpline
     % Tensor-product interpolating spline on rectilinear grids.
+    %
+    % InterpolatingTensorSpline builds a tensor-product spline that exactly
+    % interpolates data defined on a rectilinear grid in one or more
+    % dimensions.
+    %
+    % - Topic: Initialization
+    % - Topic: Primary attributes
+    % - Topic: Utility
+    % - Declaration: classdef InterpolatingTensorSpline < TensorSpline
 
     properties (SetAccess = private)
+        % Grid vectors used to define the interpolation lattice.
+        %
+        % - Topic: Primary attributes
         gridVectors
     end
 
     methods
-        function self = TensorInterpolatingSpline(gridVectors, values, options)
+        function self = InterpolatingTensorSpline(gridVectors, values, options)
+            % Create a tensor-product interpolating spline on a rectilinear grid.
+            %
+            % - Topic: Initialization
+            % - Declaration: self = InterpolatingTensorSpline(gridVectors,values,options)
+            % - Parameter gridVectors: cell array of grid vectors, one per dimension
+            % - Parameter values: array of sampled values on the grid
+            % - Parameter options.K: spline order scalar or vector with one entry per dimension
+            % - Parameter options.S: spline degree scalar or vector with one entry per dimension
+            % - Returns self: InterpolatingTensorSpline instance
             arguments
                 gridVectors cell
                 values {mustBeNumeric,mustBeReal,mustBeFinite}
@@ -15,9 +36,9 @@ classdef TensorInterpolatingSpline < TensorSpline
             end
 
             numDimensions = numel(gridVectors);
-            gridVectors = TensorInterpolatingSpline.normalizeGridVectors(gridVectors, numDimensions);
-            K = TensorInterpolatingSpline.splineOrderFromOptions(options, numDimensions);
-            TensorInterpolatingSpline.validateValueArraySize(values, gridVectors);
+            gridVectors = InterpolatingTensorSpline.normalizeGridVectors(gridVectors, numDimensions);
+            K = InterpolatingTensorSpline.splineOrderFromOptions(options, numDimensions);
+            InterpolatingTensorSpline.validateValueArraySize(values, gridVectors);
 
             tKnot = cell(1, numDimensions);
             for iDim = 1:numDimensions
@@ -45,34 +66,37 @@ classdef TensorInterpolatingSpline < TensorSpline
 
     methods (Static, Access = private)
         function K = splineOrderFromOptions(options, numDimensions)
+            % Resolve spline order from mutually exclusive K and S options.
             if isnan(options.S)
                 K = options.K;
             else
                 if ~(isscalar(options.K) && options.K == 4)
-                    error('TensorInterpolatingSpline:ConflictingSplineOrder', 'Specify either K or S, but not both.');
+                    error('InterpolatingTensorSpline:ConflictingSplineOrder', 'Specify either K or S, but not both.');
                 end
                 K = options.S + 1;
             end
 
-            K = TensorInterpolatingSpline.normalizeOrderVector(K, numDimensions);
+            K = InterpolatingTensorSpline.normalizeOrderVector(K, numDimensions);
         end
 
         function K = normalizeOrderVector(K, numDimensions)
+            % Normalize spline-order input to one order per dimension.
             validateattributes(K, {'numeric'}, {'vector','real','finite','positive','integer'});
             if isscalar(K)
                 K = repmat(K, 1, numDimensions);
             else
                 K = reshape(K, 1, []);
                 if numel(K) ~= numDimensions
-                    error('TensorInterpolatingSpline:InvalidOrderVector', ...
+                    error('InterpolatingTensorSpline:InvalidOrderVector', ...
                         'K must be scalar or have one element per dimension.');
                 end
             end
         end
 
         function gridVectors = normalizeGridVectors(gridVectors, numDimensions)
+            % Normalize and validate interpolation grid vectors.
             if ~iscell(gridVectors) || numel(gridVectors) ~= numDimensions
-                error('TensorInterpolatingSpline:InvalidGridVectors', ...
+                error('InterpolatingTensorSpline:InvalidGridVectors', ...
                     'gridVectors must be a cell array with one vector per dimension.');
             end
 
@@ -83,12 +107,13 @@ classdef TensorInterpolatingSpline < TensorSpline
         end
 
         function validateValueArraySize(values, gridVectors)
+            % Validate that the sample array matches the supplied grid vectors.
             expectedSize = cellfun(@numel, gridVectors);
             actualSize = size(values);
             actualSize = [actualSize, ones(1, numel(expectedSize) - numel(actualSize))];
 
             if ~isequal(actualSize(1:numel(expectedSize)), expectedSize)
-                error('TensorInterpolatingSpline:SizeMismatch', ...
+                error('InterpolatingTensorSpline:SizeMismatch', ...
                     'values must have size matching the lengths of gridVectors.');
             end
         end

@@ -1,25 +1,71 @@
 classdef TensorSpline < handle
     % Tensor-product spline over multiple dimensions.
+    %
+    % TensorSpline represents a tensor-product basis assembled from
+    % one-dimensional B-spline bases in each coordinate direction. It
+    % supports direct evaluation on point clouds or query grids together
+    % with mixed partial derivatives.
+    %
+    % - Topic: Initialization
+    % - Topic: Primary attributes
+    % - Topic: Operations
+    % - Topic: Methodology (Static methods)
+    % - Topic: Utility
+    % - Declaration: classdef TensorSpline < handle
 
     properties (SetAccess = private)
+        % Spline order in each tensor dimension.
+        %
+        % - Topic: Primary attributes
         K
+        % Knot vectors for each tensor dimension.
+        %
+        % - Topic: Primary attributes
         tKnot
+        % Tensor-product spline coefficients reshaped to basisSize.
+        %
+        % - Topic: Primary attributes
         xi
     end
 
     properties
+        % Mean added back to zero-order evaluations.
+        %
+        % - Topic: Primary attributes
         x_mean = 0
+        % Multiplicative scale applied to evaluations.
+        %
+        % - Topic: Primary attributes
         x_std = 1
     end
 
     properties (Dependent)
+        % Number of tensor dimensions.
+        %
+        % - Topic: Primary attributes
         numDimensions
+        % Number of basis functions in each dimension.
+        %
+        % - Topic: Primary attributes
         basisSize
+        % Coordinate limits for each dimension.
+        %
+        % - Topic: Primary attributes
         domain
     end
 
     methods
         function self = TensorSpline(K,tKnot,xi,options)
+            % Create a tensor-product spline from per-dimension orders, knots, and coefficients.
+            %
+            % - Topic: Initialization
+            % - Declaration: self = TensorSpline(K,tKnot,xi,options)
+            % - Parameter K: spline order scalar or vector with one entry per dimension
+            % - Parameter tKnot: cell array of knot vectors
+            % - Parameter xi: optional tensor-product coefficient array or vector
+            % - Parameter options.x_mean: optional additive output offset
+            % - Parameter options.x_std: optional multiplicative output scale
+            % - Returns self: TensorSpline instance
             arguments
                 K {mustBeNumeric,mustBeReal,mustBeFinite}
                 tKnot cell
@@ -47,18 +93,43 @@ classdef TensorSpline < handle
         end
 
         function value = get.numDimensions(self)
+            % Return the number of tensor dimensions.
+            %
+            % - Topic: Primary attributes
+            % - Declaration: value = get.numDimensions(self)
+            % - Parameter self: TensorSpline instance
+            % - Returns value: number of dimensions
             value = numel(self.K);
         end
 
         function value = get.basisSize(self)
+            % Return the number of basis functions per dimension.
+            %
+            % - Topic: Primary attributes
+            % - Declaration: value = get.basisSize(self)
+            % - Parameter self: TensorSpline instance
+            % - Returns value: row vector of basis sizes
             value = TensorSpline.basisSizeFromKnotCell(self.tKnot, self.K);
         end
 
         function value = get.domain(self)
+            % Return the domain limits for each dimension.
+            %
+            % - Topic: Primary attributes
+            % - Declaration: value = get.domain(self)
+            % - Parameter self: TensorSpline instance
+            % - Returns value: cell array of [min max] domain limits
             value = cellfun(@(tk) [tk(1), tk(end)], self.tKnot, 'UniformOutput', false);
         end
 
         function varargout = subsref(self, index)
+            % Evaluate the tensor spline with function-call syntax or defer to built-in indexing.
+            %
+            % - Topic: Operations
+            % - Declaration: varargout = subsref(self,index)
+            % - Parameter self: TensorSpline instance
+            % - Parameter index: MATLAB subscript structure
+            % - Returns varargout: indexed property access or spline values
             idx = index(1).subs;
             switch index(1).type
                 case '()'
@@ -83,6 +154,14 @@ classdef TensorSpline < handle
         end
 
         function values = valueAtPoints(self, X, derivativeOrders)
+            % Evaluate the tensor spline or a mixed partial derivative.
+            %
+            % - Topic: Operations
+            % - Declaration: values = valueAtPoints(self,X,derivativeOrders)
+            % - Parameter self: TensorSpline instance
+            % - Parameter X: query locations as a point matrix or cell array of matching grids
+            % - Parameter derivativeOrders: derivative order per dimension
+            % - Returns values: spline values reshaped to match the query input
             arguments
                 self (1,1) TensorSpline
                 X
@@ -114,6 +193,15 @@ classdef TensorSpline < handle
 
     methods (Static)
         function B = matrix(X,tKnot,K,options)
+            % Evaluate the tensor-product basis matrix and optional derivatives.
+            %
+            % - Topic: Methodology (Static methods)
+            % - Declaration: B = matrix(X,tKnot,K,options)
+            % - Parameter X: query locations as a point matrix or cell array of matching grids
+            % - Parameter tKnot: cell array of knot vectors
+            % - Parameter K: spline order scalar or vector with one entry per dimension
+            % - Parameter options.D: derivative order per dimension
+            % - Returns B: basis matrix with one row per query point
             arguments
                 X
                 tKnot cell
@@ -153,6 +241,13 @@ classdef TensorSpline < handle
         end
 
         function [pointMatrix, gridSize] = pointsFromGridVectors(gridVectors)
+            % Convert rectilinear grid vectors into an explicit point matrix.
+            %
+            % - Topic: Methodology (Static methods)
+            % - Declaration: [pointMatrix,gridSize] = pointsFromGridVectors(gridVectors)
+            % - Parameter gridVectors: cell array of grid vectors
+            % - Returns pointMatrix: matrix with one row per grid point
+            % - Returns gridSize: number of points along each dimension
             arguments
                 gridVectors cell
             end
@@ -173,6 +268,7 @@ classdef TensorSpline < handle
 
     methods (Static, Access = private)
         function K = normalizeOrders(K, numDimensions)
+            % Normalize spline-order input to one order per dimension.
             validateattributes(K, {'numeric'}, {'vector','real','finite','positive','integer'});
             if isscalar(K)
                 K = repmat(K, 1, numDimensions);
@@ -185,6 +281,7 @@ classdef TensorSpline < handle
         end
 
         function tKnot = normalizeKnotCell(tKnot, numDimensions)
+            % Normalize and validate a cell array of knot vectors.
             if ~iscell(tKnot) || numel(tKnot) ~= numDimensions
                 error('TensorSpline:InvalidKnotCell', 'tKnot must be a cell array with one knot vector per dimension.');
             end
@@ -196,6 +293,7 @@ classdef TensorSpline < handle
         end
 
         function basisSize = basisSizeFromKnotCell(tKnot, K)
+            % Compute basis sizes from knot vectors and spline orders.
             basisSize = cellfun(@numel, tKnot) - K;
             if any(basisSize <= 0)
                 error('TensorSpline:InvalidBasisSize', 'Each knot vector must be longer than its spline order.');
@@ -203,6 +301,7 @@ classdef TensorSpline < handle
         end
 
         function [pointMatrix, outputSize] = normalizePointInput(X, numDimensions)
+            % Normalize query locations from point-matrix or grid-cell form.
             if iscell(X)
                 if numel(X) ~= numDimensions
                     error('TensorSpline:InvalidPointCell', 'Cell input must have one array per dimension.');
@@ -234,6 +333,7 @@ classdef TensorSpline < handle
         end
 
         function derivativeOrders = normalizeDerivativeOrders(derivativeOrders, numDimensions)
+            % Normalize derivative-order input to one order per dimension.
             validateattributes(derivativeOrders, {'numeric'}, {'real','finite','nonnegative','integer'});
             if isscalar(derivativeOrders)
                 if numDimensions == 1
