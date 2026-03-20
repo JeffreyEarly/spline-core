@@ -1,126 +1,344 @@
-
 classdef BSplineUnitTests < matlab.unittest.TestCase
 
     methods (Test)
-        function plusTest(testCase)
+        function interpolatingSplineMatchesInputData(testCase)
             import matlab.unittest.constraints.IsEqualTo
             import matlab.unittest.constraints.AbsoluteTolerance
-            f = @(x) x;
-            N = 11; % number of points
-            K = 2; % order of spline
-            
-            % first let's do a uniform grid, lower order
-            x = linspace(-1,1,N)';
-            spline = InterpolatingSpline(x,f(x),K);
-            
-            spline = spline + 1;
 
-            expSolution = f(x)+1;
-            actSolution = spline(x);
-            
-            testCase.assertThat(actSolution, IsEqualTo(expSolution, 'Within', AbsoluteTolerance(2*eps))) 
+            f = @(x) sin(2*pi*x);
+            t = linspace(0,1,11)';
+
+            spline = InterpolatingSpline(t,f(t),K=4);
+
+            testCase.assertThat(spline(t), IsEqualTo(f(t), 'Within', AbsoluteTolerance(10*eps)))
         end
-        
-        function timesTest(testCase)
+
+        function interpolatingSplineSupportsNamedOrderArguments(testCase)
+            t = linspace(0,1,11)';
+            x = sin(2*pi*t);
+
+            splineFromK = InterpolatingSpline(t,x,K=4);
+            splineFromS = InterpolatingSpline(t,x,S=3);
+
+            testCase.verifyEqual(splineFromK.K,4)
+            testCase.verifyEqual(splineFromS.K,4)
+            testCase.verifyEqual(splineFromK(t), splineFromS(t), AbsTol=10*eps)
+        end
+
+        function interpolatingSplineRejectsConflictingOrderOptions(testCase)
+            t = linspace(0,1,11)';
+            x = sin(2*pi*t);
+
+            testCase.verifyError(@() InterpolatingSpline(t,x,K=5,S=3), 'InterpolatingSpline:ConflictingSplineOrder')
+        end
+
+        function plusAddsScalarOffset(testCase)
             import matlab.unittest.constraints.IsEqualTo
             import matlab.unittest.constraints.AbsoluteTolerance
+
             f = @(x) x;
-            N = 11; % number of points
-            K = 2; % order of spline
-            
-            % first let's do a uniform grid, lower order
-            x = linspace(-1,1,N)';
-            spline = InterpolatingSpline(x,f(x),K);
-            
-            spline = -2*spline;
-            
-            expSolution = -2*f(x);
-            actSolution = spline(x);
-            
-            testCase.assertThat(actSolution, IsEqualTo(expSolution, 'Within', AbsoluteTolerance(2*eps))) 
+            t = linspace(-1,1,11)';
+            spline = InterpolatingSpline(t,f(t),K=2);
+
+            shifted = spline + 1;
+
+            testCase.assertThat(shifted(t), IsEqualTo(f(t)+1, 'Within', AbsoluteTolerance(2*eps)))
         end
-        
-        function integrationTest(testCase)
+
+        function plusSupportsScalarOnLeft(testCase)
             import matlab.unittest.constraints.IsEqualTo
             import matlab.unittest.constraints.AbsoluteTolerance
-            f = @(x) x + ones(size(x));
-            g = @(x) 0.5*x.^2 + x; % \int (x+1) dx = x^2/2 + x + const
-            N = 11; % number of points
-            K = 4; % order of spline
-            
-            % first let's do a uniform grid, lower order
-            x = linspace(-1,1,N)';
-            spline = InterpolatingSpline(x,f(x),K);
-            
-            intspline = cumsum(spline);
-            
-            expSolution = g(x)-g(x(1));
-            actSolution = intspline(x);
-            
-            % There's a zero here, so we have to use absolute tolerance
-            % only.
-            testCase.assertThat(actSolution, IsEqualTo(expSolution, 'Within', AbsoluteTolerance(10*eps)))            
+
+            f = @(x) x;
+            t = linspace(-1,1,11)';
+            spline = InterpolatingSpline(t,f(t),K=2);
+
+            shifted = 1 + spline;
+
+            testCase.assertThat(shifted(t), IsEqualTo(f(t)+1, 'Within', AbsoluteTolerance(2*eps)))
         end
-        
-        function differentiationTest(testCase)
+
+        function mtimesScalesSpline(testCase)
+            import matlab.unittest.constraints.IsEqualTo
+            import matlab.unittest.constraints.AbsoluteTolerance
+
+            f = @(x) x;
+            t = linspace(-1,1,11)';
+            spline = InterpolatingSpline(t,f(t),K=2);
+
+            scaled = -2*spline;
+
+            testCase.assertThat(scaled(t), IsEqualTo(-2*f(t), 'Within', AbsoluteTolerance(2*eps)))
+        end
+
+        function mtimesSupportsSplineOnLeft(testCase)
+            import matlab.unittest.constraints.IsEqualTo
+            import matlab.unittest.constraints.AbsoluteTolerance
+
+            f = @(x) x;
+            t = linspace(-1,1,11)';
+            spline = InterpolatingSpline(t,f(t),K=2);
+
+            scaled = spline * -2;
+
+            testCase.assertThat(scaled(t), IsEqualTo(-2*f(t), 'Within', AbsoluteTolerance(2*eps)))
+        end
+
+        function plusRejectsNonScalarNumeric(testCase)
+            spline = InterpolatingSpline((0:2)',(0:2)',K=2);
+            testCase.verifyError(@() plus(spline,[1 2]), 'BSpline:plus:UnsupportedOperand')
+        end
+
+        function mtimesRejectsNonScalarNumeric(testCase)
+            spline = InterpolatingSpline((0:2)',(0:2)',K=2);
+            testCase.verifyError(@() mtimes(spline,[1 2]), 'BSpline:mtimes:UnsupportedOperand')
+        end
+
+        function interpolatingSplineDerivativeMatchesCubic(testCase)
             import matlab.unittest.constraints.IsEqualTo
             import matlab.unittest.constraints.RelativeTolerance
+
             f = @(x) -x.^3 + x.^2 - 2*x + 1;
-            g = @(x) -3*x.^2 + 2*x - 2;
-            N = 11; % number of points
-            K = 4; % order of spline
-            
-            % first let's do a uniform grid, lower order
-            x = linspace(-1,1,N)';
-            spline = InterpolatingSpline(x,f(x),K);
-            
-            spline = diff(spline);
-            
-            expSolution = g(x);
-            actSolution = spline(x);
-            
-            testCase.assertThat(actSolution, IsEqualTo(expSolution, 'Within', RelativeTolerance(100*eps))) 
+            df = @(x) -3*x.^2 + 2*x - 2;
+            t = linspace(-1,1,11)';
+
+            spline = InterpolatingSpline(t,f(t),K=4);
+
+            testCase.assertThat(spline(t,1), IsEqualTo(df(t), 'Within', RelativeTolerance(100*eps)))
         end
-        
-        function squareRootTest(testCase)
+
+        function interpolatingSplineMatchesGriddedInterpolantSpline(testCase)
             import matlab.unittest.constraints.IsEqualTo
             import matlab.unittest.constraints.AbsoluteTolerance
-            f = @(x) x.^2 - 2*x + 1;
-            N = 11; % number of points
-            K = 4; % order of spline
-            
-            % first let's do a uniform grid, lower order
-            x = linspace(-1,1,N)';
-            spline = InterpolatingSpline(x,f(x),K);
-            
-            spline = sqrt(spline);
-            
-            expSolution = sqrt(f(x));
-            actSolution = spline(x);
-            
-            testCase.assertThat(actSolution, IsEqualTo(expSolution, 'Within', AbsoluteTolerance(2*eps))) 
+
+            t = [-1; -0.33; 0.33; 1];
+            x = [0; 1; 2; 0];
+            tq = linspace(t(1),t(end),401)';
+
+            spline = InterpolatingSpline(t,x,K=4);
+            interpolant = griddedInterpolant(t,x,'spline');
+
+            testCase.assertThat(spline(tq), IsEqualTo(interpolant(tq), 'Within', AbsoluteTolerance(1e-12)))
         end
-        
-        
-        function rootsTest(testCase)
+
+        function diffOperatorMatchesDerivative(testCase)
+            import matlab.unittest.constraints.IsEqualTo
+            import matlab.unittest.constraints.RelativeTolerance
+
+            f = @(x) -x.^3 + x.^2 - 2*x + 1;
+            df = @(x) -3*x.^2 + 2*x - 2;
+            t = linspace(-1,1,11)';
+
+            spline = InterpolatingSpline(t,f(t),K=4);
+            dspline = diff(spline);
+
+            testCase.assertThat(dspline(t), IsEqualTo(df(t), 'Within', RelativeTolerance(100*eps)))
+        end
+
+        function diffRejectsNegativeOrder(testCase)
+            spline = InterpolatingSpline((0:2)',(0:2)',K=2);
+            testCase.verifyError(@() diff(spline,-1), 'MATLAB:validators:mustBeNonnegative')
+        end
+
+        function cumsumOperatorMatchesIntegral(testCase)
             import matlab.unittest.constraints.IsEqualTo
             import matlab.unittest.constraints.AbsoluteTolerance
+
+            f = @(x) x + ones(size(x));
+            g = @(x) 0.5*x.^2 + x;
+            t = linspace(-1,1,11)';
+
+            spline = InterpolatingSpline(t,f(t),K=4);
+            intspline = cumsum(spline);
+
+            testCase.assertThat(intspline(t), IsEqualTo(g(t)-g(t(1)), 'Within', AbsoluteTolerance(10*eps)))
+        end
+
+        function powerWithExponentOneReturnsOriginalSpline(testCase)
+            import matlab.unittest.constraints.IsEqualTo
+            import matlab.unittest.constraints.AbsoluteTolerance
+
+            t = linspace(0,1,11)';
+            x = sin(2*pi*t);
+            spline = InterpolatingSpline(t,x,K=4);
+
+            powered = power(spline,1);
+
+            testCase.assertThat(powered(t), IsEqualTo(spline(t), 'Within', AbsoluteTolerance(10*eps)))
+        end
+
+        function sqrtMatchesPositiveSplineOnSupport(testCase)
+            import matlab.unittest.constraints.IsEqualTo
+            import matlab.unittest.constraints.AbsoluteTolerance
+
+            t = linspace(0,1,11)';
+            x = (t + 1).^2;
+            spline = InterpolatingSpline(t,x,K=4);
+
+            rooted = sqrt(spline);
+
+            testCase.assertThat(rooted(t), IsEqualTo(t + 1, 'Within', AbsoluteTolerance(1e-8)))
+        end
+
+        function matrixAndPPFormsAgree(testCase)
+            import matlab.unittest.constraints.IsEqualTo
+            import matlab.unittest.constraints.AbsoluteTolerance
+
+            f = @(x) cos(2*pi*x/3);
+            K = 4;
+            t = linspace(0,3,13)';
+            tKnot = BSpline.knotPointsForDataPoints(t,K=K);
+
+            X = BSpline.matrix(t,tKnot,K);
+            xi = X\f(t);
+            [C,tpp] = BSpline.ppCoefficientsFromSplineCoefficients(xi,tKnot,K);
+
+            tq = linspace(t(1),t(end),301)';
+            valuesFromMatrix = BSpline.matrix(tq,tKnot,K)*xi;
+            valuesFromPP = BSpline.evaluateFromPPCoefficients(tq,C,tpp);
+
+            testCase.assertThat(valuesFromPP, IsEqualTo(valuesFromMatrix, 'Within', AbsoluteTolerance(1e-10)))
+        end
+
+        function splineDOFMatchesDerivedDataDOF(testCase)
+            t = linspace(0,3,13)';
+            K = 4;
+            splineDOF = 5;
+            derivedDataDOF = ceil(numel(t)/max(splineDOF,K));
+
+            fromSplineDOF = BSpline.knotPointsForDataPoints(t,K=K,splineDOF=splineDOF);
+            fromDataDOF = BSpline.knotPointsForDataPoints(t,K=K,dataDOF=derivedDataDOF);
+
+            testCase.verifyEqual(fromSplineDOF, fromDataDOF)
+        end
+
+        function ppEvaluationHandlesUnsortedInputs(testCase)
+            import matlab.unittest.constraints.IsEqualTo
+            import matlab.unittest.constraints.AbsoluteTolerance
+
+            f = @(x) sin(2*pi*x/3);
+            K = 4;
+            t = linspace(0,3,13)';
+            tKnot = BSpline.knotPointsForDataPoints(t,K=K);
+
+            X = BSpline.matrix(t,tKnot,K);
+            xi = X\f(t);
+            [C,tpp] = BSpline.ppCoefficientsFromSplineCoefficients(xi,tKnot,K);
+
+            tqSorted = linspace(t(1),t(end),31)';
+            tqUnsorted = tqSorted([7 1 19 4 31 12 2 25 16 9 22 5 29 14 3 18 27 11 6 24 15 8 30 13 10 21 17 20 23 26 28]);
+
+            expected = BSpline.matrix(tqUnsorted,tKnot,K)*xi;
+            actual = BSpline.evaluateFromPPCoefficients(tqUnsorted,C,tpp);
+
+            testCase.assertThat(actual, IsEqualTo(expected, 'Within', AbsoluteTolerance(1e-10)))
+        end
+
+        function valueAtPointsRejectsNegativeDerivativeOrder(testCase)
+            spline = InterpolatingSpline((0:2)',(0:2)',K=2);
+            testCase.verifyError(@() spline.valueAtPoints((0:2)',-1), 'MATLAB:validators:mustBeNonnegative')
+        end
+
+        function valueAtPointsReturnsZeroAboveSplineDegree(testCase)
+            spline = InterpolatingSpline((0:2)',(0:2)',K=2);
+
+            values = spline.valueAtPoints((0:2)',2);
+
+            testCase.verifyEqual(values, zeros(3,1))
+        end
+
+        function rootsStayWithinSplineDomain(testCase)
+            import matlab.unittest.constraints.IsEqualTo
+            import matlab.unittest.constraints.AbsoluteTolerance
+
             f = @(x) mod(x,2)-0.5;
-            N = 11; % number of points
-            K = 2; % order of spline
-            
-            % first let's do a uniform grid, lower order
-            x = linspace(0,10,N)';
-            spline = InterpolatingSpline(x,f(x),K);
-            
-            r = roots(spline);
-            
-            expSolution = (0:9)' + 0.5;
-            actSolution = r;
-            
-            testCase.assertThat(actSolution, IsEqualTo(expSolution, 'Within', AbsoluteTolerance(2*eps)))
+            t = linspace(0,10,11)';
+            spline = InterpolatingSpline(t,f(t),K=2);
+
+            expected = (0:9)' + 0.5;
+            actual = roots(spline);
+
+            testCase.assertThat(actual, IsEqualTo(expected, 'Within', AbsoluteTolerance(2*eps)))
         end
-        
+
+        function constrainedSplineFitsLine(testCase)
+            import matlab.unittest.constraints.IsEqualTo
+            import matlab.unittest.constraints.AbsoluteTolerance
+
+            t = linspace(0,1,11)';
+            x = 2*t + 1;
+            K = 2;
+            tKnot = [t(1)*ones(K,1); t(end)*ones(K,1)];
+
+            spline = ConstrainedSpline(t,x,K,tKnot,NormalDistribution(1),struct('t',[],'D',[]));
+
+            testCase.assertThat(spline(t), IsEqualTo(x, 'Within', AbsoluteTolerance(10*eps)))
+        end
+
+        function constrainedSplineAcceptsEmptyConstraints(testCase)
+            import matlab.unittest.constraints.IsEqualTo
+            import matlab.unittest.constraints.AbsoluteTolerance
+
+            t = linspace(0,1,11)';
+            x = 2*t + 1;
+            K = 2;
+            tKnot = [t(1)*ones(K,1); t(end)*ones(K,1)];
+
+            spline = ConstrainedSpline(t,x,K,tKnot,NormalDistribution(1),[]);
+
+            testCase.assertThat(spline(t), IsEqualTo(x, 'Within', AbsoluteTolerance(10*eps)))
+        end
+
+        function constrainedSplineSupportsRobustDistribution(testCase)
+            t = linspace(0,1,11)';
+            x = 2*t + 1;
+            K = 2;
+            tKnot = [t(1)*ones(K,1); t(end)*ones(K,1)];
+
+            spline = ConstrainedSpline(t,x,K,tKnot,StudentTDistribution(sigma=1,nu=3),[]);
+
+            testCase.verifySize(spline(t), size(t))
+        end
+
+        function clearingCoefficientsClearsCachedState(testCase)
+            K = 3;
+            t = linspace(0,1,5)';
+            tKnot = [t(1)*ones(K,1); t(2:end-1); t(end)*ones(K,1)];
+            spline = BSpline(K,tKnot,ones(length(tKnot)-K,1));
+
+            spline.xi = [];
+
+            testCase.verifyEmpty(spline.C)
+            testCase.verifyEmpty(spline.t_pp)
+            testCase.verifyEmpty(spline.Xtpp)
+        end
+
+        function settingCoefficientsRebuildsCachedState(testCase)
+            K = 3;
+            t = linspace(0,1,5)';
+            tKnot = [t(1)*ones(K,1); t(2:end-1); t(end)*ones(K,1)];
+            spline = BSpline(K,tKnot,[]);
+
+            spline.xi = ones(length(tKnot)-K,1);
+
+            testCase.verifyNotEmpty(spline.C)
+            testCase.verifyNotEmpty(spline.t_pp)
+            testCase.verifyNotEmpty(spline.Xtpp)
+        end
+
+        function changingKnotsInvalidatesCoefficientsAndCaches(testCase)
+            K = 3;
+            t = linspace(0,1,5)';
+            tKnot = [t(1)*ones(K,1); t(2:end-1); t(end)*ones(K,1)];
+            spline = BSpline(K,tKnot,ones(length(tKnot)-K,1));
+
+            spline.tKnot = [0; 0; 0; 0.5; 1; 1; 1];
+
+            testCase.verifyEmpty(spline.xi)
+            testCase.verifyEmpty(spline.C)
+            testCase.verifyEmpty(spline.t_pp)
+            testCase.verifyEmpty(spline.Xtpp)
+        end
     end
 
 end

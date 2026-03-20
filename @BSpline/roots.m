@@ -1,6 +1,13 @@
 function values = roots(spline)
-%ROOTS Roots of BSpline for its domain
-
+% Return real roots of a spline within its domain.
+%
+% - Topic: Operations
+% - Declaration: values = roots(spline)
+% - Parameter spline: BSpline instance
+% - Returns values: sorted real roots in the spline domain
+arguments
+    spline (1,1) BSpline
+end
 values = [];
 scale = factorial((spline.K-1):-1:0);
 C = spline.x_std*spline.C;
@@ -8,10 +15,11 @@ C(:,end) = C(:,end) + spline.x_mean;
 t_pp = spline.t_pp;
 
 for iBin=1:size(spline.C,1)
-    r = roots(C(iBin,:)./scale);
-    [~,I] = find( r >= 0 | r<= (t_pp(iBin+1)-t_pp(iBin)) );
-    if ~isempty(I)
-        values = cat(1,values,r(I)+t_pp(iBin));
+    localRoots = roots(C(iBin,:)./scale);
+    intervalWidth = t_pp(iBin+1) - t_pp(iBin);
+    isValidRoot = imag(localRoots) == 0 & real(localRoots) >= 0 & real(localRoots) <= intervalWidth;
+    if any(isValidRoot)
+        values = cat(1,values,real(localRoots(isValidRoot)) + t_pp(iBin));
     end
 end
 

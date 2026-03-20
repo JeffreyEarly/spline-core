@@ -1,94 +1,106 @@
 classdef ConstrainedSpline < BSpline
-    %ConstrainedSpline Summary of this class goes here
-    %   2 argument initialization
-    %       f = ConstrainedSpline(t,x,K,t_knot,constraints);
-    %   where
-    %       t               array of values for the independent axis
-    %       x               array of values for the dependent axis 
-    %       K               spline order
-    %       t_knot          array of knot points
-    %       constraints     constraints = struct('t',[],'D',[]);
-    %       f               cubic spline interpolant
-    % 
-    % constraints are such that f^(D)(t)=0
-    
-    
+    % Constrained spline fit through data values.
+    %
+    % Local constraints are specified with a struct containing fields
+    % `t` and `D`, so that f^(D)(t) = 0 at the supplied locations.
+    %
+    % ConstrainedSpline supports both Gaussian least-squares fitting and
+    % iteratively reweighted fitting for other distributions, together with
+    % local derivative constraints and optional global shape constraints.
+    %
+    % - Topic: Initialization
+    % - Topic: Operations
+    % - Topic: Utility
+    % - Topic: Methodology (Static methods)
+    % - Declaration: classdef ConstrainedSpline < BSpline
+
     properties (Access = public)
+        % Error model used while fitting the constrained spline.
+        %
+        % - Topic: Primary attributes
         distribution
+        % Observation locations used to fit the spline.
+        %
+        % - Topic: Primary attributes
         t
+        % Observation values used to fit the spline.
+        %
+        % - Topic: Primary attributes
         x
         
+        % Inverse coefficient covariance or normal-equation system matrix.
+        %
+        % - Topic: Primary attributes
         CmInv
+        % Design matrix for the observation locations.
+        %
+        % - Topic: Primary attributes
         X
+        % Weight matrix or weights used by the fit.
+        %
+        % - Topic: Primary attributes
         W
     end
     
     methods
-        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-        %
-        % Initialization
-        %
-        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-        function self = ConstrainedSpline(t,x,K,t_knot,distribution,constraints)
-           % Make sure (t,x) are the right shapes, and see how many
-            % dimensions of x we are given.
+        function self = ConstrainedSpline(t,x,K,tKnot,distribution,constraints)
+            % Create a constrained spline through samples x observed at t.
+            %
+            % - Topic: Initialization
+            % - Declaration: self = ConstrainedSpline(t,x,K,tKnot,distribution,constraints)
+            % - Parameter t: sample locations
+            % - Parameter x: sample values
+            % - Parameter K: spline order
+            % - Parameter tKnot: knot sequence
+            % - Parameter distribution: error model object for the fit
+            % - Parameter constraints: struct describing local or global constraints
+            % - Returns self: ConstrainedSpline instance
+            arguments
+                t {mustBeNumeric,mustBeReal,mustBeFinite}
+                x {mustBeNumeric,mustBeReal,mustBeFinite}
+                K (1,1) double {mustBePositive,mustBeInteger,mustBeGreaterThanOrEqual(K,1)}
+                tKnot (:,1) double {mustBeNumeric,mustBeReal,mustBeFinite}
+                distribution = []
+                constraints = []
+            end
+
             t = reshape(t,[],1);
-            N = length(t);
             x = reshape(x,[],1);
-            
-            if length(x) ~= N
-                error('x and t must have the same length.');
+
+            if numel(x) ~= numel(t)
+                error('ConstrainedSpline:SizeMismatch', 'x and t must have the same length.');
             end
-            
-            if any(isnan(x)) || any(isnan(t))
-                error('Some of the data contain NaNs!')
-            end
-            
+
             if isempty(distribution)
                 distribution = NormalDistribution(1);
             end
-            
+            constraints = ConstrainedSpline.normalizeConstraints(constraints);
+
             % terminate the splines at the boundaries
-            nl = find(t_knot <= t_knot(1),1,'last');
-            nr = length(t_knot)- find(t_knot == t_knot(end),1,'first')+1;
-            t_knot = [repmat(t_knot(1),K-nl,1); t_knot; repmat(t_knot(end),K-nr,1)];
-            
-            if isfield(constraints,'global') && constraints.global == ShapeConstraint.positive
-                x_mean = 0;
-            else
-                x_mean = mean(x);
-            end
-            
-%             x_std = std(x-x_mean);
-%             x = (x-x_mean)/x_std;
-            
+            tKnot = ConstrainedSpline.terminatedKnotPoints(tKnot, K);
+
             if isa(distribution,'NormalDistribution')
-                [m,CmInv,cachedVars] = ConstrainedSpline.ConstrainedSolution(t,x,K,t_knot,distribution,[],constraints,[]);
+                [coefficients,CmInv,cachedVars] = ConstrainedSpline.ConstrainedSolution(t,x,K,tKnot,distribution,[],constraints,[]);
             else
-                [m,CmInv,cachedVars] = ConstrainedSpline.IteratedLeastSquaresTensionSolution(t,x,t_knot,K,distribution,constraints,[]);
+                [coefficients,CmInv,cachedVars] = ConstrainedSpline.IteratedLeastSquaresTensionSolution(t,x,tKnot,K,distribution,constraints,[]);
             end
-          
-            self@BSpline(K,t_knot,m);
+
+            self@BSpline(K,tKnot,coefficients);
             self.distribution = distribution;
             self.t = t;
             self.x = x;
-%             self.x_mean = x_mean;
-%             self.x_std = x_std;
             self.CmInv = CmInv;
             self.X = cachedVars.X;
             self.W = cachedVars.W;
         end
-        
-        
-        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-        %
-        % Smoothing matrix and covariance matrix
-        %
-        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-        
+
         function S = smoothingMatrix(self)
-            % The smoothing matrix S takes the observations and maps them
-            % onto the estimated true values.
+            % Return the smoothing matrix that maps observations to fitted values.
+            %
+            % - Topic: Operations
+            % - Declaration: S = smoothingMatrix(self)
+            % - Parameter self: ConstrainedSpline instance
+            % - Returns S: smoothing matrix
             if size(self.W,1) == length(self.t) && size(self.W,2) == 1
                 S = (self.X*(self.CmInv\(self.X.'))).*(self.W.');
             else
@@ -99,16 +111,21 @@ classdef ConstrainedSpline < BSpline
     
     
     methods (Static)
-        
-        function tc = MinimumConstraintPoints(t_knot,K,T)
-            %% MinimumConstraintPoints
-            % Given some set of knot points for a spline of order K, if you
-            % want to universally constrain that spline at degree T, this
-            % function returns a set of constraint locations (in t) that
-            % let you do that, assuming repeat knot points at the beginning
-            % and end.
-            
-            t = unique(t_knot);
+        function tc = MinimumConstraintPoints(tKnot,K,T)
+            % Return a minimal set of locations for universal derivative constraints.
+            %
+            % For a terminated spline of order K, this chooses the smallest
+            % set of points needed to constrain all segments at polynomial
+            % degree T.
+            %
+            % - Topic: Methodology (Static methods)
+            % - Declaration: tc = MinimumConstraintPoints(tKnot,K,T)
+            % - Parameter tKnot: knot sequence
+            % - Parameter K: spline order
+            % - Parameter T: constrained polynomial degree
+            % - Returns tc: constraint locations
+
+            t = unique(tKnot);
             D = K-1-T; % 0 if we're constraining at the same order
             if mod(D,2) == 0
                 ts = t(1) + (t(2)-t(1))/(D/2 + 2)*(1:(D/2+1)).';
@@ -122,23 +139,47 @@ classdef ConstrainedSpline < BSpline
                 tc = cat(1,ts,ti,te);
             end
         end
-        
-        function cachedVars = PrecomputeSolutionMatrices(t,x,K,t_knot,distribution,W,constraints,cachedVars)
-            %% PrecomputeSolutionMatrices
-            % Computes several cachable variables.
-            if ~exist('cachedVars','var') || isempty(cachedVars)
-                cachedVars = struct('t',t,'x',x,'t_knot',t_knot,'K',K,'distribution',distribution);
+
+        function cachedVars = PrecomputeSolutionMatrices(t,x,K,tKnot,distribution,W,constraints,cachedVars)
+            % Precompute reusable matrices for constrained spline fitting.
+            %
+            % - Topic: Methodology (Static methods)
+            % - Declaration: cachedVars = PrecomputeSolutionMatrices(t,x,K,tKnot,distribution,W,constraints,cachedVars)
+            % - Parameter t: sample locations
+            % - Parameter x: sample values
+            % - Parameter K: spline order
+            % - Parameter tKnot: knot sequence
+            % - Parameter distribution: error model object
+            % - Parameter W: optional weights or weight matrix
+            % - Parameter constraints: local/global constraint specification
+            % - Parameter cachedVars: optional previously cached matrices
+            % - Returns cachedVars: struct of precomputed matrices
+            arguments
+                t (:,1) double
+                x (:,1) double
+                K (1,1) double {mustBePositive,mustBeInteger,mustBeGreaterThanOrEqual(K,1)}
+                tKnot (:,1) double {mustBeNumeric,mustBeReal,mustBeFinite}
+                distribution
+                W = []
+                constraints = []
+                cachedVars = []
             end
-            
+            constraints = ConstrainedSpline.normalizeConstraints(constraints);
+            cachedVars = ConstrainedSpline.normalizeCachedVars(cachedVars);
+
+            if isempty(fieldnames(cachedVars))
+                cachedVars = struct('t',t,'x',x,'tKnot',tKnot,'K',K,'distribution',distribution);
+            end
+
             if ~isfield(cachedVars,'X') || isempty(cachedVars.X)
                 % These are the splines at the points of observation
-                cachedVars.X = BSpline.Spline( t, t_knot, K, 0 ); % NxM
+                cachedVars.X = BSpline.matrix(t, tKnot, K); % NxM
             end
-            
+
             if ~isfield(cachedVars,'XT') || isempty(cachedVars.XT)
                 cachedVars.XT = cachedVars.X';
             end
-            
+
             if ~isfield(cachedVars,'F') || isempty(cachedVars.F)
                 % Deal with *local* constraints
                 if ~isfield(constraints,'t') || ~isfield(constraints,'D')
@@ -150,18 +191,18 @@ classdef ConstrainedSpline < BSpline
                         error('t and D must have the same length in the constraints structure.');
                     end
                     F = zeros(NC,M);
-                    Xc = BSpline.Spline( constraints.t, t_knot, K, K-1 );
+                    Xc = BSpline.matrix(constraints.t, tKnot, K, D=K-1);
                     for i=1:NC
                         F(i,:) = squeeze(Xc(i,:,constraints.D(i)+1));
                     end
                 end
                 cachedVars.F = F;
             end
-                        
-            if ~isempty(distribution.rho) && (~isfield(cachedVars,'rho_t') || isempty(cachedVar.rho_t))
+
+            if ~isempty(distribution.rho) && (~isfield(cachedVars,'rho_t') || isempty(cachedVars.rho_t))
                 cachedVars.rho_t = distribution.rho(t - t.');
             end
-            
+
             if ~isfield(cachedVars,'W') || isempty(cachedVars.W)
                 % The (W)eight matrix.
                 %
@@ -183,7 +224,7 @@ classdef ConstrainedSpline < BSpline
                 end
                 cachedVars.W = W;
             end
-            
+
             X = cachedVars.X;
             XT = cachedVars.XT;
             N = length(x);
@@ -215,7 +256,7 @@ classdef ConstrainedSpline < BSpline
                 end
                 cachedVars.XWx = XWx;
             end
-            
+
             if ~isfield(cachedVars,'SC') || isempty(cachedVars.SC)
                 % Deal with *global* constraints (S)hape (C)onstraints
                 if ~isfield(constraints,'global')
@@ -239,7 +280,7 @@ classdef ConstrainedSpline < BSpline
                 cachedVars.SC = SC;
             end
             S = cachedVars.SC;
-            
+
             if ~isempty(S)
                 if ~isfield(cachedVars,'XS') || isempty(cachedVars.XS)
                     cachedVars.XS = cachedVars.X*S;
@@ -284,36 +325,30 @@ classdef ConstrainedSpline < BSpline
                     cachedVars.SXWx = SXWx;
                 end
             end
-                        
+
         end
-        
-        function [m,CmInv,cachedVars] = ConstrainedSolution(t,x,K,t_knot,distribution,W,constraints,cachedVars)
-            %% ConstrainedSolution
+
+        function [coefficients,CmInv,cachedVars] = ConstrainedSolution(t,x,K,tKnot,distribution,W,constraints,cachedVars)
+            % Solve the constrained weighted least-squares spline system.
             %
-            % Returns the spline fit solution with constraints, given by
-            % the F matrix. It also supports IRLS with non-constant sigma.
+            % Supports local equality constraints and optional global shape
+            % constraints enforced through quadratic programming when needed.
             %
-            %
-            % N     # of observations
-            % M     # of splines
-            % NC    # of constraints
-            %
-            % inputs:
-            % t             observation times (Nx1)
-            % x             observations (Nx1)
-            % K             spline order
-            % t_knot        array of knot points
-            % distribution  expected distribution of the errors
-            % F             constraints (NCxM)
-            % W             weight matrix for observations (NxN)
-            % S             global constraint matrix (MxM)
-            % cachedVars    precomputed matrices for computation
-            %
-            % output:
-            % m         coefficients of the splines, Mx1
-            % CmInv     Inverse of the covariance of coefficients, MxM
-            
-            cachedVars = ConstrainedSpline.PrecomputeSolutionMatrices(t,x,K,t_knot,distribution,W,constraints,cachedVars);
+            % - Topic: Methodology (Static methods)
+            % - Declaration: [coefficients,CmInv,cachedVars] = ConstrainedSolution(t,x,K,tKnot,distribution,W,constraints,cachedVars)
+            % - Parameter t: sample locations
+            % - Parameter x: sample values
+            % - Parameter K: spline order
+            % - Parameter tKnot: knot sequence
+            % - Parameter distribution: error model object
+            % - Parameter W: optional weights or weight matrix
+            % - Parameter constraints: local/global constraint specification
+            % - Parameter cachedVars: optional previously cached matrices
+            % - Returns coefficients: fitted spline coefficients
+            % - Returns CmInv: inverse coefficient covariance or system matrix
+            % - Returns cachedVars: updated cache of precomputed matrices
+
+            cachedVars = ConstrainedSpline.PrecomputeSolutionMatrices(t,x,K,tKnot,distribution,W,constraints,cachedVars);
             
             F = cachedVars.F;
             XWX = cachedVars.XWX;
@@ -330,17 +365,17 @@ classdef ConstrainedSpline < BSpline
                 E_x = cat(1,E_x,F); % (M+NC)xM
                 E_x = cat(2,E_x,cat(1,F',zeros(NC)));
                 F_x = cat(1,F_x,zeros(NC,1));
-                m_x = E_x\F_x;
-                m = m_x(1:M);
+                solution = E_x\F_x;
+                coefficients = solution(1:M);
             else
-                m = E_x\F_x;
+                coefficients = E_x\F_x;
             end
-            
+
             % Now solve *with* global constraints, if necessary
             S = cachedVars.SC;
             if ~isempty(S)
-                m0 = m;
-                xi0 = S\m0;
+                coefficients0 = coefficients;
+                xi0 = S\coefficients0;
                 if any(xi0<0)
                     E_x = cachedVars.SXWXS; % MxM
                     F_x = cachedVars.SXWx;
@@ -368,7 +403,7 @@ classdef ConstrainedSpline < BSpline
                         options = optimoptions('quadprog','Display','off','Algorithm','interior-point-convex');
                         x = quadprog(2*H,-2*F_x,[],[],Aeq,beq,lb,ub,[],options);
                     end
-                    m = S*x;
+                    coefficients = S*x;
                 end
             end
             CmInv = E_x;
@@ -385,24 +420,51 @@ classdef ConstrainedSpline < BSpline
             %                 opts = optimoptions('quadprog','Algorithm','trust-region-reflective','Display','off');
             %                 [sol,qfval,qexitflag,qoutput] = solve(qprob,struct('xi',xi0),'options',opts);
             %
-            %                 m = S*sol.xi;
+            %                 coefficients = S*sol.xi;
         end
-        
-        function [m,CmInv,cachedVars] = IteratedLeastSquaresTensionSolution(t,x,t_knot,K,distribution,constraints,cachedVars)
-            % Out first call is basically just a normal fit to a tension
-            % spline. If W is not set, it will be set to either 1/w0^2 or
-            % the correlated version
+
+        function [coefficients,CmInv,cachedVars] = IteratedLeastSquaresTensionSolution(t,x,tKnot,K,distribution,constraints,cachedVars)
+            % Solve a constrained spline fit with iteratively reweighted least squares.
+            %
+            % The first iteration computes an initial constrained fit, then
+            % updates weights using the supplied distribution until the
+            % effective variance model converges.
+            %
+            % - Topic: Methodology (Static methods)
+            % - Declaration: [coefficients,CmInv,cachedVars] = IteratedLeastSquaresTensionSolution(t,x,tKnot,K,distribution,constraints,cachedVars)
+            % - Parameter t: sample locations
+            % - Parameter x: sample values
+            % - Parameter tKnot: knot sequence
+            % - Parameter K: spline order
+            % - Parameter distribution: error model object
+            % - Parameter constraints: local/global constraint specification
+            % - Parameter cachedVars: optional previously cached matrices
+            % - Returns coefficients: fitted spline coefficients
+            % - Returns CmInv: inverse coefficient covariance or system matrix
+            % - Returns cachedVars: updated cache of precomputed matrices
+            arguments
+                t (:,1) double
+                x (:,1) double
+                tKnot (:,1) double {mustBeNumeric,mustBeReal,mustBeFinite}
+                K (1,1) double {mustBePositive,mustBeInteger,mustBeGreaterThanOrEqual(K,1)}
+                distribution
+                constraints = []
+                cachedVars = []
+            end
+            constraints = ConstrainedSpline.normalizeConstraints(constraints);
+            cachedVars = ConstrainedSpline.normalizeCachedVars(cachedVars);
+
             cachedVars.W = []; cachedVars.XWX = []; cachedVars.XWx = []; cachedVars.SXWXS = []; cachedVars.SXWx = [];
-            [m,CmInv,cachedVars] = ConstrainedSpline.ConstrainedSolution(t,x,K,t_knot,distribution,[],constraints,cachedVars);
+            [coefficients,CmInv,cachedVars] = ConstrainedSpline.ConstrainedSolution(t,x,K,tKnot,distribution,[],constraints,cachedVars);
             
             X = cachedVars.X;
             sigma2_previous = (distribution.sigma0)^2;
             rel_error = 1.0;
             repeats = 1;
             while (rel_error > 0.01)
-                sigma_w2 = distribution.w(X*m - x);
-                
-                if exist('cachedVars.rho_t','var')
+                sigma_w2 = distribution.w(X*coefficients - x);
+
+                if isfield(cachedVars,'rho_t') && ~isempty(cachedVars.rho_t)
                     Sigma2 = (sqrt(sigma_w2) * sqrt(sigma_w2).') .* cachedVars.rho_t;
                     W = inv(Sigma2);
                 else
@@ -412,7 +474,7 @@ classdef ConstrainedSpline < BSpline
                 % hose any cached variable associated with W...
                 cachedVars.W = []; cachedVars.XWX = []; cachedVars.XWx = [];
                 % ...and recompute the solution with this new weighting
-                [m,CmInv,cachedVars] = ConstrainedSpline.ConstrainedSolution(t,x,K,t_knot,distribution,W,constraints,cachedVars);
+                [coefficients,CmInv,cachedVars] = ConstrainedSpline.ConstrainedSolution(t,x,K,tKnot,distribution,W,constraints,cachedVars);
                 
                 rel_error = max( abs((sigma_w2-sigma2_previous)./sigma_w2) );
                 sigma2_previous=sigma_w2;
@@ -425,8 +487,65 @@ classdef ConstrainedSpline < BSpline
             end
             
         end
-  
+
+        function tKnot = terminatedKnotPoints(tKnot, K)
+            % Ensure the knot vector has K repeated knots at each boundary.
+            %
+            % - Topic: Utility
+            % - Declaration: tKnot = terminatedKnotPoints(tKnot,K)
+            % - Parameter tKnot: knot sequence
+            % - Parameter K: spline order
+            % - Returns tKnot: terminated knot sequence
+            arguments
+                tKnot (:,1) double {mustBeNumeric,mustBeReal,mustBeFinite}
+                K (1,1) double {mustBePositive,mustBeInteger,mustBeGreaterThanOrEqual(K,1)}
+            end
+
+            nLeft = find(tKnot <= tKnot(1),1,'last');
+            nRight = numel(tKnot) - find(tKnot == tKnot(end),1,'first') + 1;
+            tKnot = [repmat(tKnot(1),K-nLeft,1); tKnot; repmat(tKnot(end),K-nRight,1)];
+        end
+
+        function constraints = normalizeConstraints(constraints)
+            % Normalize an optional constraint specification struct.
+            %
+            % - Topic: Utility
+            % - Declaration: constraints = normalizeConstraints(constraints)
+            % - Parameter constraints: empty or struct with constraint fields
+            % - Returns constraints: normalized struct with fields t and D
+            if isempty(constraints)
+                constraints = struct('t',[],'D',[]);
+                return;
+            end
+
+            if ~isstruct(constraints)
+                error('ConstrainedSpline:InvalidConstraints', 'constraints must be empty or a struct.');
+            end
+
+            if ~isfield(constraints,'t')
+                constraints.t = [];
+            end
+
+            if ~isfield(constraints,'D')
+                constraints.D = [];
+            end
+        end
+
+        function cachedVars = normalizeCachedVars(cachedVars)
+            % Normalize an optional cached-variable struct.
+            %
+            % - Topic: Utility
+            % - Declaration: cachedVars = normalizeCachedVars(cachedVars)
+            % - Parameter cachedVars: empty or struct of cached matrices
+            % - Returns cachedVars: normalized cache struct
+            if isempty(cachedVars)
+                cachedVars = struct();
+                return;
+            end
+
+            if ~isstruct(cachedVars)
+                error('ConstrainedSpline:InvalidCachedVars', 'cachedVars must be empty or a struct.');
+            end
+        end
     end
 end
-
-

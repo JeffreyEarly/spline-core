@@ -1,16 +1,26 @@
 function f = mtimes(f,g)
-%.* BSpline multiplication
+% Multiply a spline output by a scalar.
+%
+% - Topic: Operations
+% - Declaration: f = mtimes(f,g)
+% - Parameter f: BSpline instance or scalar
+% - Parameter g: scalar or BSpline instance
+% - Returns f: transformed BSpline or empty when multiplying by []
+arguments
+    f
+    g
+end
 
-if ( ~isa(f, 'BSpline') )
-    % Ensure BSpline is the first input:
-    f = mtimes(g, f);
-elseif ( isempty(g) )          % BSpline * []
+if ~isa(f,'BSpline')
+    [f, g] = deal(g, f);
+end
+
+if ~isa(f,'BSpline')
+    error('BSpline:mtimes:UnsupportedOperand', 'One operand must be a BSpline.');
+elseif isempty(g)
     f = [];
-elseif ( isnumeric(g) && isscalar(g) )
-    h = BSpline(f.K,f.t_knot,f.m);
-    h.x_std = g*f.x_std;
-    h.x_mean = g*f.x_mean;
-    f = h;
+elseif isnumeric(g) && isscalar(g)
+    f = f.affineOutputTransform(g, 0);
 else
-    error('This case is not handled!')
+    error('BSpline:mtimes:UnsupportedOperand', 'Only scalar numeric multiplication is supported.');
 end

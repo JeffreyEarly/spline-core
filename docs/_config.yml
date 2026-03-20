@@ -1,0 +1,15 @@
+remote_theme: just-the-docs/just-the-docs
+title: Spline Core
+description: Core B-spline and interpolation classes for MATLAB
+
+search_enabled: false
+
+# Aux links for the upper right navigation
+aux_links:
+  "spline-core on GitHub":
+    - "https://github.com/JeffreyEarly/spline-core"
+
+# Makes Aux links open in a new tab. Default is false
+aux_links_new_tab: false
+
+color_scheme: light

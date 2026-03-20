@@ -1,23 +1,34 @@
-function splineb = power(spline,b,constraints)
-%POWER Power of a BSpline
-
-if b == 1
-    splineb = spline;
-else
-    ts = BSpline.PointsOfSupport(spline.t_knot,spline.K,0);
-    g = spline.ValueAtPoints(ts);
-    g(abs(2*eps)>g) = 0;
-%         splineb = InterpolatingSpline(ts,(g.^b),ceil(b*spline.K));
-        K = ceil(b*spline.K);
-%     K = spline.K;
-    t_knot = InterpolatingSpline.KnotPointsForPoints(ts,K);
-    if exist('constraints','var') && ~isempty(constraints)
-        splineb = ConstrainedSpline(ts,(g.^b),K,t_knot,[],constraints);
-    else
-        X = BSpline.Spline(ts,t_knot,K);
-        m = X\(g.^b);
-        splineb = BSpline(K,t_knot,m);
-    end
-    
+function poweredSpline = power(spline,exponent,constraints)
+% Raise spline values to a real scalar power by refitting support values.
+%
+% - Topic: Operations
+% - Declaration: poweredSpline = power(spline,exponent,constraints)
+% - Parameter spline: BSpline instance
+% - Parameter exponent: scalar exponent
+% - Parameter constraints: optional constraint specification for the refit
+% - Returns poweredSpline: BSpline approximating spline.^exponent
+arguments
+    spline (1,1) BSpline
+    exponent (1,1) double {mustBeReal,mustBeFinite}
+    constraints = []
+end
+if exponent == 1
+    poweredSpline = spline;
+    return;
 end
 
+supportPoints = BSpline.pointsOfSupport(spline.tKnot,spline.K,0);
+values = spline.valueAtPoints(supportPoints);
+values(abs(values) < 2*eps) = 0;
+
+poweredOrder = ceil(exponent*spline.K);
+tKnot = BSpline.knotPointsForDataPoints(supportPoints,K=poweredOrder);
+poweredValues = values.^exponent;
+
+if ~isempty(constraints)
+    poweredSpline = ConstrainedSpline(supportPoints,poweredValues,poweredOrder,tKnot,[],constraints);
+else
+    X = BSpline.matrix(supportPoints,tKnot,poweredOrder);
+    xi = X\poweredValues;
+    poweredSpline = BSpline(poweredOrder,tKnot,xi);
+end

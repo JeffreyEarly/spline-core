@@ -1,5 +1,11 @@
 classdef ShapeConstraint
-    %ShapeConstraint This class defines the valid global shape constraints.
+    % Enumerate supported global shape constraints for constrained splines.
+    %
+    % These values are interpreted by ConstrainedSpline when constructing
+    % global inequality constraints on spline coefficients.
+    %
+    % - Topic: Utility
+    % - Declaration: classdef ShapeConstraint
     enumeration
         none
         positive
@@ -7,4 +13,3 @@ classdef ShapeConstraint
         monotonicDecreasing
     end    
 end
-

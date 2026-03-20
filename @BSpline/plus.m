@@ -1,19 +1,26 @@
 function f = plus(f,g)
-%+ BSpline addition
+% Add a scalar offset to a spline output.
+%
+% - Topic: Operations
+% - Declaration: f = plus(f,g)
+% - Parameter f: BSpline instance or scalar
+% - Parameter g: scalar or BSpline instance
+% - Returns f: transformed BSpline or empty when adding []
+arguments
+    f
+    g
+end
 
-if ( ~isa(f, 'BSpline') )
-    % Ensure BSpline is the first input:
-    f = plus(g, f);
-elseif ( isempty(g) )          % BSpline * []
+if ~isa(f,'BSpline')
+    [f, g] = deal(g, f);
+end
+
+if ~isa(f,'BSpline')
+    error('BSpline:plus:UnsupportedOperand', 'One operand must be a BSpline.');
+elseif isempty(g)
     f = [];
-elseif ( isnumeric(g) && isscalar(g) )
-    %     X = f.B(:,:,1);
-    %     m1 = X\ones(size(X,1),1);
-    %     f = BSpline(f.K,f.t_knot,f.m + g*m1);
-    h = BSpline(f.K,f.t_knot,f.m);
-    h.x_std = f.x_std;
-    h.x_mean = f.x_mean+g;
-    f = h;
+elseif isnumeric(g) && isscalar(g)
+    f = f.affineOutputTransform(1, g);
 else
-    error('This case is not handled!')
+    error('BSpline:plus:UnsupportedOperand', 'Only scalar numeric offsets are supported.');
 end

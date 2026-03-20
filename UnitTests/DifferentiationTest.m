@@ -5,7 +5,7 @@ K = 4; % order of spline
 
 % first let's do a uniform grid, lower order
 x = linspace(-1,1,N)';
-spline = InterpolatingSpline(x,f(x),K);
+spline = InterpolatingSpline(x,f(x),K=K);
 
 % dense grid to plot the interpolant
 x_dense = linspace(-1,1,10*N)';
@@ -19,10 +19,10 @@ scatter(x,f(x))
 subplot(1,2,2)
 plot(x_dense,spline(x_dense,1), 'LineWidth', 2)
 
-% dt_knot = spline_fit.t_knot(2:end-1);
-% B = BSpline.Spline(x,dt_knot,K-1);
-% m = B\spline_fit(x,1);
-% dspline = BSpline(K-1,dt_knot,m);
+% dtKnot = spline_fit.tKnot(2:end-1);
+% B = BSpline.matrix(x,dtKnot,K-1);
+% xi = B\spline_fit(x,1);
+% dspline = BSpline(K-1,dtKnot,xi);
 
 dspline = diff(spline,1);
 

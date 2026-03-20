@@ -4,7 +4,7 @@ K = 4; % order of spline
 
 % first let's do a uniform grid, lower order
 x = linspace(-1,1,N)';
-spline_fit = InterpolatingSpline(x,f(x),K);
+spline_fit = InterpolatingSpline(x,f(x),K=K);
 
 % dense grid to plot the interpolant
 x_dense = linspace(-1,1,10*N)';
@@ -20,7 +20,7 @@ title(sprintf('uniform grid, N=%d, K=%d, max error = %.2g',N,K,maxError))
 % first let's do a chebyshev grid, high order
 K = 4;
 x = cos((0:N-1)'*pi/(N-1));
-spline_fit = InterpolatingSpline(x,f(x),K);
+spline_fit = InterpolatingSpline(x,f(x),K=K);
 
 subplot(1,2,2)
 plot(x_dense,f(x_dense), 'k--', 'LineWidth', 2), hold on,
@@ -35,7 +35,7 @@ title(sprintf('chebyshev grid, N=%d, K=%d, max error = %.2g',N,K,maxError))
 x = [-1 -0.33 0.33 1]';
 y = [0 1 2 0]';
 
-spline_fit = InterpolatingSpline(x,y,4);
+spline_fit = InterpolatingSpline(x,y,K=4);
 interpolant = griddedInterpolant(x,y,'spline');
 figure
 scatter(x,y), hold on,

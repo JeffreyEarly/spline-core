@@ -1,5 +1,5 @@
 distribution = NormalDistribution(1);
-distribution = StudentTDistribution(1,3.0);
+distribution = StudentTDistribution(sigma=1,nu=3.0);
 
 t = linspace(0,2,11)';
 f = @(x) x.^2 + 2*x + 1 + distribution.rand(size(x));
