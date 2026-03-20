@@ -28,5 +28,14 @@ Evaluate the spline or one of its derivatives at arbitrary points.
 
 ## Discussion
 
+  This is the main explicit evaluation method. Pass
+  `NumDerivatives = 0` for spline values, `1` for the first
+  derivative, and so on.
+ 
+  ```matlab
+  x = spline.valueAtPoints(tQuery);
+  d2x = spline.valueAtPoints(tQuery, 2);
+  ```
+ 
             - Note: derivative orders above K-1 evaluate to zero.
   

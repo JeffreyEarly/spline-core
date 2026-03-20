@@ -5,50 +5,67 @@ classdef BSpline < handle
     % coefficients together with cached piecewise-polynomial coefficients for
     % efficient evaluation, differentiation, and algebraic transforms.
     %
-    % - Topic: Initialization
-    % - Topic: Primary attributes
-    % - Topic: Spline evaluation
-    % - Topic: Operations
-    % - Topic: Utility
-    % - Topic: Methodology (Static methods)
+    % ## Basic usage
+    %
+    % In most workflows you first build a knot sequence from sample
+    % locations, assemble the spline basis matrix, solve for coefficients,
+    % and then evaluate the resulting spline object.
+    %
+    % ```matlab
+    % t = linspace(0,1,20)';
+    % x = sin(2*pi*t);
+    % tKnot = BSpline.knotPointsForDataPoints(t, K=4);
+    % X = BSpline.matrix(t, tKnot, 4);
+    % spline = BSpline(4, tKnot, X\x);
+    %
+    % xq = spline(linspace(0,1,100)');
+    % ```
+    %
+    % - Topic: Create a spline
+    % - Topic: Inspect spline properties
+    % - Topic: Evaluate the spline
+    % - Topic: Transform the spline
+    % - Topic: Build spline bases
+    % - Topic: Represent piecewise polynomials
+    % - Topic: Maintain cached state
     %
     % - Declaration: classdef BSpline < handle
     properties (Access = public)
         % Spline order K, where polynomial degree is S = K - 1.
         %
-        % - Topic: Primary attributes
+        % - Topic: Inspect spline properties
         K
     end
 
     properties (Access = private)
         % Internal spline coefficients, stored as an Mx1 vector.
         %
-        % - Topic: Primary attributes
+        % - Topic: Inspect spline properties
         xi_
 
         % Internal knot sequence for the spline basis.
         %
-        % - Topic: Primary attributes
+        % - Topic: Inspect spline properties
         tKnot_
     end
 
     properties (GetAccess=public, SetAccess=protected)
         % Basis values and derivatives sampled at piecewise breakpoints.
         %
-        % - Topic: Spline evaluation
+        % - Topic: Represent piecewise polynomials
         % - Developer: true
         Xtpp = [];
 
         % Piecewise-polynomial breakpoint locations.
         %
-        % - Topic: Spline evaluation
+        % - Topic: Represent piecewise polynomials
         % - Developer: true
         % size(t_pp) = length(tKnot) - 2*K + 1
         t_pp
 
         % Piecewise-polynomial coefficients for interval evaluation.
         %
-        % - Topic: Spline evaluation
+        % - Topic: Represent piecewise polynomials
         % - Developer: true
         % size(C) = [length(t_pp)-1, K]
         C       
@@ -57,34 +74,34 @@ classdef BSpline < handle
     properties (Access=public)
         % Mean added back to zero-order spline evaluations.
         %
-        % - Topic: Primary attributes
+        % - Topic: Inspect spline properties
         xMean = 0 % if set, these will be used to scale the output
         % Multiplicative scale applied to spline evaluations.
         %
-        % - Topic: Primary attributes
+        % - Topic: Inspect spline properties
         xStd = 1 % xOut = xStd*(X*xi)+xMean;
     end
 
     properties (Dependent)
         % Polynomial degree S = K - 1.
         %
-        % - Topic: Primary attributes
+        % - Topic: Inspect spline properties
         % A cubic spline is K=4, S=3
         S
 
         % Minimum and maximum values of the spline domain.
         %
-        % - Topic: Primary attributes
+        % - Topic: Inspect spline properties
         domain
 
         % Spline coefficients as an Mx1 vector.
         %
-        % - Topic: Primary attributes
+        % - Topic: Inspect spline properties
         xi
 
         % Knot sequence used to define the spline basis.
         %
-        % - Topic: Primary attributes
+        % - Topic: Inspect spline properties
         tKnot
     end
     
@@ -96,7 +113,14 @@ classdef BSpline < handle
             % `valueAtPoints`, while dot indexing behaves like the default
             % MATLAB handle-class implementation.
             %
-            % - Topic: Operations
+            % Use `spline(t)` for values and `spline(t,n)` for derivatives.
+            %
+            % ```matlab
+            % x = spline(tQuery);
+            % dxdt = spline(tQuery, 1);
+            % ```
+            %
+            % - Topic: Evaluate the spline
             % - Declaration: varargout = subsref(self,index)
             % - Parameter self: BSpline instance
             % - Parameter index: MATLAB subscript structure
@@ -143,7 +167,18 @@ classdef BSpline < handle
             % Optionally accepts cached breakpoint evaluations and affine
             % output normalization parameters used by derived spline classes.
             %
-            % - Topic: Initialization
+            % Use this constructor when you already have a knot sequence and
+            % coefficient vector and want a spline object for evaluation or
+            % algebraic manipulation.
+            %
+            % ```matlab
+            % tKnot = [0; 0; 0; 0; 1; 1; 1; 1];
+            % xi = [1; -0.5; 0.25; 0];
+            % spline = BSpline(4, tKnot, xi);
+            % x = spline(linspace(0,1,50)');
+            % ```
+            %
+            % - Topic: Create a spline
             % - Declaration: spline = BSpline(K,tKnot,xi)
             % - Parameter K: spline order (degree S=K-1)
             % - Parameter tKnot: knot points
@@ -174,7 +209,7 @@ classdef BSpline < handle
         function S = get.S(self)
             % Return the spline polynomial degree.
             %
-            % - Topic: Primary attributes
+            % - Topic: Inspect spline properties
             % - Declaration: S = get.S(self)
             % - Parameter self: BSpline instance
             % - Returns S: double scalar equal to K - 1
@@ -184,7 +219,7 @@ classdef BSpline < handle
         function domain = get.domain(self)
             % Return the spline domain endpoints.
             %
-            % - Topic: Primary attributes
+            % - Topic: Inspect spline properties
             % - Declaration: domain = get.domain(self)
             % - Parameter self: BSpline instance
             % - Returns domain: 1x2 vector [tMin tMax]
@@ -194,7 +229,7 @@ classdef BSpline < handle
         function xi = get.xi(self)
             % Return the current spline coefficients.
             %
-            % - Topic: Primary attributes
+            % - Topic: Inspect spline properties
             % - Declaration: xi = get.xi(self)
             % - Parameter self: BSpline instance
             % - Returns xi: spline coefficient column vector
@@ -204,7 +239,7 @@ classdef BSpline < handle
         function set.xi(self, xi)
             % Update spline coefficients and refresh cached polynomial forms.
             %
-            % - Topic: Primary attributes
+            % - Topic: Inspect spline properties
             % - Declaration: set.xi(self,xi)
             % - Parameter self: BSpline instance
             % - Parameter xi: spline coefficient column vector
@@ -219,7 +254,7 @@ classdef BSpline < handle
         function tKnot = get.tKnot(self)
             % Return the current knot sequence.
             %
-            % - Topic: Primary attributes
+            % - Topic: Inspect spline properties
             % - Declaration: tKnot = get.tKnot(self)
             % - Parameter self: BSpline instance
             % - Returns tKnot: knot vector
@@ -229,7 +264,7 @@ classdef BSpline < handle
         function set.tKnot(self, tKnot)
             % Update the knot sequence and clear cached spline state.
             %
-            % - Topic: Primary attributes
+            % - Topic: Inspect spline properties
             % - Declaration: set.tKnot(self,tKnot)
             % - Parameter self: BSpline instance
             % - Parameter tKnot: knot vector
@@ -244,7 +279,16 @@ classdef BSpline < handle
         function x_out = valueAtPoints( self, t, NumDerivatives)
             % Evaluate the spline or one of its derivatives at arbitrary points.
             %
-            % - Topic: Operations
+            % This is the main explicit evaluation method. Pass
+            % `NumDerivatives = 0` for spline values, `1` for the first
+            % derivative, and so on.
+            %
+            % ```matlab
+            % x = spline.valueAtPoints(tQuery);
+            % d2x = spline.valueAtPoints(tQuery, 2);
+            % ```
+            %
+            % - Topic: Evaluate the spline
             % - Declaration: x_out = valueAtPoints(self,t,NumDerivatives)
             % - Parameter self: BSpline instance
             % - Parameter t: evaluation points
@@ -272,7 +316,7 @@ classdef BSpline < handle
         function tKnotDidChange(self)
             % Clear cached piecewise-polynomial data after knot updates.
             %
-            % - Topic: Utility
+            % - Topic: Maintain cached state
             % - Developer: true
             % - Declaration: tKnotDidChange(self)
             % - Parameter self: BSpline instance
@@ -285,7 +329,7 @@ classdef BSpline < handle
         function splineCoefficientsDidChange(self)
             % Refresh cached polynomial coefficients after coefficient updates.
             %
-            % - Topic: Utility
+            % - Topic: Maintain cached state
             % - Developer: true
             % - Declaration: splineCoefficientsDidChange(self)
             % - Parameter self: BSpline instance
@@ -303,7 +347,7 @@ classdef BSpline < handle
         function transformedSpline = affineOutputTransform(self, scale, offset)
             % Apply an affine transform to spline outputs without refitting.
             %
-            % - Topic: Utility
+            % - Topic: Transform the spline
             % - Declaration: transformedSpline = affineOutputTransform(self,scale,offset)
             % - Parameter self: BSpline instance
             % - Parameter scale: output scale factor

@@ -1,7 +1,14 @@
 function f = plus(f,g)
 % Add a scalar offset to a spline output.
 %
-% - Topic: Operations
+% This shifts the spline output without changing the knot sequence or
+% spline coefficients.
+%
+% ```matlab
+% shiftedSpline = spline + 3;
+% ```
+%
+% - Topic: Transform the spline
 % - Declaration: f = plus(f,g)
 % - Parameter f: BSpline instance or scalar
 % - Parameter g: scalar or BSpline instance

@@ -1,7 +1,7 @@
 function [C,tpp,Xtpp] = ppCoefficientsFromSplineCoefficients( xi, tKnot, K, options )
 % Returns the piecewise polynomial coefficients in matrix C from spline coefficients in vector xi.
 %
-% - Topic: Spline evaluation
+% - Topic: Represent piecewise polynomials
 % - Developer: true
 % - Declaration: ppCoefficientsFromSplineCoefficients( xi, tKnot, K, Xtpp )
 % - Parameter xi: spline coefficients

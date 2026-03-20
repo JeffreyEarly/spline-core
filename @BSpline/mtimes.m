@@ -1,7 +1,14 @@
 function f = mtimes(f,g)
 % Multiply a spline output by a scalar.
 %
-% - Topic: Operations
+% This rescales the spline output without refitting the spline
+% coefficients.
+%
+% ```matlab
+% scaledSpline = 2.5 * spline;
+% ```
+%
+% - Topic: Transform the spline
 % - Declaration: f = mtimes(f,g)
 % - Parameter f: BSpline instance or scalar
 % - Parameter g: scalar or BSpline instance

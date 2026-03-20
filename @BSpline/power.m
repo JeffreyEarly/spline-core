@@ -1,7 +1,15 @@
 function poweredSpline = power(spline,exponent,constraints)
 % Raise spline values to a real scalar power by refitting support values.
 %
-% - Topic: Operations
+% This is useful for simple nonlinear transforms of a spline when an exact
+% spline-space representation is not available.
+%
+% ```matlab
+% squaredSpline = spline.^2;
+% reciprocalRootSpline = spline.^(-0.5);
+% ```
+%
+% - Topic: Transform the spline
 % - Declaration: poweredSpline = power(spline,exponent,constraints)
 % - Parameter spline: BSpline instance
 % - Parameter exponent: scalar exponent

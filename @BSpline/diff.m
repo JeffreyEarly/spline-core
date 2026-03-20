@@ -1,7 +1,15 @@
 function dspline = diff(spline,n)
 % Differentiate a B-spline representation.
 %
-% - Topic: Operations
+% Use this when you want a new spline object representing the derivative,
+% rather than only evaluating derivatives at a set of points.
+%
+% ```matlab
+% dspline = diff(spline);
+% curvatureSpline = diff(spline, 2);
+% ```
+%
+% - Topic: Transform the spline
 % - Declaration: dspline = diff(spline,n)
 % - Parameter spline: BSpline instance to differentiate
 % - Parameter n: derivative order

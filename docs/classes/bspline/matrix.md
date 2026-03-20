@@ -33,4 +33,13 @@ Evaluate terminated B-spline basis functions and optional derivatives.
   given knot points tKnot. If you optionally provide D,
   then D derivatives will be returned.
  
+  Use this to assemble a design matrix for interpolation, regression, or
+  direct inspection of the basis functions.
+ 
+  ```matlab
+  B = BSpline.matrix(t, tKnot, 4);
+  xi = B \ x;
+  spline = BSpline(4, tKnot, xi);
+  ```
+ 
               

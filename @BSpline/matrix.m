@@ -5,7 +5,16 @@ function B = matrix( t, tKnot, K, options )
 % given knot points tKnot. If you optionally provide D,
 % then D derivatives will be returned.
 %
-% - Topic: Spline evaluation
+% Use this to assemble a design matrix for interpolation, regression, or
+% direct inspection of the basis functions.
+%
+% ```matlab
+% B = BSpline.matrix(t, tKnot, 4);
+% xi = B \ x;
+% spline = BSpline(4, tKnot, xi);
+% ```
+%
+% - Topic: Build spline bases
 % - Declaration: B = matrix( t, tKnot, K, options )
 % - Parameter t: points at which to evaluate the splines
 % - Parameter tKnot: spline knot points

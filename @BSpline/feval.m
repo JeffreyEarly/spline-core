@@ -1,7 +1,14 @@
 function values = feval(spline,x)
 % Evaluate a B-spline at the supplied points.
 %
-% - Topic: Operations
+% This is equivalent to `spline(x)` and is useful when you prefer an
+% explicit function-call form.
+%
+% ```matlab
+% values = feval(spline, tQuery);
+% ```
+%
+% - Topic: Evaluate the spline
 % - Declaration: values = feval(spline,x)
 % - Parameter spline: BSpline instance
 % - Parameter x: evaluation points

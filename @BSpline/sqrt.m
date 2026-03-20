@@ -1,7 +1,14 @@
 function splinesqrt = sqrt(spline,constraints)
 % Return a spline approximation to the square root of the spline output.
 %
-% - Topic: Operations
+% This is a convenience wrapper around `spline.^(1/2)` and is most useful
+% when the spline is nonnegative over its domain.
+%
+% ```matlab
+% amplitudeSpline = sqrt(energySpline);
+% ```
+%
+% - Topic: Transform the spline
 % - Declaration: splinesqrt = sqrt(spline,constraints)
 % - Parameter spline: BSpline instance
 % - Parameter constraints: optional constraint specification for the refit

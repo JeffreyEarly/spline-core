@@ -27,4 +27,11 @@ Add a scalar offset to a spline output.
 
 ## Discussion
 
+  This shifts the spline output without changing the knot sequence or
+  spline coefficients.
+ 
+  ```matlab
+  shiftedSpline = spline + 3;
+  ```
+ 
           

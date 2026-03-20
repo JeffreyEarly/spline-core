@@ -31,4 +31,11 @@ Evaluate the spline with function-call syntax or defer to built-in indexing.
   `valueAtPoints`, while dot indexing behaves like the default
   MATLAB handle-class implementation.
  
+  Use `spline(t)` for values and `spline(t,n)` for derivatives.
+ 
+  ```matlab
+  x = spline(tQuery);
+  dxdt = spline(tQuery, 1);
+  ```
+ 
           

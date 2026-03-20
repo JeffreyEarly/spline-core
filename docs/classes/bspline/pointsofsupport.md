@@ -31,4 +31,13 @@ Return representative support points for a terminated spline basis.
   This function assumes that the splines are terminated at the
   boundary with repeated end knots.
  
+  Use these points when you need one representative location per basis
+  function, for example when constructing transformed splines from sampled
+  values.
+ 
+  ```matlab
+  tSupport = BSpline.pointsOfSupport(tKnot, 4);
+  xSupport = spline(tSupport);
+  ```
+ 
             

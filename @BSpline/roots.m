@@ -1,7 +1,13 @@
 function values = roots(spline)
 % Return real roots of a spline within its domain.
 %
-% - Topic: Operations
+% Use this to locate zero crossings of the spline over its support.
+%
+% ```matlab
+% tZero = roots(spline);
+% ```
+%
+% - Topic: Transform the spline
 % - Declaration: values = roots(spline)
 % - Parameter spline: BSpline instance
 % - Returns values: sorted real roots in the spline domain

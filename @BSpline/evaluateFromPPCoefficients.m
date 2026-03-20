@@ -1,7 +1,7 @@
 function f = evaluateFromPPCoefficients(t,C,tpp, D)
 % Returns the value of the function with derivative D represented by PP coefficients C at locations t.
 %
-% - Topic: Spline evaluation
+% - Topic: Represent piecewise polynomials
 % - Developer: true
 % - Declaration: f = evaluateFromPPCoefficients(t,C,tpp, D)
 % - Parameter t: points at which to evaluate the splines

@@ -4,7 +4,16 @@ function t = pointsOfSupport(tKnot,K,D)
 % This function assumes that the splines are terminated at the
 % boundary with repeated end knots.
 %
-% - Topic: Utility
+% Use these points when you need one representative location per basis
+% function, for example when constructing transformed splines from sampled
+% values.
+%
+% ```matlab
+% tSupport = BSpline.pointsOfSupport(tKnot, 4);
+% xSupport = spline(tSupport);
+% ```
+%
+% - Topic: Build spline bases
 % - Declaration: t = pointsOfSupport(tKnot,K,D)
 % - Parameter tKnot: knot sequence
 % - Parameter K: spline order

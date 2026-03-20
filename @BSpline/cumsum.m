@@ -1,7 +1,15 @@
 function intspline = cumsum(spline)
 % Return the indefinite integral of a B-spline.
 %
-% - Topic: Operations
+% Use this to construct an antiderivative spline that can be evaluated at
+% arbitrary points after integration.
+%
+% ```matlab
+% F = cumsum(spline);
+% values = F(tQuery);
+% ```
+%
+% - Topic: Transform the spline
 % - Declaration: intspline = cumsum(spline)
 % - Parameter spline: BSpline instance to integrate
 % - Returns intspline: BSpline representing the antiderivative

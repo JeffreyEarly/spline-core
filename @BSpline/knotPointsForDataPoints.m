@@ -1,7 +1,17 @@
 function tKnot = knotPointsForDataPoints( t, options)
 % Construct a terminated knot sequence from sample locations.
 %
-% - Topic: Methodology (Static methods)
+% Use this helper to choose a knot sequence directly from sample
+% locations before interpolation or least-squares fitting.
+%
+% ```matlab
+% tKnot = BSpline.knotPointsForDataPoints(t, K=4);
+% X = BSpline.matrix(t, tKnot, 4);
+% xi = X \ x;
+% spline = BSpline(4, tKnot, xi);
+% ```
+%
+% - Topic: Build spline bases
 % - Declaration: tKnot = knotPointsForDataPoints( t, options)
 % - Parameter t: observation times (N)
 % - Parameter options.K: (optional) spline order
