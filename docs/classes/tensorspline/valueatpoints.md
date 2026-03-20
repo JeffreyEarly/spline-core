@@ -28,4 +28,12 @@ Evaluate the tensor spline or a mixed partial derivative.
 
 ## Discussion
 
+  Evaluate either on an `N x D` point matrix or on a cell array
+  of matching query grids.
+ 
+  ```matlab
+  values = spline(queryPoints);
+  valuesOnGrid = spline({X,Y});
+  ```
+ 
             

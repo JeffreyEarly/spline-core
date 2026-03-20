@@ -8,39 +8,52 @@ classdef ConstrainedSpline < BSpline
     % iteratively reweighted fitting for other distributions, together with
     % local derivative constraints and optional global shape constraints.
     %
-    % - Topic: Initialization
-    % - Topic: Operations
-    % - Topic: Utility
-    % - Topic: Methodology (Static methods)
+    % ## Basic usage
+    %
+    % Use `ConstrainedSpline` when you want to fit a spline to noisy
+    % one-dimensional data, optionally enforcing local derivative
+    % constraints or global shape constraints.
+    %
+    % ```matlab
+    % tKnot = BSpline.knotPointsForDataPoints(t, K=4);
+    % spline = ConstrainedSpline(t, x, 4, tKnot);
+    % xq = spline(tQuery);
+    % ```
+    %
+    % - Topic: Create a constrained spline
+    % - Topic: Inspect fit results
+    % - Topic: Analyze the fit
+    % - Topic: Choose constraint locations
+    % - Topic: Prepare knot sequences
     % - Declaration: classdef ConstrainedSpline < BSpline
 
     properties (Access = public)
         % Error model used while fitting the constrained spline.
         %
-        % - Topic: Primary attributes
+        % - Topic: Inspect fit results
         distribution
         % Observation locations used to fit the spline.
         %
-        % - Topic: Primary attributes
+        % - Topic: Inspect fit results
         t
         % Observation values used to fit the spline.
         %
-        % - Topic: Primary attributes
+        % - Topic: Inspect fit results
         x
         
         % Inverse coefficient covariance or normal-equation system matrix.
         %
-        % - Topic: Primary attributes
+        % - Topic: Inspect fit results
         % - Developer: true
         CmInv
         % Design matrix for the observation locations.
         %
-        % - Topic: Primary attributes
+        % - Topic: Inspect fit results
         % - Developer: true
         X
         % Weight matrix or weights used by the fit.
         %
-        % - Topic: Primary attributes
+        % - Topic: Inspect fit results
         % - Developer: true
         W
     end
@@ -49,7 +62,16 @@ classdef ConstrainedSpline < BSpline
         function self = ConstrainedSpline(t,x,K,tKnot,distribution,constraints)
             % Create a constrained spline through samples x observed at t.
             %
-            % - Topic: Initialization
+            % Use this constructor for noisy one-dimensional data when you
+            % want weighted fitting, optional robust reweighting, and local
+            % or global constraints.
+            %
+            % ```matlab
+            % tKnot = BSpline.knotPointsForDataPoints(t, K=4);
+            % spline = ConstrainedSpline(t, x, 4, tKnot);
+            % ```
+            %
+            % - Topic: Create a constrained spline
             % - Declaration: self = ConstrainedSpline(t,x,K,tKnot,distribution,constraints)
             % - Parameter t: sample locations
             % - Parameter x: sample values
@@ -100,7 +122,15 @@ classdef ConstrainedSpline < BSpline
         function S = smoothingMatrix(self)
             % Return the smoothing matrix that maps observations to fitted values.
             %
-            % - Topic: Operations
+            % Use this to inspect how the fitted values depend linearly on
+            % the observed samples for the final weighted fit.
+            %
+            % ```matlab
+            % S = spline.smoothingMatrix();
+            % xFit = S * spline.x;
+            % ```
+            %
+            % - Topic: Analyze the fit
             % - Declaration: S = smoothingMatrix(self)
             % - Parameter self: ConstrainedSpline instance
             % - Returns S: smoothing matrix
@@ -121,7 +151,14 @@ classdef ConstrainedSpline < BSpline
             % set of points needed to constrain all segments at polynomial
             % degree T.
             %
-            % - Topic: Methodology (Static methods)
+            % Use this helper to choose the smallest set of constraint
+            % locations needed to control a terminated spline at degree `T`.
+            %
+            % ```matlab
+            % tc = ConstrainedSpline.MinimumConstraintPoints(tKnot, 4, 0);
+            % ```
+            %
+            % - Topic: Choose constraint locations
             % - Declaration: tc = MinimumConstraintPoints(tKnot,K,T)
             % - Parameter tKnot: knot sequence
             % - Parameter K: spline order
@@ -497,7 +534,14 @@ classdef ConstrainedSpline < BSpline
         function tKnot = terminatedKnotPoints(tKnot, K)
             % Ensure the knot vector has K repeated knots at each boundary.
             %
-            % - Topic: Utility
+            % Use this helper to make sure a knot vector is fully
+            % terminated before fitting or evaluation.
+            %
+            % ```matlab
+            % tKnot = ConstrainedSpline.terminatedKnotPoints(tKnot, 4);
+            % ```
+            %
+            % - Topic: Prepare knot sequences
             % - Declaration: tKnot = terminatedKnotPoints(tKnot,K)
             % - Parameter tKnot: knot sequence
             % - Parameter K: spline order

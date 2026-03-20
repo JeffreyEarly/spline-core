@@ -26,4 +26,12 @@ Return the smoothing matrix that maps observations to fitted values.
 
 ## Discussion
 
+  Use this to inspect how the fitted values depend linearly on
+  the observed samples for the final weighted fit.
+ 
+  ```matlab
+  S = spline.smoothingMatrix();
+  xFit = S * spline.x;
+  ```
+ 
         

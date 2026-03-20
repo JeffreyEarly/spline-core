@@ -6,51 +6,65 @@ classdef TensorSpline < handle
     % supports direct evaluation on point clouds or query grids together
     % with mixed partial derivatives.
     %
-    % - Topic: Initialization
-    % - Topic: Primary attributes
-    % - Topic: Operations
-    % - Topic: Methodology (Static methods)
-    % - Topic: Utility
+    % ## Basic usage
+    %
+    % Use `TensorSpline` when you already have knot vectors and
+    % tensor-product coefficients and want to evaluate the resulting
+    % spline on points or grids.
+    %
+    % ```matlab
+    % tKnot = {[0;0;0;0;1;1;1;1], [0;0;0;0;1;1;1;1]};
+    % xi = randn(16,1);
+    % spline = TensorSpline([4 4], tKnot, xi);
+    %
+    % [X,Y] = ndgrid(linspace(0,1,40), linspace(0,1,50));
+    % F = spline({X,Y});
+    % ```
+    %
+    % - Topic: Create a tensor spline
+    % - Topic: Inspect tensor spline properties
+    % - Topic: Evaluate the tensor spline
+    % - Topic: Build tensor spline bases
     % - Declaration: classdef TensorSpline < handle
 
     properties (SetAccess = private)
         % Spline order in each tensor dimension.
         %
-        % - Topic: Primary attributes
+        % - Topic: Inspect tensor spline properties
         K
         % Knot vectors for each tensor dimension.
         %
-        % - Topic: Primary attributes
+        % - Topic: Inspect tensor spline properties
         tKnot
         % Tensor-product spline coefficients reshaped to basisSize.
         %
-        % - Topic: Primary attributes
+        % - Topic: Inspect tensor spline properties
         xi
     end
 
     properties
         % Mean added back to zero-order evaluations.
         %
-        % - Topic: Primary attributes
+        % - Topic: Inspect tensor spline properties
         xMean = 0
         % Multiplicative scale applied to evaluations.
         %
-        % - Topic: Primary attributes
+        % - Topic: Inspect tensor spline properties
         xStd = 1
     end
 
     properties (Dependent)
         % Number of tensor dimensions.
         %
-        % - Topic: Primary attributes
+        % - Topic: Inspect tensor spline properties
         numDimensions
         % Number of basis functions in each dimension.
         %
-        % - Topic: Primary attributes
+        % - Topic: Inspect tensor spline properties
         basisSize
         % Coordinate limits for each dimension.
         %
-        % - Topic: Primary attributes
+        % - Topic: Inspect tensor spline properties
         domain
     end
 
@@ -58,7 +72,15 @@ classdef TensorSpline < handle
         function self = TensorSpline(K,tKnot,xi,options)
             % Create a tensor-product spline from per-dimension orders, knots, and coefficients.
             %
-            % - Topic: Initialization
+            % Use this constructor when you already know the per-dimension
+            % knot vectors and tensor-product coefficients.
+            %
+            % ```matlab
+            % spline = TensorSpline([4 4], tKnot, xi);
+            % values = spline(queryPoints);
+            % ```
+            %
+            % - Topic: Create a tensor spline
             % - Declaration: self = TensorSpline(K,tKnot,xi,options)
             % - Parameter K: spline order scalar or vector with one entry per dimension
             % - Parameter tKnot: cell array of knot vectors
@@ -103,7 +125,7 @@ classdef TensorSpline < handle
         function value = get.numDimensions(self)
             % Return the number of tensor dimensions.
             %
-            % - Topic: Primary attributes
+            % - Topic: Inspect tensor spline properties
             % - Declaration: value = get.numDimensions(self)
             % - Parameter self: TensorSpline instance
             % - Returns value: number of dimensions
@@ -113,7 +135,7 @@ classdef TensorSpline < handle
         function value = get.basisSize(self)
             % Return the number of basis functions per dimension.
             %
-            % - Topic: Primary attributes
+            % - Topic: Inspect tensor spline properties
             % - Declaration: value = get.basisSize(self)
             % - Parameter self: TensorSpline instance
             % - Returns value: row vector of basis sizes
@@ -123,7 +145,7 @@ classdef TensorSpline < handle
         function value = get.domain(self)
             % Return the domain limits for each dimension.
             %
-            % - Topic: Primary attributes
+            % - Topic: Inspect tensor spline properties
             % - Declaration: value = get.domain(self)
             % - Parameter self: TensorSpline instance
             % - Returns value: cell array of [min max] domain limits
@@ -133,7 +155,15 @@ classdef TensorSpline < handle
         function varargout = subsref(self, index)
             % Evaluate the tensor spline with function-call syntax or defer to built-in indexing.
             %
-            % - Topic: Operations
+            % Use `spline(X)` for values and `spline(X,D)` for mixed
+            % partial derivatives.
+            %
+            % ```matlab
+            % values = spline(queryPoints);
+            % dFdx = spline(queryPoints, [1 0]);
+            % ```
+            %
+            % - Topic: Evaluate the tensor spline
             % - Declaration: varargout = subsref(self,index)
             % - Parameter self: TensorSpline instance
             % - Parameter index: MATLAB subscript structure
@@ -164,7 +194,15 @@ classdef TensorSpline < handle
         function values = valueAtPoints(self, X, derivativeOrders)
             % Evaluate the tensor spline or a mixed partial derivative.
             %
-            % - Topic: Operations
+            % Evaluate either on an `N x D` point matrix or on a cell array
+            % of matching query grids.
+            %
+            % ```matlab
+            % values = spline(queryPoints);
+            % valuesOnGrid = spline({X,Y});
+            % ```
+            %
+            % - Topic: Evaluate the tensor spline
             % - Declaration: values = valueAtPoints(self,X,derivativeOrders)
             % - Parameter self: TensorSpline instance
             % - Parameter X: query locations as a point matrix or cell array of matching grids
@@ -203,7 +241,15 @@ classdef TensorSpline < handle
         function B = matrix(X,tKnot,K,options)
             % Evaluate the tensor-product basis matrix and optional derivatives.
             %
-            % - Topic: Methodology (Static methods)
+            % Use this to assemble a tensor-product design matrix for
+            % interpolation, regression, or basis inspection.
+            %
+            % ```matlab
+            % B = TensorSpline.matrix(queryPoints, tKnot, [4 4]);
+            % values = B * spline.xi(:);
+            % ```
+            %
+            % - Topic: Build tensor spline bases
             % - Declaration: B = matrix(X,tKnot,K,options)
             % - Parameter X: query locations as a point matrix or cell array of matching grids
             % - Parameter tKnot: cell array of knot vectors
@@ -251,7 +297,15 @@ classdef TensorSpline < handle
         function [pointMatrix, gridSize] = pointsFromGridVectors(gridVectors)
             % Convert rectilinear grid vectors into an explicit point matrix.
             %
-            % - Topic: Methodology (Static methods)
+            % Use this helper to convert rectilinear grid vectors into the
+            % point-matrix format accepted by `TensorSpline.matrix`.
+            %
+            % ```matlab
+            % [points, gridSize] = TensorSpline.pointsFromGridVectors({x,y});
+            % B = TensorSpline.matrix(points, tKnot, [4 4]);
+            % ```
+            %
+            % - Topic: Build tensor spline bases
             % - Declaration: [pointMatrix,gridSize] = pointsFromGridVectors(gridVectors)
             % - Parameter gridVectors: cell array of grid vectors
             % - Returns pointMatrix: matrix with one row per grid point

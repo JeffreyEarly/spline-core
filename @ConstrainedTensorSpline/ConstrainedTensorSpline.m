@@ -5,42 +5,50 @@ classdef ConstrainedTensorSpline < TensorSpline
     % observations using iteratively reweighted least squares. Constraint
     % handling is intentionally omitted in this first version.
     %
-    % - Topic: Initialization
-    % - Topic: Primary attributes
-    % - Topic: Operations
-    % - Topic: Methodology (Static methods)
-    % - Topic: Utility
+    % ## Basic usage
+    %
+    % Use `ConstrainedTensorSpline` when you want to fit a tensor-product
+    % spline to noisy multivariate data.
+    %
+    % ```matlab
+    % spline = ConstrainedTensorSpline(X, x);
+    % xFit = spline(X);
+    % ```
+    %
+    % - Topic: Create a constrained tensor spline
+    % - Topic: Inspect fit results
+    % - Topic: Analyze the fit
     % - Declaration: classdef ConstrainedTensorSpline < TensorSpline
 
     properties (Access = public)
         % Error model used while fitting the tensor spline.
         %
-        % - Topic: Primary attributes
+        % - Topic: Inspect fit results
         distribution
 
         % Observation locations as an N-by-D point matrix.
         %
-        % - Topic: Primary attributes
+        % - Topic: Inspect fit results
         Xobs
         
         % Observation values as an N-by-1 vector.
         %
-        % - Topic: Primary attributes
+        % - Topic: Inspect fit results
         x
 
         % Inverse coefficient covariance or normal-equation system matrix.
         %
-        % - Topic: Primary attributes
+        % - Topic: Inspect fit results
         % - Developer: true
         CmInv
         % Design matrix for the observation locations.
         %
-        % - Topic: Primary attributes
+        % - Topic: Inspect fit results
         % - Developer: true
         X
         % Weight matrix or weights used by the fit.
         %
-        % - Topic: Primary attributes
+        % - Topic: Inspect fit results
         % - Developer: true
         W
     end
@@ -49,7 +57,16 @@ classdef ConstrainedTensorSpline < TensorSpline
         function self = ConstrainedTensorSpline(X, x, options)
             % Create a tensor-product spline fit to noisy observations.
             %
-            % - Topic: Initialization
+            % Use this constructor with an `N x D` point matrix or a cell
+            % array of matching grids when fitting noisy tensor-product
+            % data.
+            %
+            % ```matlab
+            % spline = ConstrainedTensorSpline(X, x, K=[4 4]);
+            % xFit = spline(X);
+            % ```
+            %
+            % - Topic: Create a constrained tensor spline
             % - Declaration: self = ConstrainedTensorSpline(X,x,options)
             % - Parameter X: observation locations as a point matrix or cell array of matching grids
             % - Parameter x: observation values
@@ -107,7 +124,15 @@ classdef ConstrainedTensorSpline < TensorSpline
         function S = smoothingMatrix(self)
             % Return the smoothing matrix that maps observations to fitted values.
             %
-            % - Topic: Operations
+            % Use this to inspect the linear action of the final weighted
+            % fit on the observed data.
+            %
+            % ```matlab
+            % S = spline.smoothingMatrix();
+            % xFit = S * spline.x;
+            % ```
+            %
+            % - Topic: Analyze the fit
             % - Declaration: S = smoothingMatrix(self)
             % - Parameter self: ConstrainedTensorSpline instance
             % - Returns S: smoothing matrix

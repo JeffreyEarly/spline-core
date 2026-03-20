@@ -27,4 +27,11 @@ Ensure the knot vector has K repeated knots at each boundary.
 
 ## Discussion
 
+  Use this helper to make sure a knot vector is fully
+  terminated before fitting or evaluation.
+ 
+  ```matlab
+  tKnot = ConstrainedSpline.terminatedKnotPoints(tKnot, 4);
+  ```
+ 
           

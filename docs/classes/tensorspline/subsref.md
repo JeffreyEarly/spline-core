@@ -27,4 +27,12 @@ Evaluate the tensor spline with function-call syntax or defer to built-in indexi
 
 ## Discussion
 
+  Use `spline(X)` for values and `spline(X,D)` for mixed
+  partial derivatives.
+ 
+  ```matlab
+  values = spline(queryPoints);
+  dFdx = spline(queryPoints, [1 0]);
+  ```
+ 
           

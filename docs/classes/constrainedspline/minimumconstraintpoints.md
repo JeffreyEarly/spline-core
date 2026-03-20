@@ -32,4 +32,11 @@ Return a minimal set of locations for universal derivative constraints.
   set of points needed to constrain all segments at polynomial
   degree T.
  
+  Use this helper to choose the smallest set of constraint
+  locations needed to control a terminated spline at degree `T`.
+ 
+  ```matlab
+  tc = ConstrainedSpline.MinimumConstraintPoints(tKnot, 4, 0);
+  ```
+ 
             

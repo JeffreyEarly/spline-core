@@ -29,4 +29,12 @@ Evaluate the tensor-product basis matrix and optional derivatives.
 
 ## Discussion
 
+  Use this to assemble a tensor-product design matrix for
+  interpolation, regression, or basis inspection.
+ 
+  ```matlab
+  B = TensorSpline.matrix(queryPoints, tKnot, [4 4]);
+  values = B * spline.xi(:);
+  ```
+ 
               

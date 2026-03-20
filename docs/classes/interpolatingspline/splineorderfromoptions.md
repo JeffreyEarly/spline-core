@@ -26,4 +26,11 @@ Resolve spline order from mutually exclusive K and S options.
 
 ## Discussion
 
+  Use this helper when you need to mirror the constructor logic
+  for choosing spline order from `K` or degree `S`.
+ 
+  ```matlab
+  K = InterpolatingSpline.splineOrderFromOptions(struct("S",3,"K",4));
+  ```
+ 
         

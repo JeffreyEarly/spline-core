@@ -10,15 +10,37 @@ classdef InterpolatingSpline < BSpline
     % sample locations and solves for coefficients that interpolate the
     % provided values exactly.
     %
-    % - Topic: Initialization
-    % - Topic: Utility
+    % ## Basic usage
+    %
+    % Use `InterpolatingSpline` when you want a spline that passes exactly
+    % through one-dimensional sample values.
+    %
+    % ```matlab
+    % t = linspace(0,1,12)';
+    % x = sin(2*pi*t);
+    % spline = InterpolatingSpline(t, x);
+    %
+    % xq = spline(linspace(0,1,100)');
+    % ```
+    %
+    % - Topic: Create an interpolating spline
+    % - Topic: Choose spline order
     % - Declaration: classdef InterpolatingSpline < BSpline
 
     methods
         function self = InterpolatingSpline(t,x,options)
             % Create an interpolating spline through samples x observed at t.
             %
-            % - Topic: Initialization
+            % This constructor chooses a terminated knot sequence from the
+            % sample locations and solves for coefficients that reproduce
+            % the supplied values exactly.
+            %
+            % ```matlab
+            % spline = InterpolatingSpline(t, x, K=4);
+            % xq = spline(tQuery);
+            % ```
+            %
+            % - Topic: Create an interpolating spline
             % - Declaration: self = InterpolatingSpline(t,x,options)
             % - Parameter t: sample locations
             % - Parameter x: sample values
@@ -63,7 +85,14 @@ classdef InterpolatingSpline < BSpline
         function K = splineOrderFromOptions(options)
             % Resolve spline order from mutually exclusive K and S options.
             %
-            % - Topic: Utility
+            % Use this helper when you need to mirror the constructor logic
+            % for choosing spline order from `K` or degree `S`.
+            %
+            % ```matlab
+            % K = InterpolatingSpline.splineOrderFromOptions(struct("S",3,"K",4));
+            % ```
+            %
+            % - Topic: Choose spline order
             % - Declaration: K = splineOrderFromOptions(options)
             % - Parameter options: struct with fields K and S
             % - Returns K: spline order

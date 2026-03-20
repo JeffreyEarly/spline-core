@@ -29,4 +29,13 @@ Create a tensor-product interpolating spline on a rectilinear grid.
 
 ## Discussion
 
+  Use this constructor when your data already live on a
+  rectilinear grid and should be reproduced exactly by the
+  spline.
+ 
+  ```matlab
+  spline = InterpolatingTensorSpline({x,y}, F, K=[4 4]);
+  Fq = spline({Xq,Yq});
+  ```
+ 
               

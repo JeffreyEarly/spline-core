@@ -29,4 +29,13 @@ Create an interpolating spline through samples x observed at t.
 
 ## Discussion
 
+  This constructor chooses a terminated knot sequence from the
+  sample locations and solves for coefficients that reproduce
+  the supplied values exactly.
+ 
+  ```matlab
+  spline = InterpolatingSpline(t, x, K=4);
+  xq = spline(tQuery);
+  ```
+ 
               

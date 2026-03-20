@@ -30,13 +30,26 @@ The constructor chooses a terminated knot sequence from the supplied
 sample locations and solves for coefficients that interpolate the
 provided values exactly.
  
+## Basic usage
+ 
+Use `InterpolatingSpline` when you want a spline that passes exactly
+through one-dimensional sample values.
+ 
+```matlab
+t = linspace(0,1,12)';
+x = sin(2*pi*t);
+spline = InterpolatingSpline(t, x);
+ 
+xq = spline(linspace(0,1,100)');
+```
+ 
     
 
 
 ## Topics
-+ Initialization
++ Create an interpolating spline
   + [`InterpolatingSpline`](/spline-core/classes/interpolatingspline/interpolatingspline.html) Create an interpolating spline through samples x observed at t.
-+ Utility
++ Choose spline order
   + [`splineOrderFromOptions`](/spline-core/classes/interpolatingspline/splineorderfromoptions.html) Resolve spline order from mutually exclusive K and S options.
 
 

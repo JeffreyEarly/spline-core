@@ -31,4 +31,13 @@ Create a constrained spline through samples x observed at t.
 
 ## Discussion
 
+  Use this constructor for noisy one-dimensional data when you
+  want weighted fitting, optional robust reweighting, and local
+  or global constraints.
+ 
+  ```matlab
+  tKnot = BSpline.knotPointsForDataPoints(t, K=4);
+  spline = ConstrainedSpline(t, x, 4, tKnot);
+  ```
+ 
                   

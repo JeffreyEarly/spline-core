@@ -30,4 +30,13 @@ Create a tensor-product spline fit to noisy observations.
 
 ## Discussion
 
+  Use this constructor with an `N x D` point matrix or a cell
+  array of matching grids when fitting noisy tensor-product
+  data.
+ 
+  ```matlab
+  spline = ConstrainedTensorSpline(X, x, K=[4 4]);
+  xFit = spline(X);
+  ```
+ 
                 

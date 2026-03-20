@@ -29,11 +29,16 @@ classes = {'BSpline','InterpolatingSpline','ConstrainedSpline','TensorSpline','I
 classDocumentation = ClassDocumentation.empty(length(classes),0);
 for iName=1:length(classes)
     excludedSuperclasses = {'handle', 'matlab.mixin.Heterogeneous', 'CAAnnotatedClass'};
+    excludedMethodNames = string.empty(0,1);
     switch classes{iName}
-        case {'InterpolatingSpline','ConstrainedSpline'}
+        case {'InterpolatingSpline','ConstrainedSpline','ShapeConstraint'}
             excludedSuperclasses = {'handle'};
         case {'InterpolatingTensorSpline','ConstrainedTensorSpline'}
             excludedSuperclasses = {'handle'};
+    end
+    switch classes{iName}
+        case 'ShapeConstraint'
+            excludedMethodNames = ["cellstr","char","colon","empty","eq","intersect","isequal","isequaln","ismember","ne","setdiff","setxor","strcmp","strcmpi","string","strncmp","strncmpi","union"];
     end
 
     classDocumentation(iName) = ClassDocumentation(classes{iName}, ...
@@ -42,7 +47,8 @@ for iName=1:length(classes)
         buildFolder=buildFolder, ...
         websiteFolder=websiteFolder, ...
         parent=classFolderName, ...
-        excludedSuperclasses=excludedSuperclasses);
+        excludedSuperclasses=excludedSuperclasses, ...
+        excludedMethodNames=excludedMethodNames);
 end
 arrayfun(@(a) a.writeToFile(),classDocumentation)
 

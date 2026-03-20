@@ -5,15 +5,26 @@ classdef InterpolatingTensorSpline < TensorSpline
     % interpolates data defined on a rectilinear grid in one or more
     % dimensions.
     %
-    % - Topic: Initialization
-    % - Topic: Primary attributes
-    % - Topic: Utility
+    % ## Basic usage
+    %
+    % Use `InterpolatingTensorSpline` when you have values on a rectilinear
+    % grid and want a tensor-product spline that matches them exactly.
+    %
+    % ```matlab
+    % [X,Y] = ndgrid(linspace(0,1,8), linspace(-1,1,9));
+    % F = sin(2*pi*X).*cos(pi*Y);
+    % spline = InterpolatingTensorSpline({X(:,1), Y(1,:)'}, F);
+    % Fq = spline({X,Y});
+    % ```
+    %
+    % - Topic: Create an interpolating tensor spline
+    % - Topic: Inspect interpolation grids
     % - Declaration: classdef InterpolatingTensorSpline < TensorSpline
 
     properties (SetAccess = private)
         % Grid vectors used to define the interpolation lattice.
         %
-        % - Topic: Primary attributes
+        % - Topic: Inspect interpolation grids
         gridVectors
     end
 
@@ -21,7 +32,16 @@ classdef InterpolatingTensorSpline < TensorSpline
         function self = InterpolatingTensorSpline(gridVectors, values, options)
             % Create a tensor-product interpolating spline on a rectilinear grid.
             %
-            % - Topic: Initialization
+            % Use this constructor when your data already live on a
+            % rectilinear grid and should be reproduced exactly by the
+            % spline.
+            %
+            % ```matlab
+            % spline = InterpolatingTensorSpline({x,y}, F, K=[4 4]);
+            % Fq = spline({Xq,Yq});
+            % ```
+            %
+            % - Topic: Create an interpolating tensor spline
             % - Declaration: self = InterpolatingTensorSpline(gridVectors,values,options)
             % - Parameter gridVectors: cell array of grid vectors, one per dimension
             % - Parameter values: array of sampled values on the grid
