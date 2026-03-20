@@ -1,7 +1,11 @@
 function dspline = diff(spline,n)
-% differentiation of a BSpline
+% Differentiate a B-spline representation.
 %
 % - Topic: Operations
+% - Declaration: dspline = diff(spline,n)
+% - Parameter spline: BSpline instance to differentiate
+% - Parameter n: derivative order
+% - Returns dspline: BSpline representing the nth derivative
 arguments
     spline (1,1) BSpline
     n (1,1) double {mustBeInteger,mustBeNonnegative} = 1

@@ -1,7 +1,12 @@
 function poweredSpline = power(spline,exponent,constraints)
-% power (.^)
+% Raise spline values to a real scalar power by refitting support values.
 %
 % - Topic: Operations
+% - Declaration: poweredSpline = power(spline,exponent,constraints)
+% - Parameter spline: BSpline instance
+% - Parameter exponent: scalar exponent
+% - Parameter constraints: optional constraint specification for the refit
+% - Returns poweredSpline: BSpline approximating spline.^exponent
 arguments
     spline (1,1) BSpline
     exponent (1,1) double {mustBeReal,mustBeFinite}

@@ -1,7 +1,10 @@
 function intspline = cumsum(spline)
-% indefinite integral of a BSpline
+% Return the indefinite integral of a B-spline.
 %
 % - Topic: Operations
+% - Declaration: intspline = cumsum(spline)
+% - Parameter spline: BSpline instance to integrate
+% - Returns intspline: BSpline representing the antiderivative
 arguments
     spline (1,1) BSpline
 end

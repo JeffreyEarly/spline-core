@@ -6,7 +6,7 @@ function [C,tpp,Xtpp] = ppCoefficientsFromSplineCoefficients( xi, tKnot, K, opti
 % - Parameter xi: spline coefficients
 % - Parameter tKnot: spline knot points
 % - Parameter K: spline order (degree S=K-1)
-% - Parameter Xtpp: (optional) splines at the points tpp
+% - Parameter options.Xtpp: (optional) splines at the points tpp
 % - Returns C: polynomial coefficients to be used in polyval, size(C) = [length(tpp)-1, K]
 % - Returns tpp: piece-wise polynomial intervals, size(tpp) = numel(tKnot) - 2*K + 1
 % - Returns Xtpp: splines at the points tpp

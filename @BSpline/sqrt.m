@@ -1,7 +1,11 @@
 function splinesqrt = sqrt(spline,constraints)
-% square-root of a BSpline
+% Return a spline approximation to the square root of the spline output.
 %
 % - Topic: Operations
+% - Declaration: splinesqrt = sqrt(spline,constraints)
+% - Parameter spline: BSpline instance
+% - Parameter constraints: optional constraint specification for the refit
+% - Returns splinesqrt: BSpline approximating sqrt(spline)
 arguments
     spline (1,1) BSpline
     constraints = []

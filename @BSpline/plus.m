@@ -1,7 +1,11 @@
 function f = plus(f,g)
-% addition (+)
+% Add a scalar offset to a spline output.
 %
 % - Topic: Operations
+% - Declaration: f = plus(f,g)
+% - Parameter f: BSpline instance or scalar
+% - Parameter g: scalar or BSpline instance
+% - Returns f: transformed BSpline or empty when adding []
 arguments
     f
     g

@@ -1,7 +1,10 @@
 function values = roots(spline)
-% roots of BSpline for its domain
+% Return real roots of a spline within its domain.
 %
 % - Topic: Operations
+% - Declaration: values = roots(spline)
+% - Parameter spline: BSpline instance
+% - Returns values: sorted real roots in the spline domain
 arguments
     spline (1,1) BSpline
 end

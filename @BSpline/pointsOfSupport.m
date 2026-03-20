@@ -1,10 +1,15 @@
 function t = pointsOfSupport(tKnot,K,D)
-% support points for a terminated spline basis
+% Return representative support points for a terminated spline basis.
 %
 % This function assumes that the splines are terminated at the
 % boundary with repeated end knots.
 %
 % - Topic: Utility
+% - Declaration: t = pointsOfSupport(tKnot,K,D)
+% - Parameter tKnot: knot sequence
+% - Parameter K: spline order
+% - Parameter D: reserved derivative-order argument for API compatibility
+% - Returns t: support point locations
 arguments
     tKnot (:,1) double {mustBeNumeric,mustBeReal}
     K (1,1) double {mustBeInteger,mustBeGreaterThanOrEqual(K,1)}
