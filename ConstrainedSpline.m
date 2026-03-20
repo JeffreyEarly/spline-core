@@ -31,14 +31,17 @@ classdef ConstrainedSpline < BSpline
         % Inverse coefficient covariance or normal-equation system matrix.
         %
         % - Topic: Primary attributes
+        % - Developer: true
         CmInv
         % Design matrix for the observation locations.
         %
         % - Topic: Primary attributes
+        % - Developer: true
         X
         % Weight matrix or weights used by the fit.
         %
         % - Topic: Primary attributes
+        % - Developer: true
         W
     end
     
@@ -144,6 +147,7 @@ classdef ConstrainedSpline < BSpline
             % Precompute reusable matrices for constrained spline fitting.
             %
             % - Topic: Methodology (Static methods)
+            % - Developer: true
             % - Declaration: cachedVars = PrecomputeSolutionMatrices(t,x,K,tKnot,distribution,W,constraints,cachedVars)
             % - Parameter t: sample locations
             % - Parameter x: sample values
@@ -335,6 +339,7 @@ classdef ConstrainedSpline < BSpline
             % constraints enforced through quadratic programming when needed.
             %
             % - Topic: Methodology (Static methods)
+            % - Developer: true
             % - Declaration: [coefficients,CmInv,cachedVars] = ConstrainedSolution(t,x,K,tKnot,distribution,W,constraints,cachedVars)
             % - Parameter t: sample locations
             % - Parameter x: sample values
@@ -431,6 +436,7 @@ classdef ConstrainedSpline < BSpline
             % effective variance model converges.
             %
             % - Topic: Methodology (Static methods)
+            % - Developer: true
             % - Declaration: [coefficients,CmInv,cachedVars] = IteratedLeastSquaresTensionSolution(t,x,tKnot,K,distribution,constraints,cachedVars)
             % - Parameter t: sample locations
             % - Parameter x: sample values
@@ -510,6 +516,7 @@ classdef ConstrainedSpline < BSpline
             % Normalize an optional constraint specification struct.
             %
             % - Topic: Utility
+            % - Developer: true
             % - Declaration: constraints = normalizeConstraints(constraints)
             % - Parameter constraints: empty or struct with constraint fields
             % - Returns constraints: normalized struct with fields t and D
@@ -535,6 +542,7 @@ classdef ConstrainedSpline < BSpline
             % Normalize an optional cached-variable struct.
             %
             % - Topic: Utility
+            % - Developer: true
             % - Declaration: cachedVars = normalizeCachedVars(cachedVars)
             % - Parameter cachedVars: empty or struct of cached matrices
             % - Returns cachedVars: normalized cache struct

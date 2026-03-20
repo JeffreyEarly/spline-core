@@ -11,6 +11,8 @@ mathjax: true
 
 Clear cached piecewise-polynomial data after knot updates.
 
+> Developer documentation: this item describes internal implementation details.
+
 
 ---
 
@@ -23,4 +25,4 @@ Clear cached piecewise-polynomial data after knot updates.
 
 ## Discussion
 
-      
+        

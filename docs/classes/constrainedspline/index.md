@@ -37,21 +37,28 @@ local derivative constraints and optional global shape constraints.
 + Operations
   + [`smoothingMatrix`](/spline-core/classes/constrainedspline/smoothingmatrix.html) Return the smoothing matrix that maps observations to fitted values.
 + Utility
+  + [`terminatedKnotPoints`](/spline-core/classes/constrainedspline/terminatedknotpoints.html) Ensure the knot vector has K repeated knots at each boundary.
++ Methodology (Static methods)
+  + [`MinimumConstraintPoints`](/spline-core/classes/constrainedspline/minimumconstraintpoints.html) Return a minimal set of locations for universal derivative constraints.
++ Primary attributes
+  + [`distribution`](/spline-core/classes/constrainedspline/distribution.html) Error model used while fitting the constrained spline.
+  + [`t`](/spline-core/classes/constrainedspline/t.html) Observation locations used to fit the spline.
+  + [`x`](/spline-core/classes/constrainedspline/x.html) Observation values used to fit the spline.
+
+
+## Developer Topics
+These items document internal implementation details and are not part of the primary public API.
++ Utility
   + [`normalizeCachedVars`](/spline-core/classes/constrainedspline/normalizecachedvars.html) Normalize an optional cached-variable struct.
   + [`normalizeConstraints`](/spline-core/classes/constrainedspline/normalizeconstraints.html) Normalize an optional constraint specification struct.
-  + [`terminatedKnotPoints`](/spline-core/classes/constrainedspline/terminatedknotpoints.html) Ensure the knot vector has K repeated knots at each boundary.
 + Methodology (Static methods)
   + [`ConstrainedSolution`](/spline-core/classes/constrainedspline/constrainedsolution.html) Solve the constrained weighted least-squares spline system.
   + [`IteratedLeastSquaresTensionSolution`](/spline-core/classes/constrainedspline/iteratedleastsquarestensionsolution.html) Solve a constrained spline fit with iteratively reweighted least squares.
-  + [`MinimumConstraintPoints`](/spline-core/classes/constrainedspline/minimumconstraintpoints.html) Return a minimal set of locations for universal derivative constraints.
   + [`PrecomputeSolutionMatrices`](/spline-core/classes/constrainedspline/precomputesolutionmatrices.html) Precompute reusable matrices for constrained spline fitting.
 + Primary attributes
   + [`CmInv`](/spline-core/classes/constrainedspline/cminv.html) Inverse coefficient covariance or normal-equation system matrix.
   + [`W`](/spline-core/classes/constrainedspline/w.html) Weight matrix or weights used by the fit.
   + [`X`](/spline-core/classes/constrainedspline/x_.html) Design matrix for the observation locations.
-  + [`distribution`](/spline-core/classes/constrainedspline/distribution.html) Error model used while fitting the constrained spline.
-  + [`t`](/spline-core/classes/constrainedspline/t.html) Observation locations used to fit the spline.
-  + [`x`](/spline-core/classes/constrainedspline/x.html) Observation values used to fit the spline.
 
 
 ---

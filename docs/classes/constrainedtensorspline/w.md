@@ -11,9 +11,11 @@ mathjax: true
 
 Weight matrix or weights used by the fit.
 
+> Developer documentation: this item describes internal implementation details.
+
 
 ---
 
 ## Discussion
 
-  
+    

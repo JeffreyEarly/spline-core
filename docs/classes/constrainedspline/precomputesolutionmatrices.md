@@ -11,6 +11,8 @@ mathjax: true
 
 Precompute reusable matrices for constrained spline fitting.
 
+> Developer documentation: this item describes internal implementation details.
+
 
 ---
 
@@ -33,4 +35,4 @@ Precompute reusable matrices for constrained spline fitting.
 
 ## Discussion
 
-                      
+                        

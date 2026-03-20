@@ -11,9 +11,11 @@ mathjax: true
 
 Piecewise-polynomial breakpoint locations.
 
+> Developer documentation: this item describes internal implementation details.
+
 
 ---
 
 ## Discussion
 
-    size(t_pp) = length(tKnot) - 2*K + 1
+      size(t_pp) = length(tKnot) - 2*K + 1

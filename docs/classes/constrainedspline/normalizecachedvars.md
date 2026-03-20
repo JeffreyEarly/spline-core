@@ -11,6 +11,8 @@ mathjax: true
 
 Normalize an optional cached-variable struct.
 
+> Developer documentation: this item describes internal implementation details.
+
 
 ---
 
@@ -26,4 +28,4 @@ Normalize an optional cached-variable struct.
 
 ## Discussion
 
-        
+          

@@ -11,9 +11,11 @@ mathjax: true
 
 Inverse coefficient covariance or normal-equation system matrix.
 
+> Developer documentation: this item describes internal implementation details.
+
 
 ---
 
 ## Discussion
 
-  
+    

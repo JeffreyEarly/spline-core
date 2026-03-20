@@ -11,6 +11,8 @@ mathjax: true
 
 Refresh cached polynomial coefficients after coefficient updates.
 
+> Developer documentation: this item describes internal implementation details.
+
 
 ---
 
@@ -23,4 +25,4 @@ Refresh cached polynomial coefficients after coefficient updates.
 
 ## Discussion
 
-      
+        

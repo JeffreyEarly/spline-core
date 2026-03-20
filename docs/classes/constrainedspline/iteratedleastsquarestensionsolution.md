@@ -11,6 +11,8 @@ mathjax: true
 
 Solve a constrained spline fit with iteratively reweighted least squares.
 
+> Developer documentation: this item describes internal implementation details.
+
 
 ---
 
@@ -38,4 +40,4 @@ Solve a constrained spline fit with iteratively reweighted least squares.
   updates weights using the supplied distribution until the
   effective variance model converges.
  
-                        
+                          

@@ -11,9 +11,11 @@ mathjax: true
 
 Piecewise-polynomial coefficients for interval evaluation.
 
+> Developer documentation: this item describes internal implementation details.
+
 
 ---
 
 ## Discussion
 
-    size(C) = [length(t_pp)-1, K]
+      size(C) = [length(t_pp)-1, K]

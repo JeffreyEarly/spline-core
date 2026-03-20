@@ -11,6 +11,8 @@ mathjax: true
 
 Solve the constrained weighted least-squares spline system.
 
+> Developer documentation: this item describes internal implementation details.
+
 
 ---
 
@@ -38,4 +40,4 @@ Solve the constrained weighted least-squares spline system.
   Supports local equality constraints and optional global shape
   constraints enforced through quadratic programming when needed.
  
-                          
+                            

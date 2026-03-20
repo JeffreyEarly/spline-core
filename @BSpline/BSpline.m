@@ -36,17 +36,20 @@ classdef BSpline < handle
         % Basis values and derivatives sampled at piecewise breakpoints.
         %
         % - Topic: Spline evaluation
+        % - Developer: true
         Xtpp = [];
 
         % Piecewise-polynomial breakpoint locations.
         %
         % - Topic: Spline evaluation
+        % - Developer: true
         % size(t_pp) = length(tKnot) - 2*K + 1
         t_pp
 
         % Piecewise-polynomial coefficients for interval evaluation.
         %
         % - Topic: Spline evaluation
+        % - Developer: true
         % size(C) = [length(t_pp)-1, K]
         C       
     end
@@ -270,6 +273,7 @@ classdef BSpline < handle
             % Clear cached piecewise-polynomial data after knot updates.
             %
             % - Topic: Utility
+            % - Developer: true
             % - Declaration: tKnotDidChange(self)
             % - Parameter self: BSpline instance
             self.Xtpp = [];
@@ -282,6 +286,7 @@ classdef BSpline < handle
             % Refresh cached polynomial coefficients after coefficient updates.
             %
             % - Topic: Utility
+            % - Developer: true
             % - Declaration: splineCoefficientsDidChange(self)
             % - Parameter self: BSpline instance
             if isempty(self.xi_)

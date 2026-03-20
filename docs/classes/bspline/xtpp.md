@@ -11,9 +11,11 @@ mathjax: true
 
 Basis values and derivatives sampled at piecewise breakpoints.
 
+> Developer documentation: this item describes internal implementation details.
+
 
 ---
 
 ## Discussion
 
-  
+    

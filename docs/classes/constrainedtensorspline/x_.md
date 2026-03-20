@@ -11,9 +11,11 @@ mathjax: true
 
 Design matrix for the observation locations.
 
+> Developer documentation: this item describes internal implementation details.
+
 
 ---
 
 ## Discussion
 
-  
+    

@@ -11,6 +11,8 @@ mathjax: true
 
 Solve the tensor noisy-data model with iteratively reweighted least squares.
 
+> Developer documentation: this item describes internal implementation details.
+
 
 ---
 
@@ -31,4 +33,4 @@ Solve the tensor noisy-data model with iteratively reweighted least squares.
 
 ## Discussion
 
-                  
+                    

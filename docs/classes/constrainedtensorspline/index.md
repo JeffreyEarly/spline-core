@@ -32,14 +32,19 @@ handling is intentionally omitted in this first version.
 + Initialization
   + [`ConstrainedTensorSpline`](/spline-core/classes/constrainedtensorspline/constrainedtensorspline.html) Create a tensor-product spline fit to noisy observations.
 + Primary attributes
-  + [`CmInv`](/spline-core/classes/constrainedtensorspline/cminv.html) Inverse coefficient covariance or normal-equation system matrix.
-  + [`W`](/spline-core/classes/constrainedtensorspline/w.html) Weight matrix or weights used by the fit.
-  + [`X`](/spline-core/classes/constrainedtensorspline/x_.html) Design matrix for the observation locations.
   + [`Xobs`](/spline-core/classes/constrainedtensorspline/xobs.html) Observation locations as an N-by-D point matrix.
   + [`distribution`](/spline-core/classes/constrainedtensorspline/distribution.html) Error model used while fitting the tensor spline.
   + [`x`](/spline-core/classes/constrainedtensorspline/x.html) Observation values as an N-by-1 vector.
 + Operations
   + [`smoothingMatrix`](/spline-core/classes/constrainedtensorspline/smoothingmatrix.html) Return the smoothing matrix that maps observations to fitted values.
+
+
+## Developer Topics
+These items document internal implementation details and are not part of the primary public API.
++ Primary attributes
+  + [`CmInv`](/spline-core/classes/constrainedtensorspline/cminv.html) Inverse coefficient covariance or normal-equation system matrix.
+  + [`W`](/spline-core/classes/constrainedtensorspline/w.html) Weight matrix or weights used by the fit.
+  + [`X`](/spline-core/classes/constrainedtensorspline/x_.html) Design matrix for the observation locations.
 + Methodology (Static methods)
   + [`tensorModelSolution`](/spline-core/classes/constrainedtensorspline/tensormodelsolution.html) Solve the tensor noisy-data model with iteratively reweighted least squares.
 

@@ -31,14 +31,17 @@ classdef ConstrainedTensorSpline < TensorSpline
         % Inverse coefficient covariance or normal-equation system matrix.
         %
         % - Topic: Primary attributes
+        % - Developer: true
         CmInv
         % Design matrix for the observation locations.
         %
         % - Topic: Primary attributes
+        % - Developer: true
         X
         % Weight matrix or weights used by the fit.
         %
         % - Topic: Primary attributes
+        % - Developer: true
         W
     end
 
@@ -121,6 +124,7 @@ classdef ConstrainedTensorSpline < TensorSpline
             % Solve the tensor noisy-data model with iteratively reweighted least squares.
             %
             % - Topic: Methodology (Static methods)
+            % - Developer: true
             % - Declaration: [xi,CmInv,W] = tensorModelSolution(x,X,distribution,rho_X)
             % - Parameter x: observation values as an N-by-1 vector
             % - Parameter X: splines on the observation grid, N-by-M
