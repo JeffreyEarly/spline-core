@@ -1,15 +1,15 @@
 ---
 layout: default
-title: x_std
+title: xMean
 parent: TensorSpline
 grand_parent: Classes
-nav_order: 12
+nav_order: 11
 mathjax: true
 ---
 
-#  x_std
+#  xMean
 
-Multiplicative scale applied to evaluations.
+Mean added back to zero-order evaluations.
 
 
 ---

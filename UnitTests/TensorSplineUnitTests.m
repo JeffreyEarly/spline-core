@@ -65,7 +65,7 @@ classdef TensorSplineUnitTests < matlab.unittest.TestCase
             queryPoints = [X(:), Y(:)];
             basisMatrix = TensorSpline.matrix(queryPoints, spline.tKnot, spline.K);
             values = reshape(basisMatrix * spline.xi(:), size(F));
-            values = spline.x_std * values + spline.x_mean;
+            values = spline.xStd * values + spline.xMean;
 
             testCase.assertThat(values, IsEqualTo(F, 'Within', AbsoluteTolerance(1e-10)))
         end

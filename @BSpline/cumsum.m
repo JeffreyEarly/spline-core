@@ -14,10 +14,10 @@ K = spline.K;
 tKnot = spline.tKnot;
 M = length(xi);
 
-if abs(spline.x_mean) > 0 || abs(spline.x_std - 1) > 0
+if abs(spline.xMean) > 0 || abs(spline.xStd - 1) > 0
     t = BSpline.pointsOfSupport(spline.tKnot,spline.K);
     X = BSpline.matrix(t,spline.tKnot,spline.K);
-    xi = spline.x_std*spline.xi + X\(spline.x_mean*ones(length(t),1));
+    xi = spline.xStd*spline.xi + X\(spline.xMean*ones(length(t),1));
 end
 
 dt = (tKnot(1+K:M+K)-tKnot(1:M))/K;

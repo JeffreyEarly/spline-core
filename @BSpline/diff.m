@@ -32,5 +32,5 @@ else
     end
     
     dspline = BSpline(K-D,tKnot((1+D):(end-D)),alpha(1:end-D,D+1));
-    dspline.x_std = spline.x_std;   
+    dspline.xStd = spline.xStd;
 end

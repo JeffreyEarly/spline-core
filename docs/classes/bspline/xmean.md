@@ -1,13 +1,13 @@
 ---
 layout: default
-title: x_mean
+title: xMean
 parent: BSpline
 grand_parent: Classes
 nav_order: 26
 mathjax: true
 ---
 
-#  x_mean
+#  xMean
 
 Mean added back to zero-order spline evaluations.
 

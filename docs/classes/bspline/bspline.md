@@ -23,8 +23,8 @@ Create a new B-spline representation from order, knots, and coefficients.
 + `tKnot`  knot points
 + `xi`  (optional) spline coefficients
 + `options.Xtpp`  optional cached basis values at piecewise breakpoints
-+ `options.x_mean`  optional additive output offset
-+ `options.x_std`  optional multiplicative output scale
++ `options.xMean`  optional additive output offset
++ `options.xStd`  optional multiplicative output scale
 
 ## Returns
 + `spline`  BSpline instance

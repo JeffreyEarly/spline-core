@@ -38,8 +38,8 @@ with mixed partial derivatives.
   + [`domain`](/spline-core/classes/tensorspline/domain.html) Coordinate limits for each dimension.
   + [`numDimensions`](/spline-core/classes/tensorspline/numdimensions.html) Number of tensor dimensions.
   + [`tKnot`](/spline-core/classes/tensorspline/tknot.html) Knot vectors for each tensor dimension.
-  + [`x_mean`](/spline-core/classes/tensorspline/x_mean.html) Mean added back to zero-order evaluations.
-  + [`x_std`](/spline-core/classes/tensorspline/x_std.html) Multiplicative scale applied to evaluations.
+  + [`xMean`](/spline-core/classes/tensorspline/xmean.html) Mean added back to zero-order evaluations.
+  + [`xStd`](/spline-core/classes/tensorspline/xstd.html) Multiplicative scale applied to evaluations.
   + [`xi`](/spline-core/classes/tensorspline/xi.html) Tensor-product spline coefficients reshaped to basisSize.
 + Operations
   + [`subsref`](/spline-core/classes/tensorspline/subsref.html) Evaluate the tensor spline with function-call syntax or defer to built-in indexing.

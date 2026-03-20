@@ -32,11 +32,11 @@ classdef TensorSpline < handle
         % Mean added back to zero-order evaluations.
         %
         % - Topic: Primary attributes
-        x_mean = 0
+        xMean = 0
         % Multiplicative scale applied to evaluations.
         %
         % - Topic: Primary attributes
-        x_std = 1
+        xStd = 1
     end
 
     properties (Dependent)
@@ -63,15 +63,15 @@ classdef TensorSpline < handle
             % - Parameter K: spline order scalar or vector with one entry per dimension
             % - Parameter tKnot: cell array of knot vectors
             % - Parameter xi: optional tensor-product coefficient array or vector
-            % - Parameter options.x_mean: optional additive output offset
-            % - Parameter options.x_std: optional multiplicative output scale
+            % - Parameter options.xMean: optional additive output offset
+            % - Parameter options.xStd: optional multiplicative output scale
             % - Returns self: TensorSpline instance
             arguments
                 K {mustBeNumeric,mustBeReal,mustBeFinite}
                 tKnot cell
                 xi = []
-                options.x_mean = 0
-                options.x_std = 1
+                options.xMean = 0
+                options.xStd = 1
             end
 
             numDimensions = numel(tKnot);
@@ -96,8 +96,8 @@ classdef TensorSpline < handle
             else
                 self.xi = reshape(xi, basisSize);
             end
-            self.x_mean = options.x_mean;
-            self.x_std = options.x_std;
+            self.xMean = options.xMean;
+            self.xStd = options.xStd;
         end
 
         function value = get.numDimensions(self)
@@ -187,12 +187,12 @@ classdef TensorSpline < handle
             basisMatrix = TensorSpline.matrix(pointMatrix, self.tKnot, self.K, D=derivativeOrders);
             values = basisMatrix * self.xi(:);
 
-            if ~isempty(self.x_std)
-                values = self.x_std * values;
+            if ~isempty(self.xStd)
+                values = self.xStd * values;
             end
 
-            if ~isempty(self.x_mean) && all(derivativeOrders == 0)
-                values = values + self.x_mean;
+            if ~isempty(self.xMean) && all(derivativeOrders == 0)
+                values = values + self.xMean;
             end
 
             values = reshape(values, outputSize);

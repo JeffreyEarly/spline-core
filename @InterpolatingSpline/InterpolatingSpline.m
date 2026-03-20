@@ -55,7 +55,7 @@ classdef InterpolatingSpline < BSpline
             X = BSpline.matrix(t,tKnot,K);
             xi = X\x;
 
-            self@BSpline(K,tKnot,xi,x_mean=xMean,x_std=xStd);
+            self@BSpline(K,tKnot,xi,xMean=xMean,xStd=xStd);
         end
     end
 

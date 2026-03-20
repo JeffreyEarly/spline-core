@@ -1,13 +1,13 @@
 ---
 layout: default
-title: x_std
+title: xStd
 parent: BSpline
 grand_parent: Classes
 nav_order: 27
 mathjax: true
 ---
 
-#  x_std
+#  xStd
 
 Multiplicative scale applied to spline evaluations.
 

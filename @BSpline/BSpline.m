@@ -55,11 +55,11 @@ classdef BSpline < handle
         % Mean added back to zero-order spline evaluations.
         %
         % - Topic: Primary attributes
-        x_mean = 0 % if set, these will be used to scale the output
+        xMean = 0 % if set, these will be used to scale the output
         % Multiplicative scale applied to spline evaluations.
         %
         % - Topic: Primary attributes
-        x_std = 1 % x_out = x_std*(X*xi)+x_mean;
+        xStd = 1 % xOut = xStd*(X*xi)+xMean;
     end
 
     properties (Dependent)
@@ -146,22 +146,22 @@ classdef BSpline < handle
             % - Parameter tKnot: knot points
             % - Parameter xi: (optional) spline coefficients
             % - Parameter options.Xtpp: optional cached basis values at piecewise breakpoints
-            % - Parameter options.x_mean: optional additive output offset
-            % - Parameter options.x_std: optional multiplicative output scale
+            % - Parameter options.xMean: optional additive output offset
+            % - Parameter options.xStd: optional multiplicative output scale
             % - Returns spline: BSpline instance
             arguments
                 K (1,1) double {mustBeInteger,mustBeGreaterThanOrEqual(K,1)}
                 tKnot (:,1) double {mustBeNumeric,mustBeReal}
                 xi (:,1) double = zeros(length(tKnot)-K,1)
                 options.Xtpp (:,:,:) double
-                options.x_mean = 0
-                options.x_std = 1
+                options.xMean = 0
+                options.xStd = 1
             end
             self.K = K;   
             self.tKnot_ = tKnot;
             self.xi_ = xi;
-            self.x_mean = options.x_mean;
-            self.x_std = options.x_std;
+            self.xMean = options.xMean;
+            self.xStd = options.xStd;
             if isfield(options,'Xtpp')
                 self.Xtpp = options.Xtpp;
             end
@@ -258,11 +258,11 @@ classdef BSpline < handle
                 return;
             end
             x_out = BSpline.evaluateFromPPCoefficients(t,self.C,self.t_pp,NumDerivatives);
-            if ~isempty(self.x_std)
-                x_out = self.x_std*x_out;
+            if ~isempty(self.xStd)
+                x_out = self.xStd*x_out;
             end
-            if ~isempty(self.x_mean) && NumDerivatives == 0
-                x_out = x_out + self.x_mean;
+            if ~isempty(self.xMean) && NumDerivatives == 0
+                x_out = x_out + self.xMean;
             end
         end
         
@@ -311,8 +311,8 @@ classdef BSpline < handle
             end
 
             transformedSpline = BSpline(self.K,self.tKnot,self.xi);
-            transformedSpline.x_std = scale*self.x_std;
-            transformedSpline.x_mean = scale*self.x_mean + offset;
+            transformedSpline.xStd = scale*self.xStd;
+            transformedSpline.xMean = scale*self.xMean + offset;
         end
     end
     

@@ -37,8 +37,8 @@ efficient evaluation, differentiation, and algebraic transforms.
   + [`S`](/spline-core/classes/bspline/s.html) Polynomial degree S = K - 1.
   + [`domain`](/spline-core/classes/bspline/domain.html) Minimum and maximum values of the spline domain.
   + [`tKnot`](/spline-core/classes/bspline/tknot.html) Knot sequence used to define the spline basis.
-  + [`x_mean`](/spline-core/classes/bspline/x_mean.html) Mean added back to zero-order spline evaluations.
-  + [`x_std`](/spline-core/classes/bspline/x_std.html) Multiplicative scale applied to spline evaluations.
+  + [`xMean`](/spline-core/classes/bspline/xmean.html) Mean added back to zero-order spline evaluations.
+  + [`xStd`](/spline-core/classes/bspline/xstd.html) Multiplicative scale applied to spline evaluations.
   + [`xi`](/spline-core/classes/bspline/xi.html) Spline coefficients as an Mx1 vector.
 + Spline evaluation
   + [`C`](/spline-core/classes/bspline/c.html) Piecewise-polynomial coefficients for interval evaluation.

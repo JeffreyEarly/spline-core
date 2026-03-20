@@ -59,7 +59,7 @@ classdef InterpolatingTensorSpline < TensorSpline
             basisMatrix = TensorSpline.matrix(gridPoints, tKnot, K);
             xi = basisMatrix \ values(:);
 
-            self@TensorSpline(K, tKnot, xi, x_mean=xMean, x_std=xStd);
+            self@TensorSpline(K, tKnot, xi, xMean=xMean, xStd=xStd);
             self.gridVectors = gridVectors;
         end
     end

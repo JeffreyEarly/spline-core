@@ -10,8 +10,8 @@ arguments
 end
 values = [];
 scale = factorial((spline.K-1):-1:0);
-C = spline.x_std*spline.C;
-C(:,end) = C(:,end) + spline.x_mean;
+C = spline.xStd*spline.C;
+C(:,end) = C(:,end) + spline.xMean;
 t_pp = spline.t_pp;
 
 for iBin=1:size(spline.C,1)
