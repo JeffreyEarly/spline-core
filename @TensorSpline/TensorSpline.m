@@ -83,11 +83,19 @@ classdef TensorSpline < handle
                 xi = zeros(prod(basisSize),1);
             end
 
-            validateattributes(xi, {'numeric'}, {'real','finite','numel',prod(basisSize)});
+            validateattributes(xi, {'numeric'}, {'real','finite'});
+            if numel(xi) ~= prod(basisSize)
+                error('TensorSpline:InvalidCoefficientCount', ...
+                    'xi must contain exactly prod(basisSize) coefficients.');
+            end
 
             self.K = K;
             self.tKnot = tKnot;
-            self.xi = reshape(xi, basisSize);
+            if isscalar(basisSize)
+                self.xi = reshape(xi, basisSize, 1);
+            else
+                self.xi = reshape(xi, basisSize);
+            end
             self.x_mean = options.x_mean;
             self.x_std = options.x_std;
         end
@@ -294,7 +302,7 @@ classdef TensorSpline < handle
 
         function basisSize = basisSizeFromKnotCell(tKnot, K)
             % Compute basis sizes from knot vectors and spline orders.
-            basisSize = cellfun(@numel, tKnot) - K;
+            basisSize = reshape(cellfun(@numel, tKnot), 1, []) - reshape(K, 1, []);
             if any(basisSize <= 0)
                 error('TensorSpline:InvalidBasisSize', 'Each knot vector must be longer than its spline order.');
             end
