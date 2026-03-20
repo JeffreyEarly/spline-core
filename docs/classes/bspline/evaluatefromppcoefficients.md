@@ -11,6 +11,8 @@ mathjax: true
 
 Returns the value of the function with derivative D represented by PP coefficients C at locations t.
 
+> Developer documentation: this item describes internal implementation details.
+
 
 ---
 
@@ -29,4 +31,4 @@ Returns the value of the function with derivative D represented by PP coefficien
 
 ## Discussion
 
-              
+                

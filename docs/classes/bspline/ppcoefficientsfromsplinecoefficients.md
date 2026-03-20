@@ -11,6 +11,8 @@ mathjax: true
 
 Returns the piecewise polynomial coefficients in matrix C from spline coefficients in vector xi.
 
+> Developer documentation: this item describes internal implementation details.
+
 
 ---
 
@@ -31,4 +33,4 @@ Returns the piecewise polynomial coefficients in matrix C from spline coefficien
 
 ## Discussion
 
-                  
+                    

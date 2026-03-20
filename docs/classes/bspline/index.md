@@ -41,9 +41,7 @@ efficient evaluation, differentiation, and algebraic transforms.
   + [`xStd`](/spline-core/classes/bspline/xstd.html) Multiplicative scale applied to spline evaluations.
   + [`xi`](/spline-core/classes/bspline/xi.html) Spline coefficients as an Mx1 vector.
 + Spline evaluation
-  + [`evaluateFromPPCoefficients`](/spline-core/classes/bspline/evaluatefromppcoefficients.html) Returns the value of the function with derivative D represented by PP coefficients C at locations t.
   + [`matrix`](/spline-core/classes/bspline/matrix.html) Evaluate terminated B-spline basis functions and optional derivatives.
-  + [`ppCoefficientsFromSplineCoefficients`](/spline-core/classes/bspline/ppcoefficientsfromsplinecoefficients.html) Returns the piecewise polynomial coefficients in matrix C from spline coefficients in vector xi.
 + Operations
   + [`cumsum`](/spline-core/classes/bspline/cumsum.html) Return the indefinite integral of a B-spline.
   + [`diff`](/spline-core/classes/bspline/diff.html) Differentiate a B-spline representation.
@@ -66,6 +64,8 @@ These items document internal implementation details and are not part of the pri
 + Spline evaluation
   + [`C`](/spline-core/classes/bspline/c.html) Piecewise-polynomial coefficients for interval evaluation.
   + [`Xtpp`](/spline-core/classes/bspline/xtpp.html) Basis values and derivatives sampled at piecewise breakpoints.
+  + [`evaluateFromPPCoefficients`](/spline-core/classes/bspline/evaluatefromppcoefficients.html) Returns the value of the function with derivative D represented by PP coefficients C at locations t.
+  + [`ppCoefficientsFromSplineCoefficients`](/spline-core/classes/bspline/ppcoefficientsfromsplinecoefficients.html) Returns the piecewise polynomial coefficients in matrix C from spline coefficients in vector xi.
   + [`t_pp`](/spline-core/classes/bspline/t_pp.html) Piecewise-polynomial breakpoint locations.
 + Utility
   + [`splineCoefficientsDidChange`](/spline-core/classes/bspline/splinecoefficientsdidchange.html) Refresh cached polynomial coefficients after coefficient updates.
