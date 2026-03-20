@@ -1,15 +1,15 @@
 ---
 layout: default
-title: domain
-parent: InterpolatingTensorSpline
+title: X
+parent: ConstrainedTensorSpline
 grand_parent: Classes
 nav_order: 4
 mathjax: true
 ---
 
-#  domain
+#  X
 
-Coordinate limits for each dimension.
+Design matrix for the observation locations.
 
 
 ---

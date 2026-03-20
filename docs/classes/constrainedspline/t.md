@@ -3,7 +3,7 @@ layout: default
 title: t
 parent: ConstrainedSpline
 grand_parent: Classes
-nav_order: 33
+nav_order: 13
 mathjax: true
 ---
 

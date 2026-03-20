@@ -1,9 +1,9 @@
 ---
 layout: default
 title: smoothingMatrix
-parent: ConstrainedSpline
+parent: ConstrainedTensorSpline
 grand_parent: Classes
-nav_order: 12
+nav_order: 7
 mathjax: true
 ---
 
@@ -19,7 +19,7 @@ Return the smoothing matrix that maps observations to fitted values.
  S = smoothingMatrix(self)
 ```
 ## Parameters
-+ `self`  ConstrainedSpline instance
++ `self`  ConstrainedTensorSpline instance
 
 ## Returns
 + `S`  smoothing matrix

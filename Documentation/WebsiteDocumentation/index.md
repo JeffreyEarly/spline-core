@@ -18,8 +18,8 @@ permalink: /
 `Spline Core` centers on the `BSpline` basis representation and builds
 interpolation and constrained fitting tools on top of it. The package is
 intended for spline construction, evaluation, differentiation, integration,
-constrained regression workflows, including tensor-product interpolation on
-rectilinear grids.
+constrained regression workflows, tensor-product interpolation on
+rectilinear grids, and tensor-product fitting for noisy gridded data.
 
 The figure below shows a terminated B-spline basis generated from a knot
 sequence and evaluated on a dense grid.

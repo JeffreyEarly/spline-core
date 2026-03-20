@@ -1,15 +1,15 @@
 ---
 layout: default
-title: K
-parent: InterpolatingSpline
+title: W
+parent: ConstrainedTensorSpline
 grand_parent: Classes
 nav_order: 3
 mathjax: true
 ---
 
-#  K
+#  W
 
-Spline order K, where polynomial degree is S = K - 1.
+Weight matrix or weights used by the fit.
 
 
 ---

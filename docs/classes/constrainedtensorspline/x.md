@@ -1,15 +1,15 @@
 ---
 layout: default
 title: x
-parent: ConstrainedSpline
+parent: ConstrainedTensorSpline
 grand_parent: Classes
-nav_order: 15
+nav_order: 9
 mathjax: true
 ---
 
 #  x
 
-Observation values used to fit the spline.
+Observation values as an N-by-1 vector.
 
 
 ---

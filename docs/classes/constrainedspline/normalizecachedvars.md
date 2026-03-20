@@ -3,7 +3,7 @@ layout: default
 title: normalizeCachedVars
 parent: ConstrainedSpline
 grand_parent: Classes
-nav_order: 22
+nav_order: 10
 mathjax: true
 ---
 

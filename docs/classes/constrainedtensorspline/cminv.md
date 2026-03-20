@@ -1,7 +1,7 @@
 ---
 layout: default
 title: CmInv
-parent: ConstrainedSpline
+parent: ConstrainedTensorSpline
 grand_parent: Classes
 nav_order: 1
 mathjax: true

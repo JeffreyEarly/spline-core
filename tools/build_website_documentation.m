@@ -25,11 +25,24 @@ end
 websiteRootURL = "spline-core/";
 classFolderName = 'Class documentation';
 websiteFolder = 'classes';
-excludedSuperclasses = {'handle', 'matlab.mixin.Heterogeneous', 'CAAnnotatedClass'};
-classes = {'BSpline','InterpolatingSpline','ConstrainedSpline','TensorSpline','InterpolatingTensorSpline','ShapeConstraint'};
+classes = {'BSpline','InterpolatingSpline','ConstrainedSpline','TensorSpline','InterpolatingTensorSpline','ConstrainedTensorSpline','ShapeConstraint'};
 classDocumentation = ClassDocumentation.empty(length(classes),0);
 for iName=1:length(classes)
-    classDocumentation(iName) = ClassDocumentation(classes{iName},nav_order=iName,websiteRootURL=websiteRootURL,buildFolder=buildFolder,websiteFolder=websiteFolder,parent=classFolderName,excludedSuperclasses=excludedSuperclasses);
+    excludedSuperclasses = {'handle', 'matlab.mixin.Heterogeneous', 'CAAnnotatedClass'};
+    switch classes{iName}
+        case {'InterpolatingSpline','ConstrainedSpline'}
+            excludedSuperclasses = {'handle'};
+        case {'InterpolatingTensorSpline','ConstrainedTensorSpline'}
+            excludedSuperclasses = {'handle'};
+    end
+
+    classDocumentation(iName) = ClassDocumentation(classes{iName}, ...
+        nav_order=iName, ...
+        websiteRootURL=websiteRootURL, ...
+        buildFolder=buildFolder, ...
+        websiteFolder=websiteFolder, ...
+        parent=classFolderName, ...
+        excludedSuperclasses=excludedSuperclasses);
 end
 arrayfun(@(a) a.writeToFile(),classDocumentation)
 

@@ -8,7 +8,9 @@ permalink: /getting-started
 
 # Getting Started
 
-This tutorial demonstrates the basic usage of the spline classes.
+This tutorial demonstrates the basic usage of the spline classes, from
+explicit basis construction through noisy-data fitting in one and multiple
+dimensions.
 
 ## Initialization
 
@@ -96,3 +98,40 @@ Fq = tensorSpline({X,Y});
 The tensor classes support mixed partial derivatives as well, for example
 `tensorSpline({X,Y}, [1 0])` for the derivative with respect to the first
 dimension.
+
+## Tensor-product fitting with noisy data
+
+`ConstrainedTensorSpline` fits a tensor-product spline to noisy observations.
+With the current default settings it chooses a cubic spline in each
+dimension, uses the minimal end-terminated knot vectors, and assumes unit
+Gaussian errors.
+
+```matlab
+x = linspace(-1,1,6)';
+y = linspace(-2,2,7)';
+[X,Y] = ndgrid(x,y);
+
+Ftrue = 1 + 2*X - Y + 0.5*X.^2.*Y - 0.25*X.*Y.^3;
+Fobs = Ftrue + 0.05*randn(size(Ftrue));
+
+fit = ConstrainedTensorSpline({X,Y}, Fobs);
+
+xq = linspace(min(x),max(x),41)';
+yq = linspace(min(y),max(y),51)';
+[Xq,Yq] = ndgrid(xq,yq);
+Fq = fit({Xq,Yq});
+```
+
+If you want a denser tensor basis or a robust error model, pass them as
+named options.
+
+```matlab
+fit = ConstrainedTensorSpline({X,Y}, Fobs, ...
+    K=[4 4], ...
+    tKnot={BSpline.knotPointsForDataPoints(x,K=4,dataDOF=2), ...
+           BSpline.knotPointsForDataPoints(y,K=4,dataDOF=2)}, ...
+    distribution=StudentTDistribution(sigma=0.05,nu=3));
+```
+
+At this stage `ConstrainedTensorSpline` is focused on noisy-data fitting and
+IRLS-based weighting. Constraint handling has not been added yet.
