@@ -37,17 +37,18 @@ tKnot = {[0;0;0;0;1;1;1;1], [0;0;0;0;1;1;1;1]};
 xi = randn(16,1);
 spline = TensorSpline([4 4], tKnot, xi);
  
-[X,Y] = ndgrid(linspace(0,1,40), linspace(0,1,50));
-F = spline(X, Y);
+xq = linspace(0,1,40)';
+yq = linspace(0,1,40)';
+F = spline(xq, yq);
 ```
  
-        
+          
 
 
 ## Topics
-+ Create a tensor spline
++ Create a spline
   + [`TensorSpline`](/spline-core/classes/tensorspline/tensorspline.html) Create a tensor-product spline from per-dimension orders, knots, and coefficients.
-+ Inspect tensor spline properties
++ Inspect spline properties
   + [`K`](/spline-core/classes/tensorspline/k.html) Spline order in each tensor dimension.
   + [`basisSize`](/spline-core/classes/tensorspline/basissize.html) Number of basis functions in each dimension.
   + [`domain`](/spline-core/classes/tensorspline/domain.html) Coordinate limits for each dimension.
@@ -56,10 +57,15 @@ F = spline(X, Y);
   + [`xMean`](/spline-core/classes/tensorspline/xmean.html) Mean added back to zero-order evaluations.
   + [`xStd`](/spline-core/classes/tensorspline/xstd.html) Multiplicative scale applied to evaluations.
   + [`xi`](/spline-core/classes/tensorspline/xi.html) Tensor-product spline coefficients reshaped to basisSize.
-+ Evaluate the tensor spline
++ Evaluate the spline
   + [`subsref`](/spline-core/classes/tensorspline/subsref.html) Evaluate the tensor spline with function-call syntax or defer to built-in indexing.
   + [`valueAtPoints`](/spline-core/classes/tensorspline/valueatpoints.html) Evaluate the tensor spline or a mixed partial derivative.
-+ Build tensor spline bases
++ Transform the spline
+  + [`cumsum`](/spline-core/classes/tensorspline/cumsum.html) Return the indefinite integral along one tensor dimension.
+  + [`diff`](/spline-core/classes/tensorspline/diff.html) Return a tensor spline representing mixed partial derivatives.
+  + [`mtimes`](/spline-core/classes/tensorspline/mtimes.html) Multiply tensor-spline outputs by a scalar.
+  + [`plus`](/spline-core/classes/tensorspline/plus.html) Add a scalar offset to tensor-spline outputs.
++ Build spline bases
   + [`matrix`](/spline-core/classes/tensorspline/matrix.html) Evaluate the tensor-product basis matrix and optional derivatives.
   + [`pointsFromGridVectors`](/spline-core/classes/tensorspline/pointsfromgridvectors.html) Convert rectilinear grid vectors into an explicit point matrix.
 

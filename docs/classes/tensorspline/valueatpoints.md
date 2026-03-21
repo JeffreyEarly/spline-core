@@ -3,7 +3,7 @@ layout: default
 title: valueAtPoints
 parent: TensorSpline
 grand_parent: Classes
-nav_order: 10
+nav_order: 14
 mathjax: true
 ---
 
@@ -28,12 +28,12 @@ Evaluate the tensor spline or a mixed partial derivative.
 
 ## Discussion
 
-  Evaluate either on an `N x D` point matrix or with one
-  query input per dimension.
+  Evaluate either on an `N x D` point matrix or with one query
+  input per tensor dimension.
  
   ```matlab
   values = spline(queryPoints);
-  values = spline(X, Y);
+  values = spline(xq, yq);
   ```
  
             

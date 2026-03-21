@@ -21,9 +21,12 @@ Tensor-product interpolating spline on rectilinear grids.
 
 ## Overview
  
-InterpolatingTensorSpline builds a tensor-product spline that exactly
-interpolates data defined on a rectilinear grid in one or more
-dimensions.
+Supported construction forms:
+  spline = InterpolatingTensorSpline(x1,...,xn,V)
+  spline = InterpolatingTensorSpline(x1,...,xn,V,K=K)
+  spline = InterpolatingTensorSpline(x1,...,xn,V,S=S)
+ 
+The grid inputs are vectors, one per dimension.
  
 ## Basic usage
  

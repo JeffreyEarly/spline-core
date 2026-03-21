@@ -3,7 +3,7 @@ layout: default
 title: subsref
 parent: TensorSpline
 grand_parent: Classes
-nav_order: 8
+nav_order: 12
 mathjax: true
 ---
 
@@ -27,13 +27,13 @@ Evaluate the tensor spline with function-call syntax or defer to built-in indexi
 
 ## Discussion
 
-  Use `spline(P)` for values, `spline(P,D)` for mixed
-  partial derivatives, or `spline(X1,...,Xn,D)` with one
-  query input per dimension.
+  Use `spline(X)` for values and `spline(X,D)` for mixed
+  partial derivatives.
  
   ```matlab
   values = spline(queryPoints);
-  dFdx = spline(queryPoints, [1 0]);
+  values = spline(xq, yq);
+  dFdx = spline(xq, yq, [1 0]);
   ```
  
           

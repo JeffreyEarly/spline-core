@@ -95,5 +95,66 @@ classdef TensorSplineUnitTests < matlab.unittest.TestCase
             testCase.verifySize(actual, size(F))
             testCase.assertThat(actual, IsEqualTo(F, 'Within', AbsoluteTolerance(1e-10)))
         end
+
+        function tensorSplinePlusAddsScalarOffset(testCase)
+            import matlab.unittest.constraints.IsEqualTo
+            import matlab.unittest.constraints.AbsoluteTolerance
+
+            t = linspace(-1,1,11)';
+            spline = InterpolatingTensorSpline(t, t, K=2);
+
+            shifted = spline + 1;
+
+            testCase.assertThat(shifted(t), IsEqualTo(t + 1, 'Within', AbsoluteTolerance(2*eps)))
+        end
+
+        function tensorSplineMtimesScalesSpline(testCase)
+            import matlab.unittest.constraints.IsEqualTo
+            import matlab.unittest.constraints.AbsoluteTolerance
+
+            t = linspace(-1,1,11)';
+            spline = InterpolatingTensorSpline(t, t, K=2);
+
+            scaled = -2 * spline;
+
+            testCase.assertThat(scaled(t), IsEqualTo(-2*t, 'Within', AbsoluteTolerance(2*eps)))
+        end
+
+        function tensorSplineRejectsNonScalarAffineOperands(testCase)
+            spline = InterpolatingTensorSpline((0:2)', (0:2)', K=2);
+
+            testCase.verifyError(@() plus(spline, [1 2]), 'TensorSpline:plus:UnsupportedOperand')
+            testCase.verifyError(@() mtimes(spline, [1 2]), 'TensorSpline:mtimes:UnsupportedOperand')
+        end
+
+        function tensorSplineDiffReturnsMixedPartialSpline(testCase)
+            import matlab.unittest.constraints.IsEqualTo
+            import matlab.unittest.constraints.AbsoluteTolerance
+
+            x = linspace(-1,1,6)';
+            y = linspace(0,2,7)';
+            [X,Y] = ndgrid(x,y);
+            F = X.^2 .* Y.^3 + 2*X.*Y - 5;
+            d2Fdxy = 6*X.*Y.^2 + 2;
+
+            spline = InterpolatingTensorSpline(x, y, F, K=[4 4]);
+            dspline = diff(spline, [1 1]);
+
+            testCase.assertThat(dspline(X, Y), IsEqualTo(d2Fdxy, 'Within', AbsoluteTolerance(1e-9)))
+        end
+
+        function tensorSplineCumsumMatchesIntegralInOneDimension(testCase)
+            import matlab.unittest.constraints.IsEqualTo
+            import matlab.unittest.constraints.AbsoluteTolerance
+
+            f = @(x) x + 1;
+            g = @(x) 0.5*x.^2 + x;
+            t = linspace(-1,1,11)';
+
+            spline = InterpolatingTensorSpline(t, f(t), K=4);
+            intspline = cumsum(spline);
+
+            testCase.assertThat(intspline(t), IsEqualTo(g(t) - g(t(1)), 'Within', AbsoluteTolerance(10*eps)))
+        end
     end
 end

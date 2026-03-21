@@ -22,50 +22,51 @@ classdef TensorSpline < handle
     % F = spline(xq, yq);
     % ```
     %
-    % - Topic: Create a tensor spline
-    % - Topic: Inspect tensor spline properties
-    % - Topic: Evaluate the tensor spline
-    % - Topic: Build tensor spline bases
+    % - Topic: Create a spline
+    % - Topic: Inspect spline properties
+    % - Topic: Evaluate the spline
+    % - Topic: Transform the spline
+    % - Topic: Build spline bases
     % - Declaration: classdef TensorSpline < handle
 
     properties (SetAccess = private)
         % Spline order in each tensor dimension.
         %
-        % - Topic: Inspect tensor spline properties
+        % - Topic: Inspect spline properties
         K
         % Knot vectors for each tensor dimension.
         %
-        % - Topic: Inspect tensor spline properties
+        % - Topic: Inspect spline properties
         tKnot
         % Tensor-product spline coefficients reshaped to basisSize.
         %
-        % - Topic: Inspect tensor spline properties
+        % - Topic: Inspect spline properties
         xi
     end
 
     properties
         % Mean added back to zero-order evaluations.
         %
-        % - Topic: Inspect tensor spline properties
+        % - Topic: Inspect spline properties
         xMean = 0
         % Multiplicative scale applied to evaluations.
         %
-        % - Topic: Inspect tensor spline properties
+        % - Topic: Inspect spline properties
         xStd = 1
     end
 
     properties (Dependent)
         % Number of tensor dimensions.
         %
-        % - Topic: Inspect tensor spline properties
+        % - Topic: Inspect spline properties
         numDimensions
         % Number of basis functions in each dimension.
         %
-        % - Topic: Inspect tensor spline properties
+        % - Topic: Inspect spline properties
         basisSize
         % Coordinate limits for each dimension.
         %
-        % - Topic: Inspect tensor spline properties
+        % - Topic: Inspect spline properties
         domain
     end
 
@@ -81,7 +82,7 @@ classdef TensorSpline < handle
             % values = spline(queryPoints);
             % ```
             %
-            % - Topic: Create a tensor spline
+            % - Topic: Create a spline
             % - Declaration: self = TensorSpline(K,tKnot,xi,options)
             % - Parameter K: spline order scalar or vector with one entry per dimension
             % - Parameter tKnot: cell array of knot vectors
@@ -126,7 +127,7 @@ classdef TensorSpline < handle
         function value = get.numDimensions(self)
             % Return the number of tensor dimensions.
             %
-            % - Topic: Inspect tensor spline properties
+            % - Topic: Inspect spline properties
             % - Declaration: value = get.numDimensions(self)
             % - Parameter self: TensorSpline instance
             % - Returns value: number of dimensions
@@ -136,7 +137,7 @@ classdef TensorSpline < handle
         function value = get.basisSize(self)
             % Return the number of basis functions per dimension.
             %
-            % - Topic: Inspect tensor spline properties
+            % - Topic: Inspect spline properties
             % - Declaration: value = get.basisSize(self)
             % - Parameter self: TensorSpline instance
             % - Returns value: row vector of basis sizes
@@ -146,7 +147,7 @@ classdef TensorSpline < handle
         function value = get.domain(self)
             % Return the domain limits for each dimension.
             %
-            % - Topic: Inspect tensor spline properties
+            % - Topic: Inspect spline properties
             % - Declaration: value = get.domain(self)
             % - Parameter self: TensorSpline instance
             % - Returns value: cell array of [min max] domain limits
@@ -165,7 +166,7 @@ classdef TensorSpline < handle
             % dFdx = spline(xq, yq, [1 0]);
             % ```
             %
-            % - Topic: Evaluate the tensor spline
+            % - Topic: Evaluate the spline
             % - Declaration: varargout = subsref(self,index)
             % - Parameter self: TensorSpline instance
             % - Parameter index: MATLAB subscript structure
@@ -194,7 +195,7 @@ classdef TensorSpline < handle
             % values = spline(xq, yq);
             % ```
             %
-            % - Topic: Evaluate the tensor spline
+            % - Topic: Evaluate the spline
             % - Declaration: values = valueAtPoints(self,X1,...,Xn,derivativeOrders)
             % - Parameter self: TensorSpline instance
             % - Parameter X1,...,Xn: query locations as a point matrix or one array per dimension
@@ -221,6 +222,7 @@ classdef TensorSpline < handle
 
             values = reshape(values, outputSize);
         end
+
     end
 
     methods (Static)
@@ -235,7 +237,7 @@ classdef TensorSpline < handle
             % values = B * spline.xi(:);
             % ```
             %
-            % - Topic: Build tensor spline bases
+            % - Topic: Build spline bases
             % - Declaration: B = matrix(X,tKnot,K,options)
             % - Parameter X: query locations as a point matrix
             % - Parameter tKnot: cell array of knot vectors
@@ -291,7 +293,7 @@ classdef TensorSpline < handle
             % B = TensorSpline.matrix(points, tKnot, [4 4]);
             % ```
             %
-            % - Topic: Build tensor spline bases
+            % - Topic: Build spline bases
             % - Declaration: [pointMatrix,gridSize] = pointsFromGridVectors(gridVectors)
             % - Parameter gridVectors: cell array of grid vectors
             % - Returns pointMatrix: matrix with one row per grid point
@@ -433,6 +435,10 @@ classdef TensorSpline < handle
 
         function derivativeOrders = normalizeDerivativeOrders(derivativeOrders, numDimensions)
             % Normalize derivative-order input to one order per dimension.
+            %
+            % - Topic: Utility
+            % - Developer: true
+            % - Declaration: derivativeOrders = normalizeDerivativeOrders(derivativeOrders,numDimensions)
             validateattributes(derivativeOrders, {'numeric'}, {'real','finite','nonnegative','integer'});
             if isscalar(derivativeOrders)
                 if numDimensions == 1
@@ -451,5 +457,81 @@ classdef TensorSpline < handle
                 end
             end
         end
+
+        function [xi, tKnot, K] = differentiateAlongDimension(xi, tKnot, K, derivativeOrder, dim)
+            % Differentiate tensor coefficients along one dimension.
+            %
+            % - Topic: Utility
+            % - Developer: true
+            % - Declaration: [xi,tKnot,K] = differentiateAlongDimension(xi,tKnot,K,derivativeOrder,dim)
+            perm = [dim, 1:(dim-1), (dim+1):ndims(xi)];
+            xiPermuted = permute(xi, perm);
+            xiMatrix = reshape(xiPermuted, size(xiPermuted, 1), []);
+
+            originalK = K;
+            originalTKnot = tKnot;
+            transformedSlice = diff(BSpline(originalK, originalTKnot, xiMatrix(:,1)), derivativeOrder);
+            tKnot = transformedSlice.tKnot;
+            K = transformedSlice.K;
+
+            transformedMatrix = zeros(numel(transformedSlice.xi), size(xiMatrix, 2), 'like', xiMatrix);
+            transformedMatrix(:,1) = transformedSlice.xi;
+            for iSlice = 2:size(xiMatrix, 2)
+                transformedSlice = diff(BSpline(originalK, originalTKnot, xiMatrix(:,iSlice)), derivativeOrder);
+                transformedMatrix(:,iSlice) = transformedSlice.xi;
+            end
+
+            outputSize = size(xiPermuted);
+            outputSize(1) = size(transformedMatrix, 1);
+            xi = ipermute(reshape(transformedMatrix, outputSize), perm);
+        end
+
+        function [xi, tKnot, K] = integrateAlongDimension(xi, tKnot, K, dim, xMean, xStd)
+            % Integrate tensor coefficients along one dimension.
+            %
+            % - Topic: Utility
+            % - Developer: true
+            % - Declaration: [xi,tKnot,K] = integrateAlongDimension(xi,tKnot,K,dim,xMean,xStd)
+            perm = [dim, 1:(dim-1), (dim+1):ndims(xi)];
+            xiPermuted = permute(xi, perm);
+            xiMatrix = reshape(xiPermuted, size(xiPermuted, 1), []);
+
+            originalK = K;
+            originalTKnot = tKnot;
+            transformedSlice = cumsum(BSpline(originalK, originalTKnot, xiMatrix(:,1), xMean=xMean, xStd=xStd));
+            tKnot = transformedSlice.tKnot;
+            K = transformedSlice.K;
+
+            transformedMatrix = zeros(numel(transformedSlice.xi), size(xiMatrix, 2), 'like', transformedSlice.xi);
+            transformedMatrix(:,1) = transformedSlice.xi;
+            for iSlice = 2:size(xiMatrix, 2)
+                transformedSlice = cumsum(BSpline(originalK, originalTKnot, xiMatrix(:,iSlice), xMean=xMean, xStd=xStd));
+                transformedMatrix(:,iSlice) = transformedSlice.xi;
+            end
+
+            outputSize = size(xiPermuted);
+            outputSize(1) = size(transformedMatrix, 1);
+            xi = ipermute(reshape(transformedMatrix, outputSize), perm);
+        end
+
+        function spline = zeroSplineForDomain(domain, numDimensions, options)
+            % Create a zero spline over the supplied domain.
+            %
+            % - Topic: Utility
+            % - Developer: true
+            % - Declaration: spline = zeroSplineForDomain(domain,numDimensions,options)
+            arguments
+                domain cell
+                numDimensions (1,1) double {mustBeInteger,mustBePositive}
+                options.xStd = 1
+            end
+
+            tKnot = cell(1, numDimensions);
+            for iDim = 1:numDimensions
+                tKnot{iDim} = reshape(domain{iDim}, [], 1);
+            end
+            spline = TensorSpline(ones(1, numDimensions), tKnot, 0, xMean=0, xStd=options.xStd);
+        end
     end
+
 end
