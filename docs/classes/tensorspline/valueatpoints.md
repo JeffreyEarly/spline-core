@@ -16,11 +16,11 @@ Evaluate the tensor spline or a mixed partial derivative.
 
 ## Declaration
 ```matlab
- values = valueAtPoints(self,X,derivativeOrders)
+ values = valueAtPoints(self,X1,...,Xn,derivativeOrders)
 ```
 ## Parameters
 + `self`  TensorSpline instance
-+ `X`  query locations as a point matrix or cell array of matching grids
++ `X1,...,Xn`  query locations as a point matrix or one array per dimension
 + `derivativeOrders`  derivative order per dimension
 
 ## Returns
@@ -28,12 +28,12 @@ Evaluate the tensor spline or a mixed partial derivative.
 
 ## Discussion
 
-  Evaluate either on an `N x D` point matrix or on a cell array
-  of matching query grids.
+  Evaluate either on an `N x D` point matrix or with one
+  query input per dimension.
  
   ```matlab
   values = spline(queryPoints);
-  valuesOnGrid = spline({X,Y});
+  values = spline(X, Y);
   ```
  
             

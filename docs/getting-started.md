@@ -91,12 +91,12 @@ y = linspace(0,2,7)';
 [X,Y] = ndgrid(x,y);
 F = X.^2 .* Y.^3 + 2*X.*Y - 5;
 
-tensorSpline = InterpolatingTensorSpline({x,y}, F, K=[4 4]);
-Fq = tensorSpline({X,Y});
+tensorSpline = InterpolatingTensorSpline(x, y, F, K=[4 4]);
+Fq = tensorSpline(X, Y);
 ```
 
 The tensor classes support mixed partial derivatives as well, for example
-`tensorSpline({X,Y}, [1 0])` for the derivative with respect to the first
+`tensorSpline(X, Y, [1 0])` for the derivative with respect to the first
 dimension.
 
 ## Tensor-product fitting with noisy data
@@ -119,7 +119,7 @@ fit = ConstrainedTensorSpline({X,Y}, Fobs);
 xq = linspace(min(x),max(x),41)';
 yq = linspace(min(y),max(y),51)';
 [Xq,Yq] = ndgrid(xq,yq);
-Fq = fit({Xq,Yq});
+Fq = fit(Xq, Yq);
 ```
 
 If you want a denser tensor basis or a robust error model, pass them as

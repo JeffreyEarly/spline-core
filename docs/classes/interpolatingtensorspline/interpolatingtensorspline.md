@@ -16,10 +16,10 @@ Create a tensor-product interpolating spline on a rectilinear grid.
 
 ## Declaration
 ```matlab
- self = InterpolatingTensorSpline(gridVectors,values,options)
+ self = InterpolatingTensorSpline(X1,...,Xn,values,options)
 ```
 ## Parameters
-+ `gridVectors`  cell array of grid vectors, one per dimension
++ `X1,...,Xn`  grid vectors, one per dimension
 + `values`  array of sampled values on the grid
 + `options.K`  spline order scalar or vector with one entry per dimension
 + `options.S`  spline degree scalar or vector with one entry per dimension
@@ -31,11 +31,12 @@ Create a tensor-product interpolating spline on a rectilinear grid.
 
   Use this constructor when your data already live on a
   rectilinear grid and should be reproduced exactly by the
-  spline.
+  spline. Supply one grid input per dimension followed by the
+  sampled value array.
  
   ```matlab
-  spline = InterpolatingTensorSpline({x,y}, F, K=[4 4]);
-  Fq = spline({Xq,Yq});
+  spline = InterpolatingTensorSpline(x, y, F, K=[4 4]);
+  Fq = spline(Xq, Yq);
   ```
  
               

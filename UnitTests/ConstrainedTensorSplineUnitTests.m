@@ -18,7 +18,7 @@ classdef ConstrainedTensorSplineUnitTests < matlab.unittest.TestCase
 
             spline = ConstrainedTensorSpline({X,Y}, F, K=K, tKnot=tKnot, distribution=NormalDistribution(1));
 
-            testCase.assertThat(spline({X,Y}), IsEqualTo(F, 'Within', AbsoluteTolerance(10*eps)))
+            testCase.assertThat(spline(X, Y), IsEqualTo(F, 'Within', AbsoluteTolerance(10*eps)))
         end
 
         function constrainedTensorSplineSupportsRobustDistribution(testCase)
@@ -35,7 +35,7 @@ classdef ConstrainedTensorSplineUnitTests < matlab.unittest.TestCase
 
             spline = ConstrainedTensorSpline({X,Y}, F, K=K, tKnot=tKnot, distribution=StudentTDistribution(sigma=1,nu=3));
 
-            testCase.verifySize(spline({X,Y}), size(F))
+            testCase.verifySize(spline(X, Y), size(F))
         end
 
         function smoothingMatrixHasExpectedSize(testCase)
@@ -69,7 +69,7 @@ classdef ConstrainedTensorSplineUnitTests < matlab.unittest.TestCase
             testCase.verifyEqual(spline.K, [4 4])
             testCase.verifyClass(spline.distribution, 'NormalDistribution')
             testCase.verifyEqual(cellfun(@numel, spline.tKnot), [8 8])
-            testCase.assertThat(spline({X,Y}), IsEqualTo(F, 'Within', AbsoluteTolerance(10*eps)))
+            testCase.assertThat(spline(X, Y), IsEqualTo(F, 'Within', AbsoluteTolerance(10*eps)))
         end
 
         function oneDimensionalAutomaticKnotsMatchPolyfit(testCase)
@@ -104,7 +104,7 @@ classdef ConstrainedTensorSplineUnitTests < matlab.unittest.TestCase
 
             spline = ConstrainedTensorSpline({X,Y}, F);
 
-            testCase.assertThat(spline({Xq,Yq}), IsEqualTo(Fq, 'Within', AbsoluteTolerance(1e-10)))
+            testCase.assertThat(spline(Xq, Yq), IsEqualTo(Fq, 'Within', AbsoluteTolerance(1e-10)))
         end
     end
 end

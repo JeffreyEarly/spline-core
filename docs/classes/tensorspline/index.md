@@ -38,7 +38,7 @@ xi = randn(16,1);
 spline = TensorSpline([4 4], tKnot, xi);
  
 [X,Y] = ndgrid(linspace(0,1,40), linspace(0,1,50));
-F = spline({X,Y});
+F = spline(X, Y);
 ```
  
         

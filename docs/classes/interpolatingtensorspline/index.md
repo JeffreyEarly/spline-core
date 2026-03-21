@@ -33,8 +33,8 @@ grid and want a tensor-product spline that matches them exactly.
 ```matlab
 [X,Y] = ndgrid(linspace(0,1,8), linspace(-1,1,9));
 F = sin(2*pi*X).*cos(pi*Y);
-spline = InterpolatingTensorSpline({X(:,1), Y(1,:)'}, F);
-Fq = spline({X,Y});
+spline = InterpolatingTensorSpline(X(:,1), Y(1,:), F);
+Fq = spline(X, Y);
 ```
  
     

@@ -19,7 +19,7 @@ Evaluate the tensor-product basis matrix and optional derivatives.
  B = matrix(X,tKnot,K,options)
 ```
 ## Parameters
-+ `X`  query locations as a point matrix or cell array of matching grids
++ `X`  query locations as a point matrix
 + `tKnot`  cell array of knot vectors
 + `K`  spline order scalar or vector with one entry per dimension
 + `options.D`  derivative order per dimension
