@@ -5,7 +5,7 @@ has_children: false
 has_toc: false
 mathjax: true
 parent: Class documentation
-nav_order: 4
+nav_order: 2
 ---
 
 #  TensorSpline

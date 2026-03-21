@@ -25,7 +25,7 @@ end
 websiteRootURL = "spline-core/";
 classFolderName = 'Class documentation';
 websiteFolder = 'classes';
-classes = {'BSpline','InterpolatingSpline','ConstrainedSpline','TensorSpline','ConstrainedTensorSpline','ShapeConstraint'};
+classes = {'BSpline','TensorSpline','InterpolatingSpline','ConstrainedSpline','ConstrainedTensorSpline','ShapeConstraint'};
 clean_generated_class_docs(buildFolder, websiteFolder, classes);
 classDocumentation = ClassDocumentation.empty(length(classes),0);
 for iName=1:length(classes)
