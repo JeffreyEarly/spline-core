@@ -3,7 +3,7 @@ layout: default
 title: matrix
 parent: TensorSpline
 grand_parent: Classes
-nav_order: 7
+nav_order: 9
 mathjax: true
 ---
 

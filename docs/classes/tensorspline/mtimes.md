@@ -3,7 +3,7 @@ layout: default
 title: mtimes
 parent: TensorSpline
 grand_parent: Classes
-nav_order: 8
+nav_order: 10
 mathjax: true
 ---
 

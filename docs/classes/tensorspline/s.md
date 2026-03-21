@@ -1,15 +1,15 @@
 ---
 layout: default
-title: xStd
+title: S
 parent: TensorSpline
 grand_parent: Classes
-nav_order: 18
+nav_order: 2
 mathjax: true
 ---
 
-#  xStd
+#  S
 
-Multiplicative scale applied to evaluations.
+Polynomial degree in each tensor dimension.
 
 
 ---

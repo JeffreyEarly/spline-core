@@ -56,6 +56,10 @@ classdef TensorSpline < handle
     end
 
     properties (Dependent)
+        % Polynomial degree in each tensor dimension.
+        %
+        % - Topic: Inspect spline properties
+        S
         % Number of tensor dimensions.
         %
         % - Topic: Inspect spline properties
@@ -64,7 +68,7 @@ classdef TensorSpline < handle
         %
         % - Topic: Inspect spline properties
         basisSize
-        % Coordinate limits for each dimension.
+        % Minimum and maximum values of the spline domain in each dimension.
         %
         % - Topic: Inspect spline properties
         domain
@@ -124,6 +128,16 @@ classdef TensorSpline < handle
             self.xStd = options.xStd;
         end
 
+        function value = get.S(self)
+            % Return the spline polynomial degree in each dimension.
+            %
+            % - Topic: Inspect spline properties
+            % - Declaration: value = get.S(self)
+            % - Parameter self: TensorSpline instance
+            % - Returns value: row vector equal to K - 1
+            value = self.K - 1;
+        end
+
         function value = get.numDimensions(self)
             % Return the number of tensor dimensions.
             %
@@ -150,8 +164,8 @@ classdef TensorSpline < handle
             % - Topic: Inspect spline properties
             % - Declaration: value = get.domain(self)
             % - Parameter self: TensorSpline instance
-            % - Returns value: cell array of [min max] domain limits
-            value = cellfun(@(tk) [tk(1), tk(end)], self.tKnot, 'UniformOutput', false);
+            % - Returns value: numDimensions-by-2 array of [min max] domain limits
+            value = cell2mat(cellfun(@(tk) [tk(1), tk(end)], self.tKnot, 'UniformOutput', false)');
         end
 
         function varargout = subsref(self, index)
@@ -521,14 +535,14 @@ classdef TensorSpline < handle
             % - Developer: true
             % - Declaration: spline = zeroSplineForDomain(domain,numDimensions,options)
             arguments
-                domain cell
+                domain (:,2) double {mustBeNumeric,mustBeReal,mustBeFinite}
                 numDimensions (1,1) double {mustBeInteger,mustBePositive}
                 options.xStd = 1
             end
 
             tKnot = cell(1, numDimensions);
             for iDim = 1:numDimensions
-                tKnot{iDim} = reshape(domain{iDim}, [], 1);
+                tKnot{iDim} = reshape(domain(iDim,:), [], 1);
             end
             spline = TensorSpline(ones(1, numDimensions), tKnot, 0, xMean=0, xStd=options.xStd);
         end

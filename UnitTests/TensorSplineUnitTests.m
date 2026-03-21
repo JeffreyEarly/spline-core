@@ -156,5 +156,36 @@ classdef TensorSplineUnitTests < matlab.unittest.TestCase
 
             testCase.assertThat(intspline(t), IsEqualTo(g(t) - g(t(1)), 'Within', AbsoluteTolerance(10*eps)))
         end
+
+        function tensorSplineExposesDegreeVector(testCase)
+            spline1D = InterpolatingTensorSpline(linspace(0,1,5)', linspace(0,1,5)', K=4);
+            spline2D = InterpolatingTensorSpline(linspace(0,1,5)', linspace(-1,1,6)', randn(5,6), K=[3 4]);
+
+            testCase.verifyEqual(spline1D.S, 3)
+            testCase.verifyEqual(spline2D.S, [2 3])
+        end
+
+        function tensorSplineFevalMatchesDirectEvaluation(testCase)
+            import matlab.unittest.constraints.IsEqualTo
+            import matlab.unittest.constraints.AbsoluteTolerance
+
+            x = linspace(-1,1,6)';
+            y = linspace(0,2,7)';
+            [X,Y] = ndgrid(x,y);
+            F = X.^2 .* Y.^3 + 2*X.*Y - 5;
+
+            spline = InterpolatingTensorSpline(x, y, F, K=[4 4]);
+
+            testCase.assertThat(feval(spline, X, Y), IsEqualTo(spline(X, Y), 'Within', AbsoluteTolerance(1e-10)))
+            testCase.assertThat(feval(spline, X, Y, [1 0]), IsEqualTo(spline(X, Y, [1 0]), 'Within', AbsoluteTolerance(1e-10)))
+        end
+
+        function tensorSplineDomainReturnsNumericLimits(testCase)
+            spline1D = InterpolatingTensorSpline((0:4)', (0:4)', K=2);
+            spline2D = InterpolatingTensorSpline((0:4)', (-2:2)', randn(5,5), K=[2 3]);
+
+            testCase.verifyEqual(spline1D.domain, [0 4])
+            testCase.verifyEqual(spline2D.domain, [0 4; -2 2])
+        end
     end
 end

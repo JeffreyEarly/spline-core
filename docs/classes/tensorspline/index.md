@@ -50,14 +50,16 @@ F = spline(xq, yq);
   + [`TensorSpline`](/spline-core/classes/tensorspline/tensorspline.html) Create a tensor-product spline from per-dimension orders, knots, and coefficients.
 + Inspect spline properties
   + [`K`](/spline-core/classes/tensorspline/k.html) Spline order in each tensor dimension.
+  + [`S`](/spline-core/classes/tensorspline/s.html) Polynomial degree in each tensor dimension.
   + [`basisSize`](/spline-core/classes/tensorspline/basissize.html) Number of basis functions in each dimension.
-  + [`domain`](/spline-core/classes/tensorspline/domain.html) Coordinate limits for each dimension.
+  + [`domain`](/spline-core/classes/tensorspline/domain.html) Minimum and maximum values of the spline domain in each dimension.
   + [`numDimensions`](/spline-core/classes/tensorspline/numdimensions.html) Number of tensor dimensions.
   + [`tKnot`](/spline-core/classes/tensorspline/tknot.html) Knot vectors for each tensor dimension.
   + [`xMean`](/spline-core/classes/tensorspline/xmean.html) Mean added back to zero-order evaluations.
   + [`xStd`](/spline-core/classes/tensorspline/xstd.html) Multiplicative scale applied to evaluations.
   + [`xi`](/spline-core/classes/tensorspline/xi.html) Tensor-product spline coefficients reshaped to basisSize.
 + Evaluate the spline
+  + [`feval`](/spline-core/classes/tensorspline/feval.html) Evaluate a tensor spline at the supplied points.
   + [`subsref`](/spline-core/classes/tensorspline/subsref.html) Evaluate the tensor spline with function-call syntax or defer to built-in indexing.
   + [`valueAtPoints`](/spline-core/classes/tensorspline/valueatpoints.html) Evaluate the tensor spline or a mixed partial derivative.
 + Transform the spline
