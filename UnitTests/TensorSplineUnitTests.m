@@ -187,5 +187,29 @@ classdef TensorSplineUnitTests < matlab.unittest.TestCase
             testCase.verifyEqual(spline1D.domain, [0 4])
             testCase.verifyEqual(spline2D.domain, [0 4; -2 2])
         end
+
+        function tensorSplineRootsStayWithinSplineDomain(testCase)
+            import matlab.unittest.constraints.IsEqualTo
+            import matlab.unittest.constraints.AbsoluteTolerance
+
+            f = @(x) mod(x,2) - 0.5;
+            t = linspace(0,10,11)';
+            spline = InterpolatingTensorSpline(t, f(t), K=2);
+
+            expected = (0:9)' + 0.5;
+            actual = roots(spline);
+
+            testCase.assertThat(actual, IsEqualTo(expected, 'Within', AbsoluteTolerance(2*eps)))
+        end
+
+        function tensorSplineRootsRejectHigherDimensions(testCase)
+            x = linspace(0,1,5)';
+            y = linspace(0,1,6)';
+            [X,Y] = ndgrid(x,y);
+            F = X - Y;
+            spline = InterpolatingTensorSpline(x, y, F, K=[2 2]);
+
+            testCase.verifyError(@() roots(spline), 'TensorSpline:roots:UnsupportedDimension')
+        end
     end
 end

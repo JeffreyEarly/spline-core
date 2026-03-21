@@ -67,6 +67,7 @@ F = spline(xq, yq);
   + [`diff`](/spline-core/classes/tensorspline/diff.html) Return a tensor spline representing mixed partial derivatives.
   + [`mtimes`](/spline-core/classes/tensorspline/mtimes.html) Multiply tensor-spline outputs by a scalar.
   + [`plus`](/spline-core/classes/tensorspline/plus.html) Add a scalar offset to tensor-spline outputs.
+  + [`roots`](/spline-core/classes/tensorspline/roots.html) Return real roots of a one-dimensional tensor spline within its domain.
 + Build spline bases
   + [`matrix`](/spline-core/classes/tensorspline/matrix.html) Evaluate the tensor-product basis matrix and optional derivatives.
   + [`pointsFromGridVectors`](/spline-core/classes/tensorspline/pointsfromgridvectors.html) Convert rectilinear grid vectors into an explicit point matrix.
