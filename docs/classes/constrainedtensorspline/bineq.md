@@ -1,15 +1,15 @@
 ---
 layout: default
-title: X
+title: bineq
 parent: ConstrainedTensorSpline
 grand_parent: Classes
-nav_order: 6
+nav_order: 9
 mathjax: true
 ---
 
-#  X
+#  bineq
 
-Design matrix for the observation locations.
+Right-hand side for inequality constraints.
 
 > Developer documentation: this item describes internal implementation details.
 

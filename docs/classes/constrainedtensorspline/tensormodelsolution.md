@@ -3,7 +3,7 @@ layout: default
 title: tensorModelSolution
 parent: ConstrainedTensorSpline
 grand_parent: Classes
-nav_order: 8
+nav_order: 14
 mathjax: true
 ---
 
@@ -18,13 +18,17 @@ Solve the tensor noisy-data model with iteratively reweighted least squares.
 
 ## Declaration
 ```matlab
- [xi,CmInv,W] = tensorModelSolution(x,X,distribution,rho_X)
+ [xi,CmInv,W] = tensorModelSolution(x,X,distribution,rho_X,Aeq,beq,Aineq,bineq)
 ```
 ## Parameters
 + `x`  observation values as an N-by-1 vector
 + `X`  splines on the observation grid, N-by-M
 + `distribution`  distribution describing the errors
 + `rho_X`  optional observation correlation matrix
++ `Aeq`  optional equality-constraint matrix
++ `beq`  optional equality-constraint values
++ `Aineq`  optional inequality-constraint matrix
++ `bineq`  optional inequality-constraint values
 
 ## Returns
 + `xi`  fitted tensor spline coefficients
@@ -33,4 +37,4 @@ Solve the tensor noisy-data model with iteratively reweighted least squares.
 
 ## Discussion
 
-                    
+                            

@@ -1,15 +1,15 @@
 ---
 layout: default
-title: X
+title: Aeq
 parent: ConstrainedTensorSpline
 grand_parent: Classes
-nav_order: 6
+nav_order: 1
 mathjax: true
 ---
 
-#  X
+#  Aeq
 
-Design matrix for the observation locations.
+Linear equality constraints applied to the coefficient solve.
 
 > Developer documentation: this item describes internal implementation details.
 

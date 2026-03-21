@@ -1,15 +1,15 @@
 ---
 layout: default
-title: x
+title: pointConstraints
 parent: ConstrainedTensorSpline
 grand_parent: Classes
-nav_order: 15
+nav_order: 12
 mathjax: true
 ---
 
-#  x
+#  pointConstraints
 
-Observation values as an N-by-1 vector.
+Local point constraints used during fitting.
 
 
 ---

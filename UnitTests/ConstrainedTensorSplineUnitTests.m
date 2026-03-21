@@ -106,5 +106,89 @@ classdef ConstrainedTensorSplineUnitTests < matlab.unittest.TestCase
 
             testCase.assertThat(spline(Xq, Yq), IsEqualTo(Fq, 'Within', AbsoluteTolerance(1e-10)))
         end
+
+        function pointConstraintsEnforceDerivativeInOneDimension(testCase)
+            t = linspace(-1,1,9)';
+            x = t;
+
+            spline = ConstrainedTensorSpline(t, x, ...
+                distribution=NormalDistribution(1), ...
+                pointConstraints=PointConstraint.equal(0, D=1, Value=0));
+
+            testCase.verifyLessThan(abs(spline(0, 1)), 1e-10)
+        end
+
+        function pointConstraintsEnforceValuesAtManyTensorPoints(testCase)
+            x = linspace(-1,1,6)';
+            y = linspace(-1,1,7)';
+            [X,Y] = ndgrid(x,y);
+            F = sin(pi*X) + 0.5*cos(pi*Y) + X.*Y;
+
+            tKnot = {
+                BSpline.knotPointsForDataPoints(x, K=4)
+                BSpline.knotPointsForDataPoints(y, K=4)
+            };
+
+            mask = abs(X) <= 0.25 & abs(Y) <= 0.35;
+            points = [X(mask), Y(mask)];
+            constraint = PointConstraint.equal(points, D=[0 0], Value=0);
+
+            spline = ConstrainedTensorSpline({X,Y}, F, ...
+                K=[4 4], ...
+                tKnot=tKnot, ...
+                distribution=NormalDistribution(1), ...
+                pointConstraints=constraint);
+
+            testCase.verifyLessThan(max(abs(spline(points(:,1), points(:,2)))), 1e-10)
+        end
+
+        function positiveGlobalConstraintKeepsFitNonnegative(testCase)
+            t = linspace(-1,1,21)';
+            x = t.^2 - 0.35;
+            tq = linspace(min(t), max(t), 101)';
+
+            spline = ConstrainedTensorSpline(t, x, ...
+                distribution=NormalDistribution(1), ...
+                globalConstraints=GlobalConstraint.positive());
+
+            testCase.verifyGreaterThanOrEqual(min(spline(tq)), -1e-10)
+        end
+
+        function monotonicGlobalConstraintActsAlongSelectedDimension(testCase)
+            x = linspace(-1,1,6)';
+            y = linspace(0,1,7)';
+            [X,Y] = ndgrid(x,y);
+            F = cos(pi*Y) + 0.1*X;
+
+            tKnot = {
+                BSpline.knotPointsForDataPoints(x, K=4)
+                BSpline.knotPointsForDataPoints(y, K=4)
+            };
+
+            spline = ConstrainedTensorSpline({X,Y}, F, ...
+                K=[4 4], ...
+                tKnot=tKnot, ...
+                distribution=NormalDistribution(1), ...
+                globalConstraints=GlobalConstraint.monotonicIncreasing(Dimension=2));
+
+            xq = linspace(min(x), max(x), 13)';
+            yq = linspace(min(y), max(y), 19)';
+            [Xq,Yq] = ndgrid(xq,yq);
+            Fq = spline(Xq, Yq);
+
+            testCase.verifyGreaterThanOrEqual(min(diff(Fq, 1, 2), [], 'all'), -1e-10)
+        end
+
+        function smoothingMatrixRejectsConstrainedFits(testCase)
+            t = linspace(-1,1,9)';
+            x = t.^2 - 0.2;
+
+            spline = ConstrainedTensorSpline(t, x, ...
+                distribution=NormalDistribution(1), ...
+                globalConstraints=GlobalConstraint.positive());
+
+            testCase.verifyError(@() spline.smoothingMatrix(), ...
+                'ConstrainedTensorSpline:UnavailableSmoothingMatrix')
+        end
     end
 end

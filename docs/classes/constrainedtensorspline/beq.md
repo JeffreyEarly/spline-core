@@ -1,15 +1,15 @@
 ---
 layout: default
-title: X
+title: beq
 parent: ConstrainedTensorSpline
 grand_parent: Classes
-nav_order: 6
+nav_order: 8
 mathjax: true
 ---
 
-#  X
+#  beq
 
-Design matrix for the observation locations.
+Right-hand side for equality constraints.
 
 > Developer documentation: this item describes internal implementation details.
 

@@ -1,15 +1,15 @@
 ---
 layout: default
-title: x
+title: globalConstraints
 parent: ConstrainedTensorSpline
 grand_parent: Classes
-nav_order: 15
+nav_order: 11
 mathjax: true
 ---
 
-#  x
+#  globalConstraints
 
-Observation values as an N-by-1 vector.
+Global shape constraints used during fitting.
 
 
 ---

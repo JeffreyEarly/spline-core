@@ -3,7 +3,7 @@ layout: default
 title: CmInv
 parent: ConstrainedTensorSpline
 grand_parent: Classes
-nav_order: 1
+nav_order: 3
 mathjax: true
 ---
 

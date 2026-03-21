@@ -3,7 +3,7 @@ layout: default
 title: W
 parent: ConstrainedTensorSpline
 grand_parent: Classes
-nav_order: 3
+nav_order: 5
 mathjax: true
 ---
 

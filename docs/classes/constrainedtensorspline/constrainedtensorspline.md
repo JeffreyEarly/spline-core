@@ -3,7 +3,7 @@ layout: default
 title: ConstrainedTensorSpline
 parent: ConstrainedTensorSpline
 grand_parent: Classes
-nav_order: 2
+nav_order: 4
 mathjax: true
 ---
 
@@ -24,6 +24,8 @@ Create a tensor-product spline fit to noisy observations.
 + `options.K`  optional spline order scalar or vector with one entry per dimension
 + `options.tKnot`  optional cell array of knot vectors
 + `options.distribution`  optional error model object for the fit
++ `options.pointConstraints`  optional PointConstraint array
++ `options.globalConstraints`  optional GlobalConstraint array
 
 ## Returns
 + `self`  ConstrainedTensorSpline instance
@@ -39,4 +41,4 @@ Create a tensor-product spline fit to noisy observations.
   xFit = spline(X);
   ```
  
-                
+                    

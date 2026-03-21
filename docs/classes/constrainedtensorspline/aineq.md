@@ -1,15 +1,15 @@
 ---
 layout: default
-title: X
+title: Aineq
 parent: ConstrainedTensorSpline
 grand_parent: Classes
-nav_order: 6
+nav_order: 2
 mathjax: true
 ---
 
-#  X
+#  Aineq
 
-Design matrix for the observation locations.
+Linear inequality constraints applied to the coefficient solve.
 
 > Developer documentation: this item describes internal implementation details.
 
