@@ -12,6 +12,7 @@ classdef PointConstraint
     % ```matlab
     % c1 = PointConstraint.equal((0:10)', D=2, Value=0);
     % c2 = PointConstraint.lowerBound([X(mask), Y(mask)], D=[0 0], Value=0);
+    % c3 = PointConstraint.equalOnMask({x,y}, islandMask, D=[0 0], Value=0);
     % ```
     %
     % - Topic: Specify point constraints
@@ -176,6 +177,84 @@ classdef PointConstraint
 
             self = PointConstraint(points, "<=", options.Value, D=options.D);
         end
+
+        function self = equalOnMask(grid, mask, options)
+            % Create a pointwise equality constraint from a logical mask.
+            %
+            % Use this when a constrained region is naturally described by
+            % a logical mask on a rectilinear grid.
+            %
+            % ```matlab
+            % c = PointConstraint.equalOnMask({x,y}, mask, D=[0 0], Value=0);
+            % ```
+            %
+            % - Topic: Specify point constraints
+            % - Declaration: self = equalOnMask(grid,mask,options)
+            % - Parameter grid: vector or cell array of grid vectors or matching grid arrays
+            % - Parameter mask: logical mask selecting constrained locations
+            % - Parameter options.D: derivative orders as a scalar, row vector, or N-by-D matrix
+            % - Parameter options.Value: scalar or one target value per selected point
+            % - Returns self: equality PointConstraint
+            arguments
+                grid
+                mask
+                options.D {mustBeNumeric,mustBeReal,mustBeFinite,mustBeNonnegative,mustBeInteger} = 0
+                options.Value {mustBeNumeric,mustBeReal,mustBeFinite} = 0
+            end
+
+            points = PointConstraint.pointsFromMask(grid, mask);
+            self = PointConstraint.equal(points, D=options.D, Value=options.Value);
+        end
+
+        function self = lowerBoundOnMask(grid, mask, options)
+            % Create a pointwise lower-bound constraint from a logical mask.
+            %
+            % ```matlab
+            % c = PointConstraint.lowerBoundOnMask({x,y}, mask, D=[0 1], Value=0);
+            % ```
+            %
+            % - Topic: Specify point constraints
+            % - Declaration: self = lowerBoundOnMask(grid,mask,options)
+            % - Parameter grid: vector or cell array of grid vectors or matching grid arrays
+            % - Parameter mask: logical mask selecting constrained locations
+            % - Parameter options.D: derivative orders as a scalar, row vector, or N-by-D matrix
+            % - Parameter options.Value: scalar or one bound value per selected point
+            % - Returns self: lower-bound PointConstraint
+            arguments
+                grid
+                mask
+                options.D {mustBeNumeric,mustBeReal,mustBeFinite,mustBeNonnegative,mustBeInteger} = 0
+                options.Value {mustBeNumeric,mustBeReal,mustBeFinite} = 0
+            end
+
+            points = PointConstraint.pointsFromMask(grid, mask);
+            self = PointConstraint.lowerBound(points, D=options.D, Value=options.Value);
+        end
+
+        function self = upperBoundOnMask(grid, mask, options)
+            % Create a pointwise upper-bound constraint from a logical mask.
+            %
+            % ```matlab
+            % c = PointConstraint.upperBoundOnMask({x,y}, mask, D=[0 0], Value=1);
+            % ```
+            %
+            % - Topic: Specify point constraints
+            % - Declaration: self = upperBoundOnMask(grid,mask,options)
+            % - Parameter grid: vector or cell array of grid vectors or matching grid arrays
+            % - Parameter mask: logical mask selecting constrained locations
+            % - Parameter options.D: derivative orders as a scalar, row vector, or N-by-D matrix
+            % - Parameter options.Value: scalar or one bound value per selected point
+            % - Returns self: upper-bound PointConstraint
+            arguments
+                grid
+                mask
+                options.D {mustBeNumeric,mustBeReal,mustBeFinite,mustBeNonnegative,mustBeInteger} = 0
+                options.Value {mustBeNumeric,mustBeReal,mustBeFinite} = 0
+            end
+
+            points = PointConstraint.pointsFromMask(grid, mask);
+            self = PointConstraint.upperBound(points, D=options.D, Value=options.Value);
+        end
     end
 
     methods (Static, Access = private)
@@ -253,6 +332,66 @@ classdef PointConstraint
             if ~isscalar(relation) || ~ismember(relation, validRelations)
                 error('PointConstraint:InvalidRelation', ...
                     'relation must be one of "==", ">=", or "<=".');
+            end
+        end
+
+        function pointMatrix = pointsFromMask(grid, mask)
+            % Convert a masked grid description into an explicit point matrix.
+            if iscell(grid)
+                if isempty(grid)
+                    error('PointConstraint:InvalidGrid', ...
+                        'grid must not be empty.');
+                end
+
+                isVectorGrid = cellfun(@isvector, grid);
+                if all(isVectorGrid)
+                    [allPoints, gridSize] = TensorSpline.pointsFromGridVectors(grid);
+                    normalizedMask = PointConstraint.normalizeMask(mask, gridSize);
+                    pointMatrix = allPoints(normalizedMask(:), :);
+                    return;
+                end
+
+                if any(isVectorGrid)
+                    error('PointConstraint:InvalidGrid', ...
+                        'grid must be either all vectors or all matching arrays.');
+                end
+
+                outputSize = size(grid{1});
+                normalizedMask = PointConstraint.normalizeMask(mask, outputSize);
+                numDimensions = numel(grid);
+                pointMatrix = zeros(nnz(normalizedMask), numDimensions);
+                for iDim = 1:numDimensions
+                    validateattributes(grid{iDim}, {'numeric'}, {'real','finite'});
+                    if ~isequal(size(grid{iDim}), outputSize)
+                        error('PointConstraint:InvalidGrid', ...
+                            'All grid arrays must have the same size.');
+                    end
+                    pointMatrix(:,iDim) = grid{iDim}(normalizedMask);
+                end
+                return;
+            end
+
+            validateattributes(grid, {'numeric'}, {'vector','real','finite','nonempty'});
+            normalizedMask = PointConstraint.normalizeMask(mask, size(grid));
+            pointMatrix = reshape(grid(normalizedMask), [], 1);
+        end
+
+        function mask = normalizeMask(mask, expectedSize)
+            % Normalize a logical mask to the requested output size.
+            validateattributes(mask, {'numeric','logical'}, {'nonempty'});
+
+            if isvector(mask) && prod(expectedSize) == numel(mask)
+                mask = reshape(logical(mask), expectedSize);
+            elseif isequal(size(mask), expectedSize)
+                mask = logical(mask);
+            else
+                error('PointConstraint:InvalidMaskSize', ...
+                    'mask must match the supplied grid size.');
+            end
+
+            if ~any(mask, 'all')
+                error('PointConstraint:EmptyMask', ...
+                    'mask must select at least one constrained point.');
             end
         end
     end

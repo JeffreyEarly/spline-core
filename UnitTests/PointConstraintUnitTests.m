@@ -43,5 +43,52 @@ classdef PointConstraintUnitTests < matlab.unittest.TestCase
             testCase.verifyError(@() PointConstraint.equal(points, D=1, Value=0), ...
                 'PointConstraint:AmbiguousDerivativeOrders')
         end
+
+        function equalityConstraintCanBeBuiltFromOneDimensionalMask(testCase)
+            t = (0:4)';
+            mask = [true; false; true; false; true];
+
+            constraint = PointConstraint.equalOnMask(t, mask, D=1, Value=0);
+
+            testCase.verifyEqual(constraint.Points, t(mask))
+            testCase.verifyEqual(constraint.D, ones(nnz(mask),1))
+            testCase.verifyEqual(constraint.Value, zeros(nnz(mask),1))
+            testCase.verifyEqual(constraint.Relation, "==")
+        end
+
+        function equalityConstraintCanBeBuiltFromGridVectorMask(testCase)
+            x = [0; 1];
+            y = [10; 20; 30];
+            [X,Y] = ndgrid(x,y);
+            mask = [true false true; false true false];
+
+            constraint = PointConstraint.equalOnMask({x,y}, mask, D=[0 1], Value=0);
+
+            testCase.verifyEqual(constraint.Points, [X(mask), Y(mask)])
+            testCase.verifyEqual(constraint.D, repmat([0 1], nnz(mask), 1))
+        end
+
+        function lowerBoundConstraintCanBeBuiltFromGridArrayMask(testCase)
+            x = [0; 1];
+            y = [10; 20; 30];
+            [X,Y] = ndgrid(x,y);
+            mask = [false true false; true false true];
+
+            constraint = PointConstraint.lowerBoundOnMask({X,Y}, mask, D=[1 0], Value=5);
+
+            testCase.verifyEqual(constraint.Points, [X(mask), Y(mask)])
+            testCase.verifyEqual(constraint.D, repmat([1 0], nnz(mask), 1))
+            testCase.verifyEqual(constraint.Value, 5*ones(nnz(mask),1))
+            testCase.verifyEqual(constraint.Relation, ">=")
+        end
+
+        function maskSizeMustMatchGrid(testCase)
+            x = [0; 1];
+            y = [10; 20; 30];
+            mask = true(3,3);
+
+            testCase.verifyError(@() PointConstraint.equalOnMask({x,y}, mask, D=[0 0], Value=0), ...
+                'PointConstraint:InvalidMaskSize')
+        end
     end
 end
