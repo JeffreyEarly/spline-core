@@ -1,123 +1,213 @@
-classdef InterpolatingSpline < BSpline
-    % Interpolating spline fit through data values.
+classdef InterpolatingSpline < TensorSpline
+    % Interpolating spline on one-dimensional samples or rectilinear grids.
     %
     % Supported construction forms:
-    %   f = InterpolatingSpline(t,x)
-    %   f = InterpolatingSpline(t,x,K=K)
-    %   f = InterpolatingSpline(t,x,S=S)
+    %   spline = InterpolatingSpline(x1,...,xn,V)
+    %   spline = InterpolatingSpline(x1,...,xn,V,K=K)
+    %   spline = InterpolatingSpline(x1,...,xn,V,S=S)
     %
-    % The constructor chooses a terminated knot sequence from the supplied
-    % sample locations and solves for coefficients that interpolate the
-    % provided values exactly.
+    % The grid inputs are vectors, one per dimension.
     %
     % ## Basic usage
     %
-    % Use `InterpolatingSpline` when you want a spline that passes exactly
-    % through one-dimensional sample values.
+    % Use `InterpolatingSpline` when you have values on one-dimensional
+    % samples or a rectilinear grid and want a spline that matches them
+    % exactly.
     %
     % ```matlab
-    % t = linspace(0,1,12)';
-    % x = sin(2*pi*t);
-    % spline = InterpolatingSpline(t, x);
-    %
-    % xq = spline(linspace(0,1,100)');
+    % [X,Y] = ndgrid(linspace(0,1,8), linspace(-1,1,9));
+    % F = sin(2*pi*X).*cos(pi*Y);
+    % spline = InterpolatingSpline(X(:,1), Y(1,:), F);
+    % Fq = spline(X, Y);
     % ```
     %
     % - Topic: Create an interpolating spline
-    % - Topic: Choose spline order
-    % - Declaration: classdef InterpolatingSpline < BSpline
+    % - Topic: Inspect interpolation grids
+    % - Declaration: classdef InterpolatingSpline < TensorSpline
+
+    properties (SetAccess = private)
+        % Grid vectors used to define the interpolation lattice.
+        %
+        % - Topic: Inspect interpolation grids
+        gridVectors
+    end
 
     methods
-        function self = InterpolatingSpline(t,x,options)
-            % Create an interpolating spline through samples x observed at t.
+        function self = InterpolatingSpline(varargin)
+            % Create an interpolating spline on one-dimensional samples or a rectilinear grid.
             %
-            % This constructor chooses a terminated knot sequence from the
-            % sample locations and solves for coefficients that reproduce
-            % the supplied values exactly.
+            % Use this constructor when your data already live on a
+            % rectilinear grid and should be reproduced exactly by the
+            % spline. Supply one grid input per dimension followed by the
+            % sampled value array.
             %
             % ```matlab
-            % spline = InterpolatingSpline(t, x, K=4);
-            % xq = spline(tQuery);
+            % spline = InterpolatingSpline(x, y, F, K=[4 4]);
+            % Fq = spline(Xq, Yq);
             % ```
             %
             % - Topic: Create an interpolating spline
-            % - Declaration: self = InterpolatingSpline(t,x,options)
-            % - Parameter t: sample locations
-            % - Parameter x: sample values
-            % - Parameter options.K: spline order, used when options.S is not supplied
-            % - Parameter options.S: spline degree, alternative to specifying options.K
+            % - Declaration: self = InterpolatingSpline(X1,...,Xn,values,options)
+            % - Parameter X1,...,Xn: grid vectors, one per dimension
+            % - Parameter values: array of sampled values on the grid
+            % - Parameter options.K: spline order scalar or vector with one entry per dimension
+            % - Parameter options.S: spline degree scalar or vector with one entry per dimension
             % - Returns self: InterpolatingSpline instance
-            arguments
-                t {mustBeNumeric,mustBeReal,mustBeFinite}
-                x {mustBeNumeric,mustBeReal,mustBeFinite}
-                options.K (1,1) double {mustBePositive,mustBeInteger,mustBeGreaterThanOrEqual(options.K,1)} = 4
-                options.S (1,1) double {mustBeNonnegativeOrNaNInteger} = NaN
+            [gridVectors, values, options] = InterpolatingSpline.parseConstructorInputs(varargin{:});
+
+            numDimensions = numel(gridVectors);
+            K = InterpolatingSpline.splineOrderFromOptions(options, numDimensions);
+            InterpolatingSpline.validateValueArraySize(values, gridVectors);
+
+            tKnot = cell(1, numDimensions);
+            for iDim = 1:numDimensions
+                tKnot{iDim} = BSpline.knotPointsForDataPoints(gridVectors{iDim}, K=K(iDim));
             end
 
-            t = reshape(t,[],1);
-            x = reshape(x,[],1);
+            xMean = mean(values(:));
+            values = values - xMean;
 
-            if numel(x) ~= numel(t)
-                error('InterpolatingSpline:SizeMismatch', 'x and t must have the same length.');
-            end
-
-            K = InterpolatingSpline.splineOrderFromOptions(options);
-            tKnot = BSpline.knotPointsForDataPoints(t,K=K);
-
-            xMean = mean(x);
-            x = x - xMean;
-
-            xStd = std(x);
+            xStd = std(values(:));
             if xStd > 0
-                x = x/xStd;
+                values = values / xStd;
             else
                 xStd = 1;
             end
 
-            X = BSpline.matrix(t,tKnot,K);
-            xi = X\x;
+            [gridPoints, ~] = TensorSpline.pointsFromGridVectors(gridVectors);
+            basisMatrix = TensorSpline.matrix(gridPoints, tKnot, K);
+            xi = basisMatrix \ values(:);
 
-            self@BSpline(K,tKnot,xi,xMean=xMean,xStd=xStd);
+            self@TensorSpline(K, tKnot, xi, xMean=xMean, xStd=xStd);
+            self.gridVectors = gridVectors;
         end
     end
 
-    methods (Static)
-        function K = splineOrderFromOptions(options)
-            % Resolve spline order from mutually exclusive K and S options.
-            %
-            % Use this helper when you need to mirror the constructor logic
-            % for choosing spline order from `K` or degree `S`.
-            %
-            % ```matlab
-            % K = InterpolatingSpline.splineOrderFromOptions(struct("S",3,"K",4));
-            % ```
-            %
-            % - Topic: Choose spline order
-            % - Declaration: K = splineOrderFromOptions(options)
-            % - Parameter options: struct with fields K and S
-            % - Returns K: spline order
-            arguments
-                options struct
+    methods (Static, Access = private)
+        function [gridVectors, values, options] = parseConstructorInputs(varargin)
+            % Parse constructor inputs into grid vectors, values, and options.
+            firstNameValue = InterpolatingSpline.firstNameValueIndex(varargin);
+            positionalInputs = varargin(1:firstNameValue-1);
+            nameValueInputs = varargin(firstNameValue:end);
+            [gridInputs, values] = InterpolatingSpline.parsePositionalInputs(positionalInputs{:});
+            options = InterpolatingSpline.parseNameValueOptions(nameValueInputs{:});
+            gridVectors = InterpolatingSpline.normalizeConstructorGridInputs(gridInputs, values);
+        end
+
+        function [gridInputs, values] = parsePositionalInputs(varargin)
+            % Parse required positional inputs into grids and sampled values.
+            if numel(varargin) < 2
+                error('InterpolatingSpline:NotEnoughInputs', ...
+                    'Specify one or more grid inputs followed by the sampled values.');
             end
 
+            gridInputs = varargin(1:end-1);
+            values = InterpolatingSpline.parseValues(varargin{end});
+        end
+
+        function firstNameValue = firstNameValueIndex(inputs)
+            % Return the index where trailing name-value pairs begin.
+            firstNameValue = numel(inputs) + 1;
+            for iInput = 1:numel(inputs)
+                if InterpolatingSpline.isNameLike(inputs{iInput})
+                    firstNameValue = iInput;
+                    return;
+                end
+            end
+        end
+
+        function tf = isNameLike(value)
+            % True for scalar text values that can name a trailing option.
+            tf = (ischar(value) && isrow(value)) || (isstring(value) && isscalar(value));
+        end
+
+        function values = parseValues(values)
+            % Validate sampled values.
+            arguments
+                values {mustBeNumeric,mustBeReal,mustBeFinite}
+            end
+        end
+
+        function options = parseNameValueOptions(options)
+            % Parse constructor name-value options.
+            arguments
+                options.K = 4
+                options.S = NaN
+            end
+        end
+
+        function gridVectors = normalizeConstructorGridInputs(gridInputs, values)
+            % Normalize constructor grid inputs from vectors.
+            numDimensions = numel(gridInputs);
+            if ~all(cellfun(@isvector, gridInputs))
+                error('InterpolatingSpline:InvalidGridInputs', ...
+                    'Grid inputs must be vectors, one per dimension.');
+            end
+
+            gridVectors = InterpolatingSpline.normalizeGridVectors(gridInputs, numDimensions);
+        end
+
+        function K = splineOrderFromOptions(options, numDimensions)
+            % Resolve spline order from mutually exclusive K and S options.
             if isnan(options.S)
                 K = options.K;
             else
-                if options.K ~= 4
+                if ~(isscalar(options.K) && options.K == 4)
                     error('InterpolatingSpline:ConflictingSplineOrder', 'Specify either K or S, but not both.');
                 end
                 K = options.S + 1;
             end
+
+            K = InterpolatingSpline.normalizeOrderVector(K, numDimensions);
+        end
+
+        function K = normalizeOrderVector(K, numDimensions)
+            % Normalize spline-order input to one order per dimension.
+            validateattributes(K, {'numeric'}, {'vector','real','finite','positive','integer'});
+            if isscalar(K)
+                K = repmat(K, 1, numDimensions);
+            else
+                K = reshape(K, 1, []);
+                if numel(K) ~= numDimensions
+                    error('InterpolatingSpline:InvalidOrderVector', ...
+                        'K must be scalar or have one element per dimension.');
+                end
+            end
+        end
+
+        function gridVectors = normalizeGridVectors(gridVectors, numDimensions)
+            % Normalize and validate interpolation grid vectors.
+            if ~iscell(gridVectors) || numel(gridVectors) ~= numDimensions
+                error('InterpolatingSpline:InvalidGridVectors', ...
+                    'Grid inputs must supply one vector per dimension.');
+            end
+
+            for iDim = 1:numDimensions
+                validateattributes(gridVectors{iDim}, {'numeric'}, {'vector','real','finite'});
+                gridVectors{iDim} = reshape(gridVectors{iDim}, [], 1);
+            end
+        end
+
+        function validateValueArraySize(values, gridVectors)
+            % Validate that the sample array matches the supplied grid vectors.
+            expectedSize = cellfun(@numel, gridVectors);
+            if numel(expectedSize) == 1
+                if ~(isvector(values) && numel(values) == expectedSize(1))
+                    error('InterpolatingSpline:SizeMismatch', ...
+                        'values must have size matching the lengths of the supplied grid inputs.');
+                end
+                return;
+            end
+
+            actualSize = size(values);
+            if numel(actualSize) < numel(expectedSize)
+                actualSize = [actualSize, ones(1, numel(expectedSize) - numel(actualSize))];
+            end
+
+            if ~isequal(actualSize(1:numel(expectedSize)), expectedSize)
+                error('InterpolatingSpline:SizeMismatch', ...
+                    'values must have size matching the lengths of the supplied grid inputs.');
+            end
         end
     end
-end
-
-function mustBeNonnegativeOrNaNInteger(value)
-% Validate that a value is either NaN or a nonnegative integer.
-if isnan(value)
-    return;
-end
-
-mustBeNonnegative(value);
-mustBeInteger(value);
 end

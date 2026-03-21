@@ -24,7 +24,7 @@ if exponent == 1
     return;
 end
 
-[supportPoints, supportVectors] = TensorSpline.pointsOfSupport(self.tKnot, self.K);
+[supportPoints, supportVectors] = TensorSpline.pointsOfSupport(self.tKnot_, self.K);
 values = self.valueAtPoints(supportPoints);
 values(abs(values) < 2*eps) = 0;
 

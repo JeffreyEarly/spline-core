@@ -9,33 +9,34 @@ mathjax: true
 
 #  InterpolatingSpline
 
-Create an interpolating spline through samples x observed at t.
+Create an interpolating spline on one-dimensional samples or a rectilinear grid.
 
 
 ---
 
 ## Declaration
 ```matlab
- self = InterpolatingSpline(t,x,options)
+ self = InterpolatingSpline(X1,...,Xn,values,options)
 ```
 ## Parameters
-+ `t`  sample locations
-+ `x`  sample values
-+ `options.K`  spline order, used when options.S is not supplied
-+ `options.S`  spline degree, alternative to specifying options.K
++ `X1,...,Xn`  grid vectors, one per dimension
++ `values`  array of sampled values on the grid
++ `options.K`  spline order scalar or vector with one entry per dimension
++ `options.S`  spline degree scalar or vector with one entry per dimension
 
 ## Returns
 + `self`  InterpolatingSpline instance
 
 ## Discussion
 
-  This constructor chooses a terminated knot sequence from the
-  sample locations and solves for coefficients that reproduce
-  the supplied values exactly.
+  Use this constructor when your data already live on a
+  rectilinear grid and should be reproduced exactly by the
+  spline. Supply one grid input per dimension followed by the
+  sampled value array.
  
   ```matlab
-  spline = InterpolatingSpline(t, x, K=4);
-  xq = spline(tQuery);
+  spline = InterpolatingSpline(x, y, F, K=[4 4]);
+  Fq = spline(Xq, Yq);
   ```
  
               

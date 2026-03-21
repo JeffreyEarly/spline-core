@@ -86,12 +86,19 @@ classdef BSplineUnitTests < matlab.unittest.TestCase
 
         function plusRejectsNonScalarNumeric(testCase)
             spline = InterpolatingSpline((0:2)',(0:2)',K=2);
-            testCase.verifyError(@() plus(spline,[1 2]), 'BSpline:plus:UnsupportedOperand')
+            testCase.verifyError(@() plus(spline,[1 2]), 'TensorSpline:plus:UnsupportedOperand')
         end
 
         function mtimesRejectsNonScalarNumeric(testCase)
             spline = InterpolatingSpline((0:2)',(0:2)',K=2);
-            testCase.verifyError(@() mtimes(spline,[1 2]), 'BSpline:mtimes:UnsupportedOperand')
+            testCase.verifyError(@() mtimes(spline,[1 2]), 'TensorSpline:mtimes:UnsupportedOperand')
+        end
+
+        function interpolatingSplineExposesVectorKnotSequenceInOneDimension(testCase)
+            spline = InterpolatingSpline(linspace(0,1,11)', sin(2*pi*linspace(0,1,11)'), K=4);
+
+            testCase.verifyTrue(isnumeric(spline.tKnot))
+            testCase.verifySize(spline.tKnot, [numel(spline.tKnot), 1])
         end
 
         function interpolatingSplineDerivativeMatchesCubic(testCase)
@@ -236,7 +243,7 @@ classdef BSplineUnitTests < matlab.unittest.TestCase
 
         function valueAtPointsRejectsNegativeDerivativeOrder(testCase)
             spline = InterpolatingSpline((0:2)',(0:2)',K=2);
-            testCase.verifyError(@() spline.valueAtPoints((0:2)',-1), 'MATLAB:validators:mustBeNonnegative')
+            testCase.verifyError(@() spline.valueAtPoints((0:2)',-1), 'MATLAB:expectedNonnegative')
         end
 
         function valueAtPointsReturnsZeroAboveSplineDegree(testCase)

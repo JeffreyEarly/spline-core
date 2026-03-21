@@ -82,7 +82,7 @@ construction, evaluation, constrained fitting, and shape constraints.
 
 ## Tensor-product splines
 
-`TensorSpline` and `InterpolatingTensorSpline` extend the same ideas to
+`TensorSpline` and `InterpolatingSpline` extend the same ideas to
 rectilinear grids in multiple dimensions.
 
 ```matlab
@@ -91,7 +91,7 @@ y = linspace(0,2,7)';
 [X,Y] = ndgrid(x,y);
 F = X.^2 .* Y.^3 + 2*X.*Y - 5;
 
-tensorSpline = InterpolatingTensorSpline(x, y, F, K=[4 4]);
+tensorSpline = InterpolatingSpline(x, y, F, K=[4 4]);
 Fq = tensorSpline(X, Y);
 ```
 

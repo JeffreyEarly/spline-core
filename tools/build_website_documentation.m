@@ -25,15 +25,14 @@ end
 websiteRootURL = "spline-core/";
 classFolderName = 'Class documentation';
 websiteFolder = 'classes';
-classes = {'BSpline','InterpolatingSpline','ConstrainedSpline','TensorSpline','InterpolatingTensorSpline','ConstrainedTensorSpline','ShapeConstraint'};
+classes = {'BSpline','InterpolatingSpline','ConstrainedSpline','TensorSpline','ConstrainedTensorSpline','ShapeConstraint'};
+clean_generated_class_docs(buildFolder, websiteFolder, classes);
 classDocumentation = ClassDocumentation.empty(length(classes),0);
 for iName=1:length(classes)
     excludedSuperclasses = {'handle', 'matlab.mixin.Heterogeneous', 'CAAnnotatedClass'};
     excludedMethodNames = string.empty(0,1);
     switch classes{iName}
-        case {'InterpolatingSpline','ConstrainedSpline','ShapeConstraint'}
-            excludedSuperclasses = {'handle'};
-        case {'InterpolatingTensorSpline','ConstrainedTensorSpline'}
+        case {'InterpolatingSpline','ConstrainedSpline','ConstrainedTensorSpline','ShapeConstraint'}
             excludedSuperclasses = {'handle'};
     end
     switch classes{iName}
@@ -52,4 +51,28 @@ for iName=1:length(classes)
 end
 arrayfun(@(a) a.writeToFile(),classDocumentation)
 
+end
+
+function clean_generated_class_docs(buildFolder, websiteFolder, classes)
+classDocsRoot = fullfile(buildFolder, websiteFolder);
+if ~isfolder(classDocsRoot)
+    return;
+end
+
+expectedFolders = lower(string(classes));
+existingEntries = dir(classDocsRoot);
+existingFolders = string({existingEntries([existingEntries.isdir]).name});
+existingFolders = existingFolders(~ismember(existingFolders, [".", ".."]));
+
+orphanedFolders = setdiff(existingFolders, expectedFolders);
+for folderName = orphanedFolders
+    rmdir(fullfile(classDocsRoot, folderName), 's');
+end
+
+for folderName = expectedFolders
+    targetFolder = fullfile(classDocsRoot, folderName);
+    if isfolder(targetFolder)
+        rmdir(targetFolder, 's');
+    end
+end
 end

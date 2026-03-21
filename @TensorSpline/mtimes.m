@@ -25,7 +25,7 @@ if ~isa(f, 'TensorSpline')
 elseif isempty(g)
     f = [];
 elseif isnumeric(g) && isscalar(g)
-    f = TensorSpline(f.K, f.tKnot, f.xi, xMean=g*f.xMean, xStd=g*f.xStd);
+    f = TensorSpline(f.K, f.tKnot_, f.xi, xMean=g*f.xMean, xStd=g*f.xStd);
 else
     error('TensorSpline:mtimes:UnsupportedOperand', ...
         'Only scalar numeric multiplication is supported.');

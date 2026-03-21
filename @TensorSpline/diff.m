@@ -32,7 +32,7 @@ end
 
 xi = self.xi;
 K = self.K;
-tKnot = self.tKnot;
+tKnot = self.tKnot_;
 for iDim = 1:self.numDimensions
     if derivativeOrders(iDim) == 0
         continue;

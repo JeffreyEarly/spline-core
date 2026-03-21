@@ -10,7 +10,7 @@ classdef TensorSplineUnitTests < matlab.unittest.TestCase
             [X,Y] = ndgrid(x,y);
             F = X.^2 .* Y.^3 + 2*X.*Y - 5;
 
-            spline = InterpolatingTensorSpline(x, y, F, K=[4 4]);
+            spline = InterpolatingSpline(x, y, F, K=[4 4]);
 
             testCase.assertThat(spline(X, Y), IsEqualTo(F, 'Within', AbsoluteTolerance(1e-10)))
         end
@@ -25,7 +25,7 @@ classdef TensorSplineUnitTests < matlab.unittest.TestCase
             F = X.^2 .* Y.^3 + 2*X.*Y - 5;
             dFdx = 2*X.*Y.^3 + 2*Y;
 
-            spline = InterpolatingTensorSpline(x, y, F, K=[4 4]);
+            spline = InterpolatingSpline(x, y, F, K=[4 4]);
 
             testCase.assertThat(spline(X, Y, [1 0]), IsEqualTo(dFdx, 'Within', AbsoluteTolerance(1e-9)))
         end
@@ -39,7 +39,7 @@ classdef TensorSplineUnitTests < matlab.unittest.TestCase
             [X,Y] = ndgrid(x,y);
             F = sin(pi*X) + cos(0.5*pi*Y);
 
-            spline = InterpolatingTensorSpline(x, y, F, K=[4 4]);
+            spline = InterpolatingSpline(x, y, F, K=[4 4]);
             interpolant = griddedInterpolant({x,y}, F, 'spline');
 
             xq = linspace(x(1),x(end),21)';
@@ -61,7 +61,7 @@ classdef TensorSplineUnitTests < matlab.unittest.TestCase
             [X,Y] = ndgrid(x,y);
             F = X.^2 .* Y.^3 + 2*X.*Y - 5;
 
-            spline = InterpolatingTensorSpline(x, y, F, K=[4 4]);
+            spline = InterpolatingSpline(x, y, F, K=[4 4]);
             queryPoints = [X(:), Y(:)];
             basisMatrix = TensorSpline.matrix(queryPoints, spline.tKnot, spline.K);
             values = reshape(basisMatrix * spline.xi(:), size(F));
@@ -76,8 +76,8 @@ classdef TensorSplineUnitTests < matlab.unittest.TestCase
             [X,Y] = ndgrid(x,y);
             F = sin(pi*X) .* cos(0.5*pi*Y);
 
-            testCase.verifyError(@() InterpolatingTensorSpline(X, Y, F, K=[4 4]), ...
-                'InterpolatingTensorSpline:InvalidGridInputs')
+            testCase.verifyError(@() InterpolatingSpline(X, Y, F, K=[4 4]), ...
+                'InterpolatingSpline:InvalidGridInputs')
         end
 
         function tensorSplinePreservesQueryArrayShape(testCase)
@@ -89,7 +89,7 @@ classdef TensorSplineUnitTests < matlab.unittest.TestCase
             [X,Y] = ndgrid(x,y);
             F = X.^2 .* Y.^3 + 2*X.*Y - 5;
 
-            spline = InterpolatingTensorSpline(x, y, F, K=[4 4]);
+            spline = InterpolatingSpline(x, y, F, K=[4 4]);
             actual = spline(X, Y);
 
             testCase.verifySize(actual, size(F))
@@ -101,7 +101,7 @@ classdef TensorSplineUnitTests < matlab.unittest.TestCase
             import matlab.unittest.constraints.AbsoluteTolerance
 
             t = linspace(-1,1,11)';
-            spline = InterpolatingTensorSpline(t, t, K=2);
+            spline = InterpolatingSpline(t, t, K=2);
 
             shifted = spline + 1;
 
@@ -113,7 +113,7 @@ classdef TensorSplineUnitTests < matlab.unittest.TestCase
             import matlab.unittest.constraints.AbsoluteTolerance
 
             t = linspace(-1,1,11)';
-            spline = InterpolatingTensorSpline(t, t, K=2);
+            spline = InterpolatingSpline(t, t, K=2);
 
             scaled = -2 * spline;
 
@@ -121,7 +121,7 @@ classdef TensorSplineUnitTests < matlab.unittest.TestCase
         end
 
         function tensorSplineRejectsNonScalarAffineOperands(testCase)
-            spline = InterpolatingTensorSpline((0:2)', (0:2)', K=2);
+            spline = InterpolatingSpline((0:2)', (0:2)', K=2);
 
             testCase.verifyError(@() plus(spline, [1 2]), 'TensorSpline:plus:UnsupportedOperand')
             testCase.verifyError(@() mtimes(spline, [1 2]), 'TensorSpline:mtimes:UnsupportedOperand')
@@ -137,7 +137,7 @@ classdef TensorSplineUnitTests < matlab.unittest.TestCase
             F = X.^2 .* Y.^3 + 2*X.*Y - 5;
             d2Fdxy = 6*X.*Y.^2 + 2;
 
-            spline = InterpolatingTensorSpline(x, y, F, K=[4 4]);
+            spline = InterpolatingSpline(x, y, F, K=[4 4]);
             dspline = diff(spline, [1 1]);
 
             testCase.assertThat(dspline(X, Y), IsEqualTo(d2Fdxy, 'Within', AbsoluteTolerance(1e-9)))
@@ -151,15 +151,15 @@ classdef TensorSplineUnitTests < matlab.unittest.TestCase
             g = @(x) 0.5*x.^2 + x;
             t = linspace(-1,1,11)';
 
-            spline = InterpolatingTensorSpline(t, f(t), K=4);
+            spline = InterpolatingSpline(t, f(t), K=4);
             intspline = cumsum(spline);
 
             testCase.assertThat(intspline(t), IsEqualTo(g(t) - g(t(1)), 'Within', AbsoluteTolerance(10*eps)))
         end
 
         function tensorSplineExposesDegreeVector(testCase)
-            spline1D = InterpolatingTensorSpline(linspace(0,1,5)', linspace(0,1,5)', K=4);
-            spline2D = InterpolatingTensorSpline(linspace(0,1,5)', linspace(-1,1,6)', randn(5,6), K=[3 4]);
+            spline1D = InterpolatingSpline(linspace(0,1,5)', linspace(0,1,5)', K=4);
+            spline2D = InterpolatingSpline(linspace(0,1,5)', linspace(-1,1,6)', randn(5,6), K=[3 4]);
 
             testCase.verifyEqual(spline1D.S, 3)
             testCase.verifyEqual(spline2D.S, [2 3])
@@ -174,15 +174,15 @@ classdef TensorSplineUnitTests < matlab.unittest.TestCase
             [X,Y] = ndgrid(x,y);
             F = X.^2 .* Y.^3 + 2*X.*Y - 5;
 
-            spline = InterpolatingTensorSpline(x, y, F, K=[4 4]);
+            spline = InterpolatingSpline(x, y, F, K=[4 4]);
 
             testCase.assertThat(feval(spline, X, Y), IsEqualTo(spline(X, Y), 'Within', AbsoluteTolerance(1e-10)))
             testCase.assertThat(feval(spline, X, Y, [1 0]), IsEqualTo(spline(X, Y, [1 0]), 'Within', AbsoluteTolerance(1e-10)))
         end
 
         function tensorSplineDomainReturnsNumericLimits(testCase)
-            spline1D = InterpolatingTensorSpline((0:4)', (0:4)', K=2);
-            spline2D = InterpolatingTensorSpline((0:4)', (-2:2)', randn(5,5), K=[2 3]);
+            spline1D = InterpolatingSpline((0:4)', (0:4)', K=2);
+            spline2D = InterpolatingSpline((0:4)', (-2:2)', randn(5,5), K=[2 3]);
 
             testCase.verifyEqual(spline1D.domain, [0 4])
             testCase.verifyEqual(spline2D.domain, [0 4; -2 2])
@@ -194,7 +194,7 @@ classdef TensorSplineUnitTests < matlab.unittest.TestCase
 
             f = @(x) mod(x,2) - 0.5;
             t = linspace(0,10,11)';
-            spline = InterpolatingTensorSpline(t, f(t), K=2);
+            spline = InterpolatingSpline(t, f(t), K=2);
 
             expected = (0:9)' + 0.5;
             actual = roots(spline);
@@ -207,7 +207,7 @@ classdef TensorSplineUnitTests < matlab.unittest.TestCase
             y = linspace(0,1,6)';
             [X,Y] = ndgrid(x,y);
             F = X - Y;
-            spline = InterpolatingTensorSpline(x, y, F, K=[2 2]);
+            spline = InterpolatingSpline(x, y, F, K=[2 2]);
 
             testCase.verifyError(@() roots(spline), 'TensorSpline:roots:UnsupportedDimension')
         end
@@ -215,7 +215,7 @@ classdef TensorSplineUnitTests < matlab.unittest.TestCase
         function tensorSplinePointsOfSupportMatchBasisSize(testCase)
             x = linspace(-1,1,6)';
             y = linspace(0,2,7)';
-            spline = InterpolatingTensorSpline(x, y, x .* y', K=[4 4]);
+            spline = InterpolatingSpline(x, y, x .* y', K=[4 4]);
 
             [supportPoints, supportVectors] = TensorSpline.pointsOfSupport(spline.tKnot, spline.K);
 
@@ -231,7 +231,7 @@ classdef TensorSplineUnitTests < matlab.unittest.TestCase
             y = linspace(0,2,7)';
             [X,Y] = ndgrid(x,y);
             F = X.^2 + Y + 2;
-            spline = InterpolatingTensorSpline(x, y, F, K=[4 4]);
+            spline = InterpolatingSpline(x, y, F, K=[4 4]);
             squaredSpline = spline.^2;
             supportPoints = TensorSpline.pointsOfSupport(spline.tKnot, spline.K);
 
@@ -247,7 +247,7 @@ classdef TensorSplineUnitTests < matlab.unittest.TestCase
             y = linspace(0,2,7)';
             [X,Y] = ndgrid(x,y);
             F = (X + 1).^2 + (Y + 2).^2;
-            spline = InterpolatingTensorSpline(x, y, F, K=[4 4]);
+            spline = InterpolatingSpline(x, y, F, K=[4 4]);
             rootedSpline = sqrt(spline);
             supportPoints = TensorSpline.pointsOfSupport(spline.tKnot, spline.K);
 

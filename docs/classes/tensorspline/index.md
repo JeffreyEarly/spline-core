@@ -54,7 +54,7 @@ F = spline(xq, yq);
   + [`basisSize`](/spline-core/classes/tensorspline/basissize.html) Number of basis functions in each dimension.
   + [`domain`](/spline-core/classes/tensorspline/domain.html) Minimum and maximum values of the spline domain in each dimension.
   + [`numDimensions`](/spline-core/classes/tensorspline/numdimensions.html) Number of tensor dimensions.
-  + [`tKnot`](/spline-core/classes/tensorspline/tknot.html) Knot vectors for each tensor dimension.
+  + [`tKnot`](/spline-core/classes/tensorspline/tknot.html) Knot vectors defining the spline basis.
   + [`xMean`](/spline-core/classes/tensorspline/xmean.html) Mean added back to zero-order evaluations.
   + [`xStd`](/spline-core/classes/tensorspline/xstd.html) Multiplicative scale applied to evaluations.
   + [`xi`](/spline-core/classes/tensorspline/xi.html) Tensor-product spline coefficients reshaped to basisSize.

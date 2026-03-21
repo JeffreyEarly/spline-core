@@ -10,37 +10,35 @@ nav_order: 2
 
 #  InterpolatingSpline
 
-Interpolating spline fit through data values.
+Interpolating spline on one-dimensional samples or rectilinear grids.
 
 
 ---
 
 ## Declaration
 
-<div class="language-matlab highlighter-rouge"><div class="highlight"><pre class="highlight"><code>classdef InterpolatingSpline < BSpline</code></pre></div></div>
+<div class="language-matlab highlighter-rouge"><div class="highlight"><pre class="highlight"><code>classdef InterpolatingSpline < TensorSpline</code></pre></div></div>
 
 ## Overview
  
 Supported construction forms:
-  f = InterpolatingSpline(t,x)
-  f = InterpolatingSpline(t,x,K=K)
-  f = InterpolatingSpline(t,x,S=S)
+  spline = InterpolatingSpline(x1,...,xn,V)
+  spline = InterpolatingSpline(x1,...,xn,V,K=K)
+  spline = InterpolatingSpline(x1,...,xn,V,S=S)
  
-The constructor chooses a terminated knot sequence from the supplied
-sample locations and solves for coefficients that interpolate the
-provided values exactly.
+The grid inputs are vectors, one per dimension.
  
 ## Basic usage
  
-Use `InterpolatingSpline` when you want a spline that passes exactly
-through one-dimensional sample values.
+Use `InterpolatingSpline` when you have values on one-dimensional
+samples or a rectilinear grid and want a spline that matches them
+exactly.
  
 ```matlab
-t = linspace(0,1,12)';
-x = sin(2*pi*t);
-spline = InterpolatingSpline(t, x);
- 
-xq = spline(linspace(0,1,100)');
+[X,Y] = ndgrid(linspace(0,1,8), linspace(-1,1,9));
+F = sin(2*pi*X).*cos(pi*Y);
+spline = InterpolatingSpline(X(:,1), Y(1,:), F);
+Fq = spline(X, Y);
 ```
  
     
@@ -48,9 +46,9 @@ xq = spline(linspace(0,1,100)');
 
 ## Topics
 + Create an interpolating spline
-  + [`InterpolatingSpline`](/spline-core/classes/interpolatingspline/interpolatingspline.html) Create an interpolating spline through samples x observed at t.
-+ Choose spline order
-  + [`splineOrderFromOptions`](/spline-core/classes/interpolatingspline/splineorderfromoptions.html) Resolve spline order from mutually exclusive K and S options.
+  + [`InterpolatingSpline`](/spline-core/classes/interpolatingspline/interpolatingspline.html) Create an interpolating spline on one-dimensional samples or a rectilinear grid.
++ Inspect interpolation grids
+  + [`gridVectors`](/spline-core/classes/interpolatingspline/gridvectors.html) Grid vectors used to define the interpolation lattice.
 
 
 ---

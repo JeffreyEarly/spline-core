@@ -34,14 +34,15 @@ classdef TensorSpline < handle
         %
         % - Topic: Inspect spline properties
         K
-        % Knot vectors for each tensor dimension.
-        %
-        % - Topic: Inspect spline properties
-        tKnot
         % Tensor-product spline coefficients reshaped to basisSize.
         %
         % - Topic: Inspect spline properties
         xi
+    end
+
+    properties (Access = private)
+        % Internal knot vectors for each tensor dimension.
+        tKnot_
     end
 
     properties
@@ -68,6 +69,12 @@ classdef TensorSpline < handle
         %
         % - Topic: Inspect spline properties
         basisSize
+        % Knot vectors defining the spline basis.
+        %
+        % Returns a numeric vector in 1-D and a cell array in higher dimensions.
+        %
+        % - Topic: Inspect spline properties
+        tKnot
         % Minimum and maximum values of the spline domain in each dimension.
         %
         % - Topic: Inspect spline properties
@@ -118,7 +125,7 @@ classdef TensorSpline < handle
             end
 
             self.K = K;
-            self.tKnot = tKnot;
+            self.tKnot_ = tKnot;
             if isscalar(basisSize)
                 self.xi = reshape(xi, basisSize, 1);
             else
@@ -155,7 +162,21 @@ classdef TensorSpline < handle
             % - Declaration: value = get.basisSize(self)
             % - Parameter self: TensorSpline instance
             % - Returns value: row vector of basis sizes
-            value = TensorSpline.basisSizeFromKnotCell(self.tKnot, self.K);
+            value = TensorSpline.basisSizeFromKnotCell(self.tKnot_, self.K);
+        end
+
+        function value = get.tKnot(self)
+            % Return the knot vectors defining the tensor-product basis.
+            %
+            % - Topic: Inspect spline properties
+            % - Declaration: value = get.tKnot(self)
+            % - Parameter self: TensorSpline instance
+            % - Returns value: knot vector in 1-D, cell array otherwise
+            if self.numDimensions == 1
+                value = self.tKnot_{1};
+            else
+                value = self.tKnot_;
+            end
         end
 
         function value = get.domain(self)
@@ -165,7 +186,7 @@ classdef TensorSpline < handle
             % - Declaration: value = get.domain(self)
             % - Parameter self: TensorSpline instance
             % - Returns value: numDimensions-by-2 array of [min max] domain limits
-            value = cell2mat(cellfun(@(tk) [tk(1), tk(end)], self.tKnot, 'UniformOutput', false)');
+            value = cell2mat(cellfun(@(tk) [tk(1), tk(end)], self.tKnot_, 'UniformOutput', false)');
         end
 
         function varargout = subsref(self, index)
@@ -223,7 +244,7 @@ classdef TensorSpline < handle
                 return;
             end
 
-            basisMatrix = TensorSpline.matrix(pointMatrix, self.tKnot, self.K, D=derivativeOrders);
+            basisMatrix = TensorSpline.matrix(pointMatrix, self.tKnot_, self.K, D=derivativeOrders);
             values = basisMatrix * self.xi(:);
 
             if ~isempty(self.xStd)

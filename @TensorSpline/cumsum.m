@@ -25,11 +25,11 @@ if dim > self.numDimensions
 end
 
 [xi, tKnotDim, Kdim] = TensorSpline.integrateAlongDimension( ...
-    self.xi, self.tKnot{dim}, self.K(dim), dim, self.xMean, self.xStd);
+    self.xi, self.tKnot_{dim}, self.K(dim), dim, self.xMean, self.xStd);
 
 K = self.K;
 K(dim) = Kdim;
-tKnot = self.tKnot;
+tKnot = self.tKnot_;
 tKnot{dim} = tKnotDim;
 
 intspline = TensorSpline(K, tKnot, xi);

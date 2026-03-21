@@ -1,7 +1,7 @@
 ---
 layout: default
 title: gridVectors
-parent: InterpolatingTensorSpline
+parent: InterpolatingSpline
 grand_parent: Classes
 nav_order: 2
 mathjax: true
