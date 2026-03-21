@@ -211,5 +211,48 @@ classdef TensorSplineUnitTests < matlab.unittest.TestCase
 
             testCase.verifyError(@() roots(spline), 'TensorSpline:roots:UnsupportedDimension')
         end
+
+        function tensorSplinePointsOfSupportMatchBasisSize(testCase)
+            x = linspace(-1,1,6)';
+            y = linspace(0,2,7)';
+            spline = InterpolatingTensorSpline(x, y, x .* y', K=[4 4]);
+
+            [supportPoints, supportVectors] = TensorSpline.pointsOfSupport(spline.tKnot, spline.K);
+
+            testCase.verifySize(supportPoints, [prod(spline.basisSize), spline.numDimensions])
+            testCase.verifyEqual(cellfun(@numel, supportVectors), spline.basisSize)
+        end
+
+        function tensorSplinePowerMatchesSquaredValuesOnSupport(testCase)
+            import matlab.unittest.constraints.IsEqualTo
+            import matlab.unittest.constraints.AbsoluteTolerance
+
+            x = linspace(-1,1,6)';
+            y = linspace(0,2,7)';
+            [X,Y] = ndgrid(x,y);
+            F = X.^2 + Y + 2;
+            spline = InterpolatingTensorSpline(x, y, F, K=[4 4]);
+            squaredSpline = spline.^2;
+            supportPoints = TensorSpline.pointsOfSupport(spline.tKnot, spline.K);
+
+            testCase.assertThat(squaredSpline(supportPoints), ...
+                IsEqualTo(spline(supportPoints).^2, 'Within', AbsoluteTolerance(1e-10)))
+        end
+
+        function tensorSplineSqrtMatchesSquareRootValuesOnSupport(testCase)
+            import matlab.unittest.constraints.IsEqualTo
+            import matlab.unittest.constraints.AbsoluteTolerance
+
+            x = linspace(0,1,6)';
+            y = linspace(0,2,7)';
+            [X,Y] = ndgrid(x,y);
+            F = (X + 1).^2 + (Y + 2).^2;
+            spline = InterpolatingTensorSpline(x, y, F, K=[4 4]);
+            rootedSpline = sqrt(spline);
+            supportPoints = TensorSpline.pointsOfSupport(spline.tKnot, spline.K);
+
+            testCase.assertThat(rootedSpline(supportPoints), ...
+                IsEqualTo(sqrt(spline(supportPoints)), 'Within', AbsoluteTolerance(1e-10)))
+        end
     end
 end

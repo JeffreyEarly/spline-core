@@ -3,7 +3,7 @@ layout: default
 title: subsref
 parent: TensorSpline
 grand_parent: Classes
-nav_order: 15
+nav_order: 18
 mathjax: true
 ---
 
