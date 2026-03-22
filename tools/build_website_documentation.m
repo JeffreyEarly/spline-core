@@ -2,7 +2,7 @@ function build_website_documentation(options)
 arguments
     options.rootDir = ".."
 end
-rootDir = char(options.rootDir);
+rootDir = char(java.io.File(char(options.rootDir)).getCanonicalPath());
 buildFolder = fullfile(rootDir,"docs");
 sourceFolder = fullfile(rootDir,"Documentation","WebsiteDocumentation");
 
