@@ -25,3 +25,5 @@ These examples are written as plain MATLAB scripts and are rendered into website
   Enforce positivity and monotonicity over an entire domain with GlobalConstraint objects.
 - [Mask-Constrained Tensor Fits](./mask-constrained-fit)
   Impose value and derivative constraints over an entire masked region using PointConstraint helper methods.
+- [Scattered Data Fitting in 2D](./scattered-data-fitting-2d)
+  Fit a tensor-product spline to scattered two-dimensional observations and use dataDOF to control knot density in each coordinate direction.

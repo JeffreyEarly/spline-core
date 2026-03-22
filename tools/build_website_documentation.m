@@ -40,6 +40,7 @@ tutorialSources = {
     fullfile(rootDir, "Examples", "Tutorials", "LocalPointConstraints1D.m")
     fullfile(rootDir, "Examples", "Tutorials", "GlobalShapeConstraints.m")
     fullfile(rootDir, "Examples", "Tutorials", "MaskConstrainedFit.m")
+    fullfile(rootDir, "Examples", "Tutorials", "ScatteredDataFitting2D.m")
 };
 tutorialDocumentation = TutorialDocumentation.documentationFromSourceFiles(tutorialSources, ...
     buildFolder=buildFolder, ...
