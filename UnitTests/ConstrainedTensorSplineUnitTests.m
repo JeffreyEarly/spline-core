@@ -142,6 +142,21 @@ classdef ConstrainedTensorSplineUnitTests < matlab.unittest.TestCase
             testCase.verifyLessThan(max(abs(spline(points(:,1), points(:,2)))), 1e-10)
         end
 
+        function maskPointConstraintsCanFlattenARegion(testCase)
+            x = linspace(-1,1,9)';
+            y = linspace(-1,1,11)';
+            [X,Y] = ndgrid(x,y);
+            F = exp(-2*(X.^2 + Y.^2));
+            mask = (X.^2 + Y.^2) <= 0.2^2;
+
+            spline = ConstrainedTensorSpline({X,Y}, F, ...
+                distribution=NormalDistribution(1), ...
+                pointConstraints=PointConstraint.equalOnMask({x,y}, mask, D=[0 0], Value=0));
+
+            maskedPoints = [X(mask), Y(mask)];
+            testCase.verifyLessThan(max(abs(spline(maskedPoints(:,1), maskedPoints(:,2)))), 1e-8)
+        end
+
         function positiveGlobalConstraintKeepsFitNonnegative(testCase)
             t = linspace(-1,1,21)';
             x = t.^2 - 0.35;
@@ -177,6 +192,18 @@ classdef ConstrainedTensorSplineUnitTests < matlab.unittest.TestCase
             Fq = spline(Xq, Yq);
 
             testCase.verifyGreaterThanOrEqual(min(diff(Fq, 1, 2), [], 'all'), -1e-10)
+        end
+
+        function monotonicGlobalConstraintWorksInOneDimension(testCase)
+            t = linspace(0,1,31)';
+            x = 0.2 + 0.8*(1 - exp(-4*t)) + 0.03*sin(8*pi*t);
+            tq = linspace(min(t), max(t), 151)';
+
+            spline = ConstrainedTensorSpline(t, x, ...
+                distribution=NormalDistribution(1), ...
+                globalConstraints=GlobalConstraint.monotonicIncreasing());
+
+            testCase.verifyGreaterThanOrEqual(min(diff(spline(tq))), -1e-10)
         end
 
         function smoothingMatrixRejectsConstrainedFits(testCase)

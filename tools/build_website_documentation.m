@@ -5,6 +5,13 @@ end
 rootDir = char(java.io.File(char(options.rootDir)).getCanonicalPath());
 buildFolder = fullfile(rootDir,"docs");
 sourceFolder = fullfile(rootDir,"Documentation","WebsiteDocumentation");
+previousBuildFolder = "";
+
+if isfolder(fullfile(buildFolder, "tutorials"))
+    previousBuildFolder = tempname();
+    mkdir(previousBuildFolder);
+    copyfile(fullfile(buildFolder, "tutorials"), fullfile(previousBuildFolder, "tutorials"));
+end
 
 if isfolder(buildFolder)
     rmdir(buildFolder, "s");
@@ -28,12 +35,16 @@ end
 
 tutorialSources = {
     fullfile(rootDir, "Examples", "Tutorials", "InterpolatingSplineBasics.m")
+    fullfile(rootDir, "Examples", "Tutorials", "RobustSplineFitting.m")
+    fullfile(rootDir, "Examples", "Tutorials", "GlobalShapeConstraints.m")
+    fullfile(rootDir, "Examples", "Tutorials", "MaskConstrainedFit.m")
 };
 tutorialDocumentation = TutorialDocumentation.documentationFromSourceFiles(tutorialSources, ...
     buildFolder=buildFolder, ...
     websiteRootURL="spline-core/", ...
     websiteFolder="tutorials", ...
     sourceRoot=rootDir, ...
+    previousBuildFolder=previousBuildFolder, ...
     executionPaths=string(rootDir));
 TutorialDocumentation.writeMarkdownIndex(tutorialDocumentation, ...
     buildFolder=buildFolder, ...
@@ -41,6 +52,9 @@ TutorialDocumentation.writeMarkdownIndex(tutorialDocumentation, ...
     nav_order=4);
 arrayfun(@(a) a.writeToFile(), tutorialDocumentation)
 clear tutorialDocumentation
+if previousBuildFolder ~= "" && isfolder(previousBuildFolder)
+    rmdir(previousBuildFolder, "s");
+end
 
 % Running tutorials instantiates classes like InterpolatingSpline. MATLAB can
 % then return stripped method/property comment metadata until the class cache

@@ -438,7 +438,11 @@ classdef ConstrainedTensorSpline < TensorSpline
 
         function A = monotonicDifferenceMatrix(basisSize, dim, direction)
             % Build coefficient-difference inequalities along one dimension.
+            basisSize = reshape(basisSize, 1, []);
             numCoefficients = prod(basisSize);
+            if isscalar(basisSize)
+                basisSize = [basisSize, 1];
+            end
             coefficientGrid = reshape(1:numCoefficients, basisSize);
 
             lowerSubscripts = repmat({':'}, 1, numel(basisSize));
@@ -545,7 +549,7 @@ classdef ConstrainedTensorSpline < TensorSpline
             end
 
             if reciprocalCondition < eps(class(full(A)))
-                x = pinv(A) * b;
+                x = pinv(full(A)) * b;
             else
                 x = A\b;
             end

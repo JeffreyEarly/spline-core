@@ -14,3 +14,9 @@ These examples are written as plain MATLAB scripts and are rendered into website
 
 - [Interpolating Spline Basics](./interpolating-spline-basics)
   Construct and evaluate one-dimensional and tensor-product interpolating splines.
+- [Robust Fitting of Noisy Data](./robust-spline-fitting)
+  Compare ordinary least squares and Student-t IRLS when fitting a spline to noisy data with outliers.
+- [Global Shape Constraints](./global-shape-constraints)
+  Enforce positivity and monotonicity over an entire domain with GlobalConstraint objects.
+- [Mask-Constrained Tensor Fits](./mask-constrained-fit)
+  Impose value and derivative constraints over an entire masked region using PointConstraint helper methods.
