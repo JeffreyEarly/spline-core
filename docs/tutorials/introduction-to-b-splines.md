@@ -18,9 +18,9 @@ This tutorial reproduces the two introductory spline figures from the
 interpolation paper that motivated this package:
 [Interpolation with tension](https://journals.ametsoc.org/view/journals/atot/37/3/JTECH-D-19-0087.1.xml).
 
-We start with seven exact samples $(t_i, x_i)$ and build interpolants of
-order $K = 1, 2, 3, 4$. In this package the degree is
-$S = K - 1$, so these correspond to piecewise constant, piecewise
+We start with seven exact samples $$(t_i, x_i)$$ and build interpolants of
+order $$K = 1, 2, 3, 4$$. In this package the degree is
+$$S = K - 1$$, so these correspond to piecewise constant, piecewise
 linear, quadratic, and cubic interpolants.
 
 The constructor
@@ -95,14 +95,16 @@ end
 ## Interpret the first figure
 
 The top row is nearest-neighbor interpolation. It is piecewise constant,
-so only the value itself is nonzero. For $K = 2$, the spline becomes
+so only the value itself is nonzero. For $$K = 2$$, the spline becomes
 piecewise linear and its first derivative is piecewise constant. Higher
 orders add one more level of continuity and one more nonzero derivative.
 
 In other words, the order controls both the local polynomial degree and
 how smoothly adjacent pieces connect:
 
-$$S = K - 1$$
+$$
+S = K - 1
+$$
 
 The knot sequence changes with $K$ because the package uses the canonical
 interpolating construction for each order. That keeps the number of basis
@@ -145,17 +147,21 @@ maxDifference
 The interpolants above are linear combinations of B-spline basis
 functions. A first-order B-spline is the rectangle function
 
-$$X_m^1(t) =
+$$
+X_m^1(t) =
 \begin{cases}
 1, & \tau_m \le t < \tau_{m+1}, \\
 0, & \text{otherwise},
-\end{cases}$$
+\end{cases}
+$$
 
 and higher orders are generated recursively by the Cox-de Boor formula
 
-$$X_m^K(t) =
+$$
+X_m^K(t) =
 \frac{t - \tau_m}{\tau_{m+K-1} - \tau_m} X_m^{K-1}(t) +
-\frac{\tau_{m+K} - t}{\tau_{m+K} - \tau_{m+1}} X_{m+1}^{K-1}(t).$$
+\frac{\tau_{m+K} - t}{\tau_{m+K} - \tau_{m+1}} X_{m+1}^{K-1}(t).
+$$
 
 To visualize the basis directly, we keep one irregular knot sequence
 fixed and activate a single coefficient in a `BSpline` object. This is
@@ -227,9 +233,11 @@ The first-order basis function is compactly supported on one knot
 interval. Each increase in order extends the support across one more knot
 interval and makes the basis smoother. That is the key reason B-splines
 are useful: they are local, but they still build smooth global curves
-when combined through a coefficient vector $\xi$:
+when combined through a coefficient vector $$\xi$$:
 
-$$x(t) = \sum_m X_m^K(t)\,\xi^m.$$
+$$
+x(t) = \sum_m X_m^K(t)\,\xi^m.
+$$
 
 The interpolation problem is therefore reduced to choosing knot
 locations, assembling the basis matrix, and solving for the coefficients
