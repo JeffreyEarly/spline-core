@@ -90,5 +90,17 @@ classdef PointConstraintUnitTests < matlab.unittest.TestCase
             testCase.verifyError(@() PointConstraint.equalOnMask({x,y}, mask, D=[0 0], Value=0), ...
                 'PointConstraint:InvalidMaskSize')
         end
+
+        function pointAndGlobalConstraintsCanFormMixedArray(testCase)
+            constraints = [
+                PointConstraint.equal((0:2)', D=1, Value=0)
+                GlobalConstraint.positive()
+            ];
+
+            testCase.verifyClass(constraints, 'SplineConstraint')
+            testCase.verifyEqual(numel(constraints), 2)
+            testCase.verifyTrue(isa(constraints(1), 'PointConstraint'))
+            testCase.verifyTrue(isa(constraints(2), 'GlobalConstraint'))
+        end
     end
 end

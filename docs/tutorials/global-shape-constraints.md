@@ -26,11 +26,9 @@ xTrue = 0.15 + 0.85*(1 - exp(-4*t));
 xObs = xTrue + 0.05*randn(size(t));
 xObs([8 18 31]) = xObs([8 18 31]) - [0.09; 0.12; 0.07];
 
-tKnot = linspace(min(t), max(t), 12)';
-
-freeFit = ConstrainedTensorSpline(t, xObs, K=4, tKnot={tKnot});
-shapeConstrainedFit = ConstrainedTensorSpline(t, xObs, K=4, tKnot={tKnot}, ...
-    globalConstraints=[ ...
+freeFit = ConstrainedTensorSpline(t, xObs, K=4, dataDOF=4);
+shapeConstrainedFit = ConstrainedTensorSpline(t, xObs, K=4, dataDOF=4, ...
+    constraints=[ ...
         GlobalConstraint.positive()
         GlobalConstraint.monotonicIncreasing()]);
 

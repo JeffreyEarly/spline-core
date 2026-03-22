@@ -1,19 +1,21 @@
 ---
 layout: default
-title: x
+title: X
 parent: ConstrainedTensorSpline
 grand_parent: Classes
-nav_order: 15
+nav_order: 6
 mathjax: true
 ---
 
-#  x
+#  X
 
-Observation values as an N-by-1 vector.
+Design matrix for the observation locations.
+
+> Developer documentation: this item describes internal implementation details.
 
 
 ---
 
 ## Discussion
 
-  
+    

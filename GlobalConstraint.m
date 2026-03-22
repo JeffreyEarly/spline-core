@@ -1,4 +1,4 @@
-classdef GlobalConstraint
+classdef GlobalConstraint < SplineConstraint
     % Specify a global shape constraint for a constrained spline fit.
     %
     % Use `GlobalConstraint` to describe semantic whole-domain constraints

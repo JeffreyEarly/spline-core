@@ -72,20 +72,75 @@ classdef ConstrainedTensorSplineUnitTests < matlab.unittest.TestCase
             testCase.assertThat(spline(X, Y), IsEqualTo(F, 'Within', AbsoluteTolerance(10*eps)))
         end
 
-        function oneDimensionalAutomaticKnotsMatchPolyfit(testCase)
+        function oneDimensionalMinimalKnotFitMatchesPolyfit(testCase)
             import matlab.unittest.constraints.IsEqualTo
             import matlab.unittest.constraints.AbsoluteTolerance
 
             t = linspace(-2,2,11)';
             x = 1 - 0.5*t + 0.25*t.^2 - 0.1*t.^3 + 0.05*sin(2*t);
             tq = linspace(min(t), max(t), 41)';
+            tKnot = [repmat(t(1), 4, 1); repmat(t(end), 4, 1)];
 
-            spline = ConstrainedTensorSpline(t, x);
+            spline = ConstrainedTensorSpline(t, x, K=4, tKnot=tKnot);
 
             p = polyfit(t, x, 3);
             xFit = polyval(p, tq);
 
             testCase.assertThat(spline(tq), IsEqualTo(xFit, 'Within', AbsoluteTolerance(1e-10)))
+        end
+
+        function oneDimensionalAutomaticKnotsUseBSplineHelperWhenPossible(testCase)
+            t = linspace(-2,2,11)';
+            x = sin(t);
+
+            spline = ConstrainedTensorSpline(t, x, K=4);
+            expectedTKnot = BSpline.knotPointsForDataPoints(t, K=4);
+
+            testCase.verifyEqual(spline.tKnot, expectedTKnot)
+        end
+
+        function oneDimensionalConstructorAcceptsNumericTKnot(testCase)
+            t = linspace(-1,1,13)';
+            x = exp(t);
+            tKnot = BSpline.knotPointsForDataPoints(t, K=4, dataDOF=2);
+
+            spline = ConstrainedTensorSpline(t, x, K=4, tKnot=tKnot);
+
+            testCase.verifyEqual(spline.tKnot, tKnot)
+        end
+
+        function dataDOFControlsAutomaticKnotSelection(testCase)
+            t = linspace(-2,2,21)';
+            x = sin(2*t);
+
+            spline = ConstrainedTensorSpline(t, x, K=4, dataDOF=3);
+            expectedTKnot = BSpline.knotPointsForDataPoints(t, K=4, dataDOF=3);
+
+            testCase.verifyEqual(spline.tKnot, expectedTKnot)
+        end
+
+        function splineDOFControlsAutomaticKnotSelection(testCase)
+            t = linspace(-2,2,21)';
+            x = cos(2*t);
+
+            spline = ConstrainedTensorSpline(t, x, K=4, splineDOF=6);
+            expectedTKnot = BSpline.knotPointsForDataPoints(t, K=4, splineDOF=6);
+
+            testCase.verifyEqual(spline.tKnot, expectedTKnot)
+        end
+
+        function terminatedKnotPointsTerminatesNumericInput(testCase)
+            tKnot = [0; 0; 0.4; 1; 1];
+            terminated = ConstrainedTensorSpline.terminatedKnotPoints(tKnot, 4);
+
+            testCase.verifyEqual(terminated, [0; 0; 0; 0; 0.4; 1; 1; 1; 1])
+        end
+
+        function minimumConstraintPointsMatchesExpectedOneDimensionalLocations(testCase)
+            tKnot = [0; 0; 0; 0; 1; 2; 3; 3; 3; 3];
+            tc = ConstrainedTensorSpline.minimumConstraintPoints(tKnot, 4, 0);
+
+            testCase.verifyEqual(tc, [0; 0.5; 1; 2; 3; 2.5])
         end
 
         function twoDimensionalAutomaticKnotsMatchPolynomialSurface(testCase)
@@ -113,9 +168,23 @@ classdef ConstrainedTensorSplineUnitTests < matlab.unittest.TestCase
 
             spline = ConstrainedTensorSpline(t, x, ...
                 distribution=NormalDistribution(1), ...
-                pointConstraints=PointConstraint.equal(0, D=1, Value=0));
+                constraints=PointConstraint.equal(0, D=1, Value=0));
 
             testCase.verifyLessThan(abs(spline(0, 1)), 1e-10)
+        end
+
+        function mixedConstraintArrayIsAccepted(testCase)
+            t = linspace(-1,1,21)';
+            x = t.^2 - 0.2;
+            constraints = [
+                PointConstraint.equal(0, D=1, Value=0)
+                GlobalConstraint.positive()
+            ];
+
+            spline = ConstrainedTensorSpline(t, x, constraints=constraints);
+
+            testCase.verifyLessThan(abs(spline(0,1)), 1e-10)
+            testCase.verifyGreaterThanOrEqual(min(spline(linspace(-1,1,101)')), -1e-10)
         end
 
         function pointConstraintsEnforceValuesAtManyTensorPoints(testCase)
@@ -137,7 +206,7 @@ classdef ConstrainedTensorSplineUnitTests < matlab.unittest.TestCase
                 K=[4 4], ...
                 tKnot=tKnot, ...
                 distribution=NormalDistribution(1), ...
-                pointConstraints=constraint);
+                constraints=constraint);
 
             testCase.verifyLessThan(max(abs(spline(points(:,1), points(:,2)))), 1e-10)
         end
@@ -151,7 +220,7 @@ classdef ConstrainedTensorSplineUnitTests < matlab.unittest.TestCase
 
             spline = ConstrainedTensorSpline({X,Y}, F, ...
                 distribution=NormalDistribution(1), ...
-                pointConstraints=PointConstraint.equalOnMask({x,y}, mask, D=[0 0], Value=0));
+                constraints=PointConstraint.equalOnMask({x,y}, mask, D=[0 0], Value=0));
 
             maskedPoints = [X(mask), Y(mask)];
             testCase.verifyLessThan(max(abs(spline(maskedPoints(:,1), maskedPoints(:,2)))), 1e-8)
@@ -164,7 +233,7 @@ classdef ConstrainedTensorSplineUnitTests < matlab.unittest.TestCase
 
             spline = ConstrainedTensorSpline(t, x, ...
                 distribution=NormalDistribution(1), ...
-                globalConstraints=GlobalConstraint.positive());
+                constraints=GlobalConstraint.positive());
 
             testCase.verifyGreaterThanOrEqual(min(spline(tq)), -1e-10)
         end
@@ -184,7 +253,7 @@ classdef ConstrainedTensorSplineUnitTests < matlab.unittest.TestCase
                 K=[4 4], ...
                 tKnot=tKnot, ...
                 distribution=NormalDistribution(1), ...
-                globalConstraints=GlobalConstraint.monotonicIncreasing(Dimension=2));
+                constraints=GlobalConstraint.monotonicIncreasing(Dimension=2));
 
             xq = linspace(min(x), max(x), 13)';
             yq = linspace(min(y), max(y), 19)';
@@ -201,7 +270,7 @@ classdef ConstrainedTensorSplineUnitTests < matlab.unittest.TestCase
 
             spline = ConstrainedTensorSpline(t, x, ...
                 distribution=NormalDistribution(1), ...
-                globalConstraints=GlobalConstraint.monotonicIncreasing());
+                constraints=GlobalConstraint.monotonicIncreasing());
 
             testCase.verifyGreaterThanOrEqual(min(diff(spline(tq))), -1e-10)
         end
@@ -212,7 +281,7 @@ classdef ConstrainedTensorSplineUnitTests < matlab.unittest.TestCase
 
             spline = ConstrainedTensorSpline(t, x, ...
                 distribution=NormalDistribution(1), ...
-                globalConstraints=GlobalConstraint.positive());
+                constraints=GlobalConstraint.positive());
 
             testCase.verifyError(@() spline.smoothingMatrix(), ...
                 'ConstrainedTensorSpline:UnavailableSmoothingMatrix')

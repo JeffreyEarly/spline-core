@@ -31,24 +31,28 @@ Use `ConstrainedTensorSpline` when you want to fit a tensor-product
 spline to noisy multivariate data.
  
 ```matlab
-spline = ConstrainedTensorSpline(X, x);
-xFit = spline(X);
+spline = ConstrainedTensorSpline(points, values);
+valuesFit = spline(points);
 ```
  
-      
+          
 
 
 ## Topics
 + Create a constrained tensor spline
   + [`ConstrainedTensorSpline`](/spline-core/classes/constrainedtensorspline/constrainedtensorspline.html) Create a tensor-product spline fit to noisy observations.
 + Inspect fit results
-  + [`Xobs`](/spline-core/classes/constrainedtensorspline/xobs.html) Observation locations as an N-by-D point matrix.
   + [`distribution`](/spline-core/classes/constrainedtensorspline/distribution.html) Error model used while fitting the tensor spline.
   + [`globalConstraints`](/spline-core/classes/constrainedtensorspline/globalconstraints.html) Global shape constraints used during fitting.
   + [`pointConstraints`](/spline-core/classes/constrainedtensorspline/pointconstraints.html) Local point constraints used during fitting.
-  + [`x`](/spline-core/classes/constrainedtensorspline/x.html) Observation values as an N-by-1 vector.
+  + [`points`](/spline-core/classes/constrainedtensorspline/points.html) Observation locations as an N-by-D point matrix.
+  + [`values`](/spline-core/classes/constrainedtensorspline/values.html) Observation values as an N-by-1 vector.
 + Analyze the fit
   + [`smoothingMatrix`](/spline-core/classes/constrainedtensorspline/smoothingmatrix.html) Return the smoothing matrix that maps observations to fitted values.
++ Choose constraint locations
+  + [`minimumConstraintPoints`](/spline-core/classes/constrainedtensorspline/minimumconstraintpoints.html) Return a minimal set of one-dimensional locations for universal derivative constraints.
++ Prepare knot sequences
+  + [`terminatedKnotPoints`](/spline-core/classes/constrainedtensorspline/terminatedknotpoints.html) Ensure each knot vector has K repeated knots at its boundaries.
 
 
 ## Developer Topics
@@ -58,10 +62,11 @@ These items document internal implementation details and are not part of the pri
   + [`Aineq`](/spline-core/classes/constrainedtensorspline/aineq.html) Linear inequality constraints applied to the coefficient solve.
   + [`CmInv`](/spline-core/classes/constrainedtensorspline/cminv.html) Inverse coefficient covariance or normal-equation system matrix.
   + [`W`](/spline-core/classes/constrainedtensorspline/w.html) Weight matrix or weights used by the fit.
-  + [`X`](/spline-core/classes/constrainedtensorspline/x_.html) Design matrix for the observation locations.
+  + [`X`](/spline-core/classes/constrainedtensorspline/x.html) Design matrix for the observation locations.
   + [`beq`](/spline-core/classes/constrainedtensorspline/beq.html) Right-hand side for equality constraints.
   + [`bineq`](/spline-core/classes/constrainedtensorspline/bineq.html) Right-hand side for inequality constraints.
 + Methodology (Static methods)
+  + [`constraintArguments`](/spline-core/classes/constrainedtensorspline/constraintarguments.html) Normalize mixed constraint inputs into constructor arguments.
   + [`tensorModelSolution`](/spline-core/classes/constrainedtensorspline/tensormodelsolution.html) Solve the tensor noisy-data model with iteratively reweighted least squares.
 
 

@@ -16,16 +16,18 @@ Create a tensor-product spline fit to noisy observations.
 
 ## Declaration
 ```matlab
- self = ConstrainedTensorSpline(X,x,options)
+ self = ConstrainedTensorSpline(points,values,options)
 ```
 ## Parameters
-+ `X`  observation locations as a point matrix or cell array of matching grids
-+ `x`  observation values
++ `points`  observation locations as a point matrix or cell array of matching grids
++ `values`  observation values
 + `options.K`  optional spline order scalar or vector with one entry per dimension
-+ `options.tKnot`  optional cell array of knot vectors
++ `options.S`  optional spline degree scalar or vector with one entry per dimension
++ `options.tKnot`  optional knot vector in 1-D or cell array of knot vectors
++ `options.dataDOF`  optional stride used to subsample sorted coordinates before knot placement
++ `options.splineDOF`  optional target number of splines per dimension
 + `options.distribution`  optional error model object for the fit
-+ `options.pointConstraints`  optional PointConstraint array
-+ `options.globalConstraints`  optional GlobalConstraint array
++ `options.constraints`  optional mixed SplineConstraint array
 
 ## Returns
 + `self`  ConstrainedTensorSpline instance
@@ -36,9 +38,12 @@ Create a tensor-product spline fit to noisy observations.
   array of matching grids when fitting noisy tensor-product
   data.
  
+  In one dimension, `K=N` together with `splineDOF=N` gives the
+  same least-squares polynomial fit as `polyfit(t,x,N-1)`.
+ 
   ```matlab
-  spline = ConstrainedTensorSpline(X, x, K=[4 4]);
-  xFit = spline(X);
+  spline = ConstrainedTensorSpline(points, values, K=[4 4]);
+  valuesFit = spline(points);
   ```
  
-                    
+                        

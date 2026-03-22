@@ -3,7 +3,7 @@ layout: default
 title: smoothingMatrix
 parent: ConstrainedTensorSpline
 grand_parent: Classes
-nav_order: 13
+nav_order: 15
 mathjax: true
 ---
 
@@ -31,7 +31,7 @@ Return the smoothing matrix that maps observations to fitted values.
  
   ```matlab
   S = spline.smoothingMatrix();
-  xFit = S * spline.x;
+  valuesFit = S * spline.values;
   ```
  
         

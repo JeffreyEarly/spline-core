@@ -21,7 +21,7 @@ Raise spline values to a real scalar power by refitting support values.
 ## Parameters
 + `spline`  BSpline instance
 + `exponent`  scalar exponent
-+ `constraints`  optional constraint specification for the refit
++ `constraints`  optional SplineConstraint array for the refit
 
 ## Returns
 + `poweredSpline`  BSpline approximating spline.^exponent

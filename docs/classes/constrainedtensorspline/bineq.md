@@ -3,7 +3,7 @@ layout: default
 title: bineq
 parent: ConstrainedTensorSpline
 grand_parent: Classes
-nav_order: 9
+nav_order: 8
 mathjax: true
 ---
 

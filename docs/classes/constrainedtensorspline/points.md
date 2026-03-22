@@ -1,13 +1,13 @@
 ---
 layout: default
-title: Xobs
+title: points
 parent: ConstrainedTensorSpline
 grand_parent: Classes
-nav_order: 7
+nav_order: 14
 mathjax: true
 ---
 
-#  Xobs
+#  points
 
 Observation locations as an N-by-D point matrix.
 

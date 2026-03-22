@@ -64,21 +64,27 @@ legend("InterpolatingSpline","Samples")
 
 ## Constrained fits
 
-`ConstrainedSpline` extends `BSpline` to fit noisy data with local derivative
-constraints and optional global shape constraints.
+`ConstrainedTensorSpline` extends the same idea to noisy fitting. In one
+dimension it is intended to feel like the fitting counterpart to
+`InterpolatingSpline`: you can pass a sample vector directly, let the class
+choose knots from the data, and then add local or global constraints when
+needed.
 
 ```matlab
 t = linspace(0,1,50)';
 x = exp(t) + 0.05*randn(size(t));
-K = 4;
-tKnot = BSpline.knotPointsForDataPoints(t,K=K,dataDOF=2);
-constraints = struct("global",ShapeConstraint.monotonicIncreasing);
-
-fit = ConstrainedSpline(t,x,K,tKnot,[],constraints);
+fit = ConstrainedTensorSpline(t, x, ...
+    K=4, ...
+    dataDOF=2, ...
+    constraints=GlobalConstraint.monotonicIncreasing());
 ```
 
 The class documentation provides the full method-level reference for basis
 construction, evaluation, constrained fitting, and shape constraints.
+
+If you want `ConstrainedTensorSpline` to reduce to the same least-squares
+polynomial fit as `polyfit(t,x,N-1)`, use `K=N` and `splineDOF=N`. For
+example, `K=4, splineDOF=4` gives the cubic least-squares fit.
 
 ## Tensor-product splines
 
@@ -103,8 +109,8 @@ dimension.
 
 `ConstrainedTensorSpline` fits a tensor-product spline to noisy observations.
 With the current default settings it chooses a cubic spline in each
-dimension, uses the minimal end-terminated knot vectors, and assumes unit
-Gaussian errors.
+dimension, chooses knot vectors from the observed coordinate values, and
+assumes unit Gaussian errors.
 
 ```matlab
 x = linspace(-1,1,6)';
@@ -133,5 +139,5 @@ fit = ConstrainedTensorSpline({X,Y}, Fobs, ...
     distribution=StudentTDistribution(sigma=0.05,nu=3));
 ```
 
-At this stage `ConstrainedTensorSpline` is focused on noisy-data fitting and
-IRLS-based weighting. Constraint handling has not been added yet.
+Use the `constraints` option to pass any mix of `PointConstraint` and
+`GlobalConstraint` objects.

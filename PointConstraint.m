@@ -1,4 +1,4 @@
-classdef PointConstraint
+classdef PointConstraint < SplineConstraint
     % Specify local equality or bound constraints at one or more points.
     %
     % Use `PointConstraint` to declare values or derivative conditions at

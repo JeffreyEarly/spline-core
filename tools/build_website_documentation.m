@@ -68,7 +68,7 @@ evalin('base', 'rehash');
 websiteRootURL = "spline-core/";
 classFolderName = 'Class documentation';
 websiteFolder = 'classes';
-classes = {'BSpline','TensorSpline','InterpolatingSpline','ConstrainedSpline','ConstrainedTensorSpline','ShapeConstraint','PointConstraint','GlobalConstraint'};
+classes = {'BSpline','TensorSpline','InterpolatingSpline','ConstrainedSpline','ConstrainedTensorSpline','ShapeConstraint','SplineConstraint','PointConstraint','GlobalConstraint'};
 classDocumentation = ClassDocumentation.empty(length(classes),0);
 for iName=1:length(classes)
     excludedSuperclasses = {'handle', 'matlab.mixin.Heterogeneous', 'CAAnnotatedClass'};

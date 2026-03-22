@@ -13,7 +13,7 @@ function poweredSpline = power(spline,exponent,constraints)
 % - Declaration: poweredSpline = power(spline,exponent,constraints)
 % - Parameter spline: BSpline instance
 % - Parameter exponent: scalar exponent
-% - Parameter constraints: optional constraint specification for the refit
+% - Parameter constraints: optional SplineConstraint array for the refit
 % - Returns poweredSpline: BSpline approximating spline.^exponent
 arguments
     spline (1,1) BSpline
@@ -32,9 +32,14 @@ values(abs(values) < 2*eps) = 0;
 poweredOrder = ceil(exponent*spline.K);
 tKnot = BSpline.knotPointsForDataPoints(supportPoints,K=poweredOrder);
 poweredValues = values.^exponent;
-
-if ~isempty(constraints)
-    poweredSpline = ConstrainedSpline(supportPoints,poweredValues,poweredOrder,tKnot,[],constraints);
+[constraintArguments, poweredValues] = ConstrainedTensorSpline.constraintArguments( ...
+    constraints, poweredValues, EnforcePositiveIfPossible=true, NumDimensions=1);
+if ~isempty(constraintArguments)
+    fittedSpline = ConstrainedTensorSpline(supportPoints, poweredValues, ...
+        K=poweredOrder, ...
+        tKnot=tKnot, ...
+        constraintArguments{:});
+    poweredSpline = BSpline(poweredOrder, fittedSpline.tKnot, fittedSpline.xi(:));
 else
     X = BSpline.matrix(supportPoints,tKnot,poweredOrder);
     xi = X\poweredValues;
