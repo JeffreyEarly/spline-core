@@ -2,7 +2,7 @@
 % Title: Mask-Constrained Tensor Fits
 % Slug: mask-constrained-fit
 % Description: Impose value and derivative constraints over an entire masked region using PointConstraint helper methods.
-% NavOrder: 4
+% NavOrder: 6
 
 %% Build a noisy 2D field with an island mask
 % `PointConstraint.equalOnMask` converts a logical mask into many local

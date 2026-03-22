@@ -3,6 +3,7 @@ layout: default
 title: Introduction to B-splines
 parent: Tutorials
 nav_order: 2
+mathjax: true
 permalink: /tutorials/introduction-to-b-splines
 ---
 

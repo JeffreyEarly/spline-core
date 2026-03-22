@@ -37,6 +37,7 @@ tutorialSources = {
     fullfile(rootDir, "Examples", "Tutorials", "InterpolatingSplineBasics.m")
     fullfile(rootDir, "Examples", "Tutorials", "IntroductionToBSplines.m")
     fullfile(rootDir, "Examples", "Tutorials", "RobustSplineFitting.m")
+    fullfile(rootDir, "Examples", "Tutorials", "LocalPointConstraints1D.m")
     fullfile(rootDir, "Examples", "Tutorials", "GlobalShapeConstraints.m")
     fullfile(rootDir, "Examples", "Tutorials", "MaskConstrainedFit.m")
 };

@@ -3,6 +3,7 @@ layout: default
 title: Interpolating Spline Basics
 parent: Tutorials
 nav_order: 1
+mathjax: true
 permalink: /tutorials/interpolating-spline-basics
 ---
 

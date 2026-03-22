@@ -3,6 +3,7 @@ layout: default
 title: Robust Fitting of Noisy Data
 parent: Tutorials
 nav_order: 3
+mathjax: true
 permalink: /tutorials/robust-spline-fitting
 ---
 

@@ -2,7 +2,8 @@
 layout: default
 title: Global Shape Constraints
 parent: Tutorials
-nav_order: 4
+nav_order: 5
+mathjax: true
 permalink: /tutorials/global-shape-constraints
 ---
 

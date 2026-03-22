@@ -2,7 +2,7 @@
 % Title: Global Shape Constraints
 % Slug: global-shape-constraints
 % Description: Enforce positivity and monotonicity over an entire domain with GlobalConstraint objects.
-% NavOrder: 3
+% NavOrder: 5
 
 %% Fit a monotone nonnegative profile
 % Global constraints apply to the whole fitted spline rather than a few

@@ -2,7 +2,7 @@
 % Title: Robust Fitting of Noisy Data
 % Slug: robust-spline-fitting
 % Description: Compare ordinary least squares and Student-t IRLS when fitting a spline to noisy data with outliers.
-% NavOrder: 2
+% NavOrder: 3
 
 %% Create noisy observations with outliers
 % `ConstrainedTensorSpline` fits noisy data rather than interpolating it

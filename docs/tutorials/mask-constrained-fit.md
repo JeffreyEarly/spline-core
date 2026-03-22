@@ -2,7 +2,8 @@
 layout: default
 title: Mask-Constrained Tensor Fits
 parent: Tutorials
-nav_order: 5
+nav_order: 6
+mathjax: true
 permalink: /tutorials/mask-constrained-fit
 ---
 
