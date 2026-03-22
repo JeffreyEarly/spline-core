@@ -2,12 +2,16 @@ function build_website_documentation(options)
 arguments
     options.rootDir = ".."
 end
-buildFolder = fullfile(options.rootDir,"docs");
-sourceFolder = fullfile(options.rootDir,"Documentation","WebsiteDocumentation");
+rootDir = char(options.rootDir);
+buildFolder = fullfile(rootDir,"docs");
+sourceFolder = fullfile(rootDir,"Documentation","WebsiteDocumentation");
 
+if isfolder(buildFolder)
+    rmdir(buildFolder, "s");
+end
 copyfile(sourceFolder,buildFolder);
 
-changelogPath = fullfile(options.rootDir, "CHANGELOG.md");
+changelogPath = fullfile(rootDir, "CHANGELOG.md");
 if isfile(changelogPath)
     header = "---" + newline + ...
              "layout: default" + newline + ...
@@ -15,18 +19,39 @@ if isfile(changelogPath)
              "nav_order: 100" + newline + ...
              "---" + newline + newline;
     versionHistoryText = header + fileread(changelogPath);
-    versionHistoryFilePath = fullfile(options.rootDir,"docs","version-history.md");
+    versionHistoryFilePath = fullfile(rootDir,"docs","version-history.md");
     fid = fopen(versionHistoryFilePath, "w");
     assert(fid ~= -1, "Could not open CHANGELOG.md for writing");
     fwrite(fid, versionHistoryText);
     fclose(fid);
 end
 
+tutorialSources = {
+    fullfile(rootDir, "Examples", "Tutorials", "InterpolatingSplineBasics.m")
+};
+tutorialDocumentation = TutorialDocumentation.documentationFromSourceFiles(tutorialSources, ...
+    buildFolder=buildFolder, ...
+    websiteRootURL="spline-core/", ...
+    websiteFolder="tutorials", ...
+    sourceRoot=rootDir, ...
+    executionPaths=string(rootDir));
+TutorialDocumentation.writeMarkdownIndex(tutorialDocumentation, ...
+    buildFolder=buildFolder, ...
+    websiteFolder="tutorials", ...
+    nav_order=4);
+arrayfun(@(a) a.writeToFile(), tutorialDocumentation)
+clear tutorialDocumentation
+
+% Running tutorials instantiates classes like InterpolatingSpline. MATLAB can
+% then return stripped method/property comment metadata until the class cache
+% is cleared, which breaks the generated API pages.
+evalin('base', 'clear classes');
+evalin('base', 'rehash');
+
 websiteRootURL = "spline-core/";
 classFolderName = 'Class documentation';
 websiteFolder = 'classes';
 classes = {'BSpline','TensorSpline','InterpolatingSpline','ConstrainedSpline','ConstrainedTensorSpline','ShapeConstraint','PointConstraint','GlobalConstraint'};
-clean_generated_class_docs(buildFolder, websiteFolder, classes);
 classDocumentation = ClassDocumentation.empty(length(classes),0);
 for iName=1:length(classes)
     excludedSuperclasses = {'handle', 'matlab.mixin.Heterogeneous', 'CAAnnotatedClass'};
@@ -51,28 +76,4 @@ for iName=1:length(classes)
 end
 arrayfun(@(a) a.writeToFile(),classDocumentation)
 
-end
-
-function clean_generated_class_docs(buildFolder, websiteFolder, classes)
-classDocsRoot = fullfile(buildFolder, websiteFolder);
-if ~isfolder(classDocsRoot)
-    return;
-end
-
-expectedFolders = lower(string(classes));
-existingEntries = dir(classDocsRoot);
-existingFolders = string({existingEntries([existingEntries.isdir]).name});
-existingFolders = existingFolders(~ismember(existingFolders, [".", ".."]));
-
-orphanedFolders = setdiff(existingFolders, expectedFolders);
-for folderName = orphanedFolders
-    rmdir(fullfile(classDocsRoot, folderName), 's');
-end
-
-for folderName = expectedFolders
-    targetFolder = fullfile(classDocsRoot, folderName);
-    if isfolder(targetFolder)
-        rmdir(targetFolder, 's');
-    end
-end
 end

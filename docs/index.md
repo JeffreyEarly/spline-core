@@ -11,6 +11,7 @@ permalink: /
 
 - [Install](installation) the Matlab package
 - Read the [Getting Started](getting-started) guide
+- Explore runnable [Tutorials](tutorials)
 - Dive deeper into the [class documentation](classes/bspline/)
 
 ---
