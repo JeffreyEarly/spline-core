@@ -2,7 +2,7 @@
 layout: default
 title: Global Shape Constraints
 parent: Tutorials
-nav_order: 3
+nav_order: 4
 permalink: /tutorials/global-shape-constraints
 ---
 

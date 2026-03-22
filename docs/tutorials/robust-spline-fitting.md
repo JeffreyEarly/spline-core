@@ -2,7 +2,7 @@
 layout: default
 title: Robust Fitting of Noisy Data
 parent: Tutorials
-nav_order: 2
+nav_order: 3
 permalink: /tutorials/robust-spline-fitting
 ---
 
