@@ -11,8 +11,8 @@ classdef InterpolatingSpline < TensorSpline
     %   spline = InterpolatingSpline({x,y,...},V)
     %   spline = InterpolatingSpline(grid,V,S=S)
     %
-    % If \(\mathbf{B}\) is the tensor-product basis matrix on the supplied
-    % grid and \(\tilde{y}\) is the normalized data vector, the stored
+    % If $$\mathbf{B}$$ is the tensor-product basis matrix on the supplied
+    % grid and $$\tilde{y}$$ is the normalized data vector, the stored
     % coefficients solve
     %
     % $$
@@ -64,7 +64,7 @@ classdef InterpolatingSpline < TensorSpline
             % \mathbf{B}\xi = \tilde{y},
             % $$
             %
-            % where \(\mathbf{B}\) is the tensor-product basis matrix
+            % where $$\mathbf{B}$$ is the tensor-product basis matrix
             % evaluated on the grid points.
             %
             % ```matlab

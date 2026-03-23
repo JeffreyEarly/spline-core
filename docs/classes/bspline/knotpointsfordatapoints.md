@@ -43,7 +43,7 @@ Construct a terminated knot sequence from sample locations.
   \Delta n = \left\lceil \frac{N}{\max(\mathrm{splineDOF}, S+1)} \right\rceil,
   $$
 
-  where \(N = \mathrm{numel}(t)\).
+  where $$N = \mathrm{numel}(t)$$.
 
   To recover the old `dataDOF=d` behavior, convert it to
   `splineDOF = max(S+1, ceil(numel(t)/d))`:

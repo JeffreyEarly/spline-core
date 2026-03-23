@@ -4,7 +4,7 @@ function S = smoothingMatrix(self)
 % Use this to inspect the linear action of the final weighted
 % fit on the observed data.
 %
-% For an unconstrained fit with diagonal weights \(W\), this matrix is the
+% For an unconstrained fit with diagonal weights $$W$$, this matrix is the
 % familiar linear smoother
 %
 % $$

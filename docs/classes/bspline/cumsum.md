@@ -29,7 +29,7 @@ Return the indefinite integral of a B-spline.
   Use this to construct an antiderivative spline that can be evaluated at
   arbitrary points after integration.
 
-  For coefficient vector \(\xi\), the integrated spline uses cumulative
+  For coefficient vector $$\xi$$, the integrated spline uses cumulative
   coefficients
 
   $$

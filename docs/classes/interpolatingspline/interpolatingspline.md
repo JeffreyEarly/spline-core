@@ -41,7 +41,7 @@ Create an interpolating spline on one-dimensional samples or a rectilinear grid.
   \mathbf{B}\xi = \tilde{y},
   $$
 
-  where \(\mathbf{B}\) is the tensor-product basis matrix
+  where $$\mathbf{B}$$ is the tensor-product basis matrix
   evaluated on the grid points.
 
   ```matlab

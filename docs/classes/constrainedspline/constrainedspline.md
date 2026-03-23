@@ -36,7 +36,7 @@ Create a tensor-product spline fit to noisy observations.
   array of grid vectors in higher dimensions when fitting noisy
   tensor-product data sampled on a rectilinear grid.
 
-  If the design matrix is \(\mathbf{B}\), the coefficient vector
+  If the design matrix is $$\mathbf{B}$$, the coefficient vector
   is estimated by an iteratively reweighted least-squares solve
   with optional linear equality and inequality constraints. The
   weights are updated from the current residuals through the

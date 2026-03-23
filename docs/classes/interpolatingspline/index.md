@@ -31,8 +31,8 @@ Supported construction forms:
   spline = InterpolatingSpline({x,y,...},V)
   spline = InterpolatingSpline(grid,V,S=S)
 
-If \(\mathbf{B}\) is the tensor-product basis matrix on the supplied
-grid and \(\tilde{y}\) is the normalized data vector, the stored
+If $$\mathbf{B}$$ is the tensor-product basis matrix on the supplied
+grid and $$\tilde{y}$$ is the normalized data vector, the stored
 coefficients solve
 
 $$

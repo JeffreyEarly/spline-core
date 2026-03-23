@@ -13,8 +13,8 @@ classdef BSpline < handle
     % f(t) = x_{\mathrm{Mean}} + x_{\mathrm{Std}} \sum_{j=1}^{M} \xi_j B_{j,S}(t;\tau),
     % $$
     %
-    % where \(\tau\) is the terminated knot sequence, \(B_{j,S}\) are the
-    % one-dimensional B-spline basis functions of degree \(S\), and
+    % where $$\tau$$ is the terminated knot sequence, $$B_{j,S}$$ are the
+    % one-dimensional B-spline basis functions of degree $$S$$, and
     % `xMean` is added only for zero-order evaluation.
     %
     % ## Basic usage

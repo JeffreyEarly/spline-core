@@ -40,7 +40,7 @@ Convert spline coefficients into piecewise-polynomial interval coefficients.
   f_i(u) = \sum_{m=0}^{S} \frac{c_{i,m}}{m!} u^m,
   $$
 
-  where the rows of `C` store the coefficients \(c_{i,m}\) in the order
+  where the rows of `C` store the coefficients $$c_{i,m}$$ in the order
   expected by `polyval` after the factorial scaling used in
   `evaluateFromPPCoefficients`.
 

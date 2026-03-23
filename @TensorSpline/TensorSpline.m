@@ -14,7 +14,7 @@ classdef TensorSpline < handle
     % \prod_{k=1}^{d} B_{j_k,S_k}(x_k;\tau_k),
     % $$
     %
-    % where each \(\tau_k\) is the knot vector for one coordinate
+    % where each $$\tau_k$$ is the knot vector for one coordinate
     % direction. Evaluation is pointwise on matching-size query arrays:
     % paired column vectors evaluate paired sample locations, while matching
     % `ndgrid` arrays evaluate a tensor-product lattice.

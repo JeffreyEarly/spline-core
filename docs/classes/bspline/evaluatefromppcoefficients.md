@@ -37,7 +37,7 @@ Evaluate a cached piecewise-polynomial spline representation.
   f_i^{(D)}(u) = \sum_{m=D}^{S} \frac{c_{i,m}}{(m-D)!} u^{m-D},
   $$
 
-  where the interval coefficients \(c_{i,m}\) are stored in `C`.
+  where the interval coefficients $$c_{i,m}$$ are stored in `C`.
 
   ```matlab
   xq = BSpline.evaluateFromPPCoefficients(tQuery, C, tpp);
