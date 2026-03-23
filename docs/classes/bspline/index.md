@@ -10,7 +10,7 @@ nav_order: 1
 
 #  BSpline
 
-Create, evaluate, and manipulate terminated B-spline representations.
+Create, evaluate, and manipulate one-dimensional terminated B-splines.
 
 
 ---
@@ -21,9 +21,21 @@ Create, evaluate, and manipulate terminated B-spline representations.
 
 ## Overview
 
-BSpline stores a spline basis order, knot sequence, and spline
-coefficients together with cached piecewise-polynomial coefficients for
-efficient evaluation, differentiation, and algebraic transforms.
+`BSpline` is the low-level one-dimensional spline object used by the
+higher-level interpolation and fitting classes. It stores a spline
+degree `S`, a terminated knot sequence `knotPoints`, and a coefficient
+vector `xi`, then caches an equivalent piecewise-polynomial
+representation for fast evaluation.
+
+Mathematically, the stored spline is
+
+$$
+f(t) = x_{\mathrm{Mean}} + x_{\mathrm{Std}} \sum_{j=1}^{M} \xi_j B_{j,S}(t;\tau),
+$$
+
+where \(\tau\) is the terminated knot sequence, \(B_{j,S}\) are the
+one-dimensional B-spline basis functions of degree \(S\), and
+`xMean` is added only for zero-order evaluation.
 
 ## Basic usage
 
@@ -34,9 +46,9 @@ and then evaluate the resulting spline object.
 ```matlab
 t = linspace(0,1,20)';
 x = sin(2*pi*t);
-tKnot = BSpline.knotPointsForDataPoints(t, K=4);
-X = BSpline.matrix(t, tKnot, 4);
-spline = BSpline(4, tKnot, X\x);
+knotPoints = BSpline.knotPointsForDataPoints(t, S=3);
+X = BSpline.matrix(t, knotPoints, 3);
+spline = BSpline(S=3, knotPoints=knotPoints, xi=X\x);
 
 xq = spline(linspace(0,1,100)');
 ```
@@ -47,12 +59,12 @@ xq = spline(linspace(0,1,100)');
 
 ## Topics
 + Create a spline
-  + [`BSpline`](/spline-core/classes/bspline/bspline.html) Create a new B-spline representation from order, knots, and coefficients.
+  + [`BSpline`](/spline-core/classes/bspline/bspline.html) Create a one-dimensional spline from degree, knots, and coefficients.
 + Inspect spline properties
   + [`K`](/spline-core/classes/bspline/k.html) Spline order K, where polynomial degree is S = K - 1.
   + [`S`](/spline-core/classes/bspline/s.html) Polynomial degree S = K - 1.
   + [`domain`](/spline-core/classes/bspline/domain.html) Minimum and maximum values of the spline domain.
-  + [`tKnot`](/spline-core/classes/bspline/tknot.html) Knot sequence used to define the spline basis.
+  + [`knotPoints`](/spline-core/classes/bspline/knotpoints.html) Knot sequence used to define the spline basis.
   + [`xMean`](/spline-core/classes/bspline/xmean.html) Mean added back to zero-order spline evaluations.
   + [`xStd`](/spline-core/classes/bspline/xstd.html) Multiplicative scale applied to spline evaluations.
   + [`xi`](/spline-core/classes/bspline/xi.html) Spline coefficients as an Mx1 vector.
@@ -79,8 +91,8 @@ These items document internal implementation details and are not part of the pri
 + Represent piecewise polynomials
   + [`C`](/spline-core/classes/bspline/c.html) Piecewise-polynomial coefficients for interval evaluation.
   + [`Xtpp`](/spline-core/classes/bspline/xtpp.html) Basis values and derivatives sampled at piecewise breakpoints.
-  + [`evaluateFromPPCoefficients`](/spline-core/classes/bspline/evaluatefromppcoefficients.html) Returns the value of the function with derivative D represented by PP coefficients C at locations t.
-  + [`ppCoefficientsFromSplineCoefficients`](/spline-core/classes/bspline/ppcoefficientsfromsplinecoefficients.html) Returns the piecewise polynomial coefficients in matrix C from spline coefficients in vector xi.
+  + [`evaluateFromPPCoefficients`](/spline-core/classes/bspline/evaluatefromppcoefficients.html) Evaluate a cached piecewise-polynomial spline representation.
+  + [`ppCoefficientsFromSplineCoefficients`](/spline-core/classes/bspline/ppcoefficientsfromsplinecoefficients.html) Convert spline coefficients into piecewise-polynomial interval coefficients.
   + [`t_pp`](/spline-core/classes/bspline/t_pp.html) Piecewise-polynomial breakpoint locations.
 + Maintain cached state
   + [`splineCoefficientsDidChange`](/spline-core/classes/bspline/splinecoefficientsdidchange.html) Refresh cached polynomial coefficients after coefficient updates.

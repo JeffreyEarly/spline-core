@@ -4,6 +4,20 @@ function knotPoints = knotPointsForDataPoints(t, options)
 % Use this helper to choose a knot sequence directly from sample
 % locations before interpolation or least-squares fitting.
 %
+% The implementation sorts the sample locations, optionally subsamples them
+% to target `splineDOF`, constructs pseudo-sites on that reduced grid, then
+% repeats the first and last knot values `S+1` times so the spline basis is
+% terminated at the interval endpoints.
+%
+% When `splineDOF` is supplied, the current implementation chooses the
+% sample stride as
+%
+% $$
+% \Delta n = \left\lceil \frac{N}{\max(\mathrm{splineDOF}, S+1)} \right\rceil,
+% $$
+%
+% where \(N = \mathrm{numel}(t)\).
+%
 % To recover the old `dataDOF=d` behavior, convert it to
 % `splineDOF = max(S+1, ceil(numel(t)/d))`:
 %

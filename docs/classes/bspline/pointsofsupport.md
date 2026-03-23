@@ -3,7 +3,7 @@ layout: default
 title: pointsOfSupport
 parent: BSpline
 grand_parent: Classes
-nav_order: 15
+nav_order: 16
 mathjax: true
 ---
 
@@ -16,27 +16,28 @@ Return representative support points for a terminated spline basis.
 
 ## Declaration
 ```matlab
- t = pointsOfSupport(tKnot,K,D)
+ t = pointsOfSupport(knotPoints, S)
 ```
 ## Parameters
-+ `tKnot`  knot sequence
-+ `K`  spline order
-+ `D`  reserved derivative-order argument for API compatibility
++ `knotPoints`  knot sequence
++ `S`  spline degree
 
 ## Returns
 + `t`  support point locations
 
 ## Discussion
 
-  This function assumes that the splines are terminated at the
-  boundary with repeated end knots.
+  This function assumes that the splines are terminated at the boundary
+  with repeated end knots. It returns one representative point per basis
+  function, using knot midpoints or interior knot values depending on the
+  spline order parity.
 
-  Use these points when you need one representative location per basis
-  function, for example when constructing transformed splines from sampled
-  values.
+  These points are especially useful when a nonlinear transform is
+  approximated by sampling a spline and refitting another spline to the
+  sampled values.
 
   ```matlab
-  tSupport = BSpline.pointsOfSupport(tKnot, 4);
+  tSupport = BSpline.pointsOfSupport(knotPoints, 3);
   xSupport = spline(tSupport);
   ```
 

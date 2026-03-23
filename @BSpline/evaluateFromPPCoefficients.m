@@ -1,5 +1,18 @@
 function f = evaluateFromPPCoefficients(t,C,tpp, D)
-% Returns the value of the function with derivative D represented by PP coefficients C at locations t.
+% Evaluate a cached piecewise-polynomial spline representation.
+%
+% On interval `i`, let `u = t - tpp(i)`. This function evaluates
+%
+% $$
+% f_i^{(D)}(u) = \sum_{m=D}^{S} \frac{c_{i,m}}{(m-D)!} u^{m-D},
+% $$
+%
+% where the interval coefficients \(c_{i,m}\) are stored in `C`.
+%
+% ```matlab
+% xq = BSpline.evaluateFromPPCoefficients(tQuery, C, tpp);
+% dxq = BSpline.evaluateFromPPCoefficients(tQuery, C, tpp, 1);
+% ```
 %
 % - Topic: Represent piecewise polynomials
 % - Developer: true

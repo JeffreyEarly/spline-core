@@ -32,9 +32,17 @@ Evaluate the spline or one of its derivatives at arbitrary points.
   `D=0` for spline values, `D=1` for the first
   derivative, and so on.
 
+  The returned array represents
+
+  $$
+  f^{(D)}(t) = x_{\mathrm{Std}} \sum_{j=1}^{M} \xi_j B_{j,S}^{(D)}(t;\tau),
+  $$
+
+  with `xMean` added back only when `D=0`.
+
   ```matlab
   x = spline.valueAtPoints(tQuery);
   d2x = spline.valueAtPoints(tQuery, D=2);
   ```
 
-            - Note: derivative orders above K-1 evaluate to zero.
+

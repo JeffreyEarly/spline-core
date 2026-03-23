@@ -18,4 +18,4 @@ Piecewise-polynomial breakpoint locations.
 
 ## Discussion
 
-      size(t_pp) = length(tKnot) - 2*K + 1
+      size(t_pp) = length(knotPoints) - 2*K + 1

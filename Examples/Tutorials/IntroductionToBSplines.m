@@ -15,11 +15,11 @@
 % linear, quadratic, and cubic interpolants.
 %
 % The constructor
-% `InterpolatingSpline(t, x, K=K)` chooses the canonical terminated knot
+% `InterpolatingSpline(t, x, S=K-1)` chooses the canonical terminated knot
 % sequence for the requested order and solves for the coefficients that
 % force the spline to pass through all observations. If you want to see or
 % reuse those canonical knots yourself, the lower-level entry point is
-% `BSpline.knotPointsForDataPoints(tData, K=K)`.
+% `BSpline.knotPointsForDataPoints(tData, S=K-1)`.
 
 tData = 2*pi*2.5*[0; 1; 3; 4; 5; 8; 10]/10;
 xData = sin(tData);
@@ -33,8 +33,8 @@ figure(Position=[100 100 1120 760])
 tiledlayout(maxK, maxK, TileSpacing="compact", Padding="compact")
 
 for K = 1:maxK
-    splineFit = InterpolatingSpline(tData, xData, K=K);
-    knotLocations = unique(splineFit.tKnot);
+    splineFit = InterpolatingSpline(tData, xData, S=K-1);
+    knotLocations = unique(splineFit.knotPoints);
 
     for derivativeOrder = 0:maxK-1
         nexttile
@@ -49,7 +49,7 @@ for K = 1:maxK
             xline(knotValue, ":", Color=0.7*[1 1 1], LineWidth=0.8);
         end
 
-        plot(tQuery, splineFit(tQuery, derivativeOrder), "k", LineWidth=1.5)
+        plot(tQuery, splineFit.valueAtPoints(tQuery, D=derivativeOrder), "k", LineWidth=1.5)
         xlim([min(tData), max(tData)])
         ylim(valueLimits)
         grid on
@@ -107,16 +107,16 @@ if exist("tutorialFigureCapture", "var") && isa(tutorialFigureCapture, "function
 % directly.
 
 canonicalOrder = 4;
-canonicalTKnot = BSpline.knotPointsForDataPoints(tData, K=canonicalOrder);
-canonicalBasis = BSpline.matrix(tData, canonicalTKnot, canonicalOrder);
-canonicalSpline = BSpline(canonicalOrder, canonicalTKnot, canonicalBasis \ xData);
+canonicalTKnot = BSpline.knotPointsForDataPoints(tData, S=canonicalOrder-1);
+canonicalBasis = BSpline.matrix(tData, canonicalTKnot, canonicalOrder-1);
+canonicalSpline = BSpline(S=canonicalOrder-1, knotPoints=canonicalTKnot, xi=canonicalBasis \ xData);
 
 %% Compare the direct BSpline construction with InterpolatingSpline
 % The two paths below are equivalent in one dimension. The first is the
 % convenience constructor, and the second exposes the underlying
 % `BSpline` calls explicitly.
 
-directInterpolant = InterpolatingSpline(tData, xData, K=canonicalOrder);
+directInterpolant = InterpolatingSpline(tData, xData, S=canonicalOrder-1);
 maxDifference = max(abs(directInterpolant(tQuery) - canonicalSpline(tQuery)));
 
 %% Build a single B-spline basis function and its derivatives
@@ -158,7 +158,7 @@ for K = 1:maxK
     tKnot = [repmat(tSupport(1), K-1, 1); tSupport; repmat(tSupport(end), K-1, 1)];
     coefficients = zeros(numel(tSupport) + K - 2, 1);
     coefficients(iSpline + K - 1) = 1;
-    basisSpline = BSpline(K, tKnot, coefficients);
+    basisSpline = BSpline(S=K-1, knotPoints=tKnot, xi=coefficients);
 
     for derivativeOrder = 0:maxK-1
         nexttile
@@ -173,7 +173,7 @@ for K = 1:maxK
             xline(knotValue, ":", Color=0.7*[1 1 1], LineWidth=0.8);
         end
 
-        plot(tPlot, basisSpline(tPlot, derivativeOrder), "k", LineWidth=1.5)
+        plot(tPlot, basisSpline.valueAtPoints(tPlot, D=derivativeOrder), "k", LineWidth=1.5)
         xlim([min(tSupport), max(tSupport)])
         ylim(basisLimits)
         grid on

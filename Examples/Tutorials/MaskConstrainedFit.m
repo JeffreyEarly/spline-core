@@ -19,9 +19,9 @@ Ftrue = exp(-((X+0.7).^2 + 0.7*(Y+0.2).^2)) +  0.65*exp(-1.2*((X-0.6).^2 + (Y-0.
 Fobs = Ftrue + 0.04*randn(size(Ftrue));
 
 islandMask = (X.^2 + Y.^2) <= 0.38^2;
-freeFit = ConstrainedSpline({x, y}, Fobs, K=[4 4],  tKnot={linspace(min(x), max(x), 16)', linspace(min(y), max(y), 18)'});
+freeFit = ConstrainedSpline({x, y}, Fobs, S=[3 3],  knotPoints={linspace(min(x), max(x), 16)', linspace(min(y), max(y), 18)'});
 
-maskedFit = ConstrainedSpline({x, y}, Fobs, K=[4 4],  tKnot={linspace(min(x), max(x), 16)', linspace(min(y), max(y), 18)'},  constraints=[  PointConstraint.equalOnMask({x, y}, islandMask, D=[0 0], value=0)
+maskedFit = ConstrainedSpline({x, y}, Fobs, S=[3 3],  knotPoints={linspace(min(x), max(x), 16)', linspace(min(y), max(y), 18)'},  constraints=[  PointConstraint.equalOnMask({x, y}, islandMask, D=[0 0], value=0)
         PointConstraint.equalOnMask({x, y}, islandMask, D=[0 1], value=0)]);
 
 xq = linspace(min(x), max(x), 121)';

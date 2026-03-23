@@ -1,9 +1,21 @@
 classdef BSpline < handle
-    % Create, evaluate, and manipulate terminated B-spline representations.
+    % Create, evaluate, and manipulate one-dimensional terminated B-splines.
     %
-    % BSpline stores a spline basis degree, knot sequence, and spline
-    % coefficients together with cached piecewise-polynomial coefficients for
-    % efficient evaluation, differentiation, and algebraic transforms.
+    % `BSpline` is the low-level one-dimensional spline object used by the
+    % higher-level interpolation and fitting classes. It stores a spline
+    % degree `S`, a terminated knot sequence `knotPoints`, and a coefficient
+    % vector `xi`, then caches an equivalent piecewise-polynomial
+    % representation for fast evaluation.
+    %
+    % Mathematically, the stored spline is
+    %
+    % $$
+    % f(t) = x_{\mathrm{Mean}} + x_{\mathrm{Std}} \sum_{j=1}^{M} \xi_j B_{j,S}(t;\tau),
+    % $$
+    %
+    % where \(\tau\) is the terminated knot sequence, \(B_{j,S}\) are the
+    % one-dimensional B-spline basis functions of degree \(S\), and
+    % `xMean` is added only for zero-order evaluation.
     %
     % ## Basic usage
     %
@@ -119,14 +131,16 @@ classdef BSpline < handle
         %
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         function self = BSpline(options)
-            % Create a new B-spline representation from degree, knots, and coefficients.
+            % Create a one-dimensional spline from degree, knots, and coefficients.
             %
-            % Optionally accepts cached breakpoint evaluations and affine
-            % output normalization parameters used by derived spline classes.
+            % Use this constructor when you already know the terminated knot
+            % sequence `knotPoints` and the coefficient vector `xi`.
             %
-            % Use this constructor when you already have a knot sequence and
-            % coefficient vector and want a spline object for evaluation or
-            % algebraic manipulation.
+            % The constructed spline is
+            %
+            % $$
+            % f(t) = x_{\mathrm{Mean}} + x_{\mathrm{Std}} \sum_{j=1}^{M} \xi_j B_{j,S}(t;\tau).
+            % $$
             %
             % ```matlab
             % knotPoints = [0; 0; 0; 0; 1; 1; 1; 1];

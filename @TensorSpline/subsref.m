@@ -3,7 +3,9 @@ function varargout = subsref(self, index)
 %
 % Function-call syntax is a thin wrapper around `valueAtPoints(...)`.
 % Use `spline(X1,...,Xn)` for pointwise values at matching-size
-% query arrays. For derivatives, use `valueAtPoints(X1,...,Xn,D=...)`.
+% query arrays. Paired column vectors evaluate paired sample locations,
+% while matching `ndgrid` arrays evaluate a tensor-product lattice. For
+% derivatives, use `valueAtPoints(X1,...,Xn,D=...)`.
 %
 % ```matlab
 % values = spline(xq, yq);

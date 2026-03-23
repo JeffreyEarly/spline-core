@@ -21,6 +21,27 @@ before dropping into the method-level reference.
 - [`BSpline`](./bspline): low-level one-dimensional basis and spline operations
 - [`TensorSpline`](./tensorspline): low-level tensor-product spline operations
 
+## Shared notation
+
+The core spline classes use the same notation throughout the generated
+reference so that equations, MATLAB examples, and property names match.
+
+- spline degree: \(S\)
+- spline order: \(K = S + 1\)
+- knot sequence or tensor-product knot cell: \(\tau\), exposed in the API as `knotPoints`
+- spline coefficients: \(\xi\), exposed in the API as `xi`
+- one-dimensional coordinates: \(t\)
+- tensor grid vectors: \(x_1,\ldots,x_d\)
+- matching query arrays: \(X_1,\ldots,X_d\)
+- derivative orders: \(D\)
+- observed values in fitting problems: \(y\)
+- basis matrices: \(B\) in one dimension and \(\mathbf{B}\) for tensor-product systems
+
+When a class stores affine output normalization, the formulas in the
+reference treat `xMean` as an additive offset applied only to zero-order
+evaluation and `xStd` as a multiplicative scale applied to values and
+derivatives.
+
 ## Constraint classes
 
 Constraint objects live in their own section because they support

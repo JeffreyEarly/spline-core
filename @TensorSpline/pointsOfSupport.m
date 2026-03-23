@@ -5,6 +5,10 @@ function [pointMatrix, supportVectors] = pointsOfSupport(knotPoints, S)
 % basis function, for example when constructing transformed splines from
 % sampled values.
 %
+% The support vectors are computed one dimension at a time with
+% `BSpline.pointsOfSupport`, then combined by a Cartesian product to form
+% the returned point matrix.
+%
 % ```matlab
 % [supportPoints, supportVectors] = TensorSpline.pointsOfSupport(knotPoints, [3 3]);
 % values = spline(supportVectors{:});

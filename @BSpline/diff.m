@@ -4,6 +4,9 @@ function dspline = diff(spline,n)
 % Use this when you want a new spline object representing the derivative,
 % rather than only evaluating derivatives at a set of points.
 %
+% The implementation applies the standard B-spline coefficient-difference
+% recursion and trims one knot from each end for each derivative taken.
+%
 % ```matlab
 % dspline = diff(spline);
 % curvatureSpline = diff(spline, 2);

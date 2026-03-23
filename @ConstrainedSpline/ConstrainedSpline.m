@@ -1,9 +1,29 @@
 classdef ConstrainedSpline < TensorSpline
     % Tensor-product spline fit through noisy data values.
     %
-    % ConstrainedSpline fits a tensor-product spline basis to noisy
-    % observations using iteratively reweighted least squares together with
-    % optional local point constraints and global shape constraints.
+    % `ConstrainedSpline` is the noisy-data fitting counterpart to
+    % `InterpolatingSpline`. It fits a tensor-product spline basis to values
+    % sampled on a one-dimensional grid or a rectilinear tensor grid, with
+    % optional robust weighting, observation covariance, local point
+    % constraints, and global shape constraints.
+    %
+    % At each iteratively reweighted least-squares step it solves
+    %
+    % $$
+    % \min_{\xi}\ (y - \mathbf{B}\xi)^{T} W (y - \mathbf{B}\xi)
+    % $$
+    %
+    % subject to
+    %
+    % $$
+    % A_{\mathrm{eq}}\xi = b_{\mathrm{eq}}, \qquad
+    % A_{\mathrm{ineq}}\xi \le b_{\mathrm{ineq}}.
+    % $$
+    %
+    % When the distribution model provides correlated errors, the code
+    % forms a covariance model from the per-observation variances and the
+    % correlation kernel, then solves the weighted system through a matrix
+    % factorization rather than explicitly inverting the covariance.
     %
     % ## Basic usage
     %
@@ -11,8 +31,10 @@ classdef ConstrainedSpline < TensorSpline
     % spline to noisy values on a one-dimensional grid or rectilinear grid.
     %
     % ```matlab
-    % spline = ConstrainedSpline({x, y}, values);
-    % valuesFit = spline(Xq, Yq);
+    % x = linspace(0,1,20)';
+    % y = exp(-20*(x-0.5).^2) + 0.05*randn(size(x));
+    % spline = ConstrainedSpline(x, y, S=3, constraints=GlobalConstraint.positive());
+    % yFit = spline(x);
     % ```
     %
     % - Topic: Create a constrained tensor spline
@@ -100,12 +122,20 @@ classdef ConstrainedSpline < TensorSpline
             % array of grid vectors in higher dimensions when fitting noisy
             % tensor-product data sampled on a rectilinear grid.
             %
+            % If the design matrix is \(\mathbf{B}\), the coefficient vector
+            % is estimated by an iteratively reweighted least-squares solve
+            % with optional linear equality and inequality constraints. The
+            % weights are updated from the current residuals through the
+            % supplied error `distribution`.
+            %
             % In one dimension, `S=N-1` together with `splineDOF=N` gives the
             % same least-squares polynomial fit as `polyfit(t,x,N-1)`.
             %
             % ```matlab
-            % spline = ConstrainedSpline({x, y}, values, S=[3 3]);
-            % valuesFit = spline(Xq, Yq);
+            % x = linspace(0,1,20)';
+            % y = exp(-20*(x-0.5).^2) + 0.05*randn(size(x));
+            % spline = ConstrainedSpline(x, y, S=3, constraints=GlobalConstraint.positive());
+            % yFit = spline(x);
             % ```
             %
             % - Topic: Create a constrained tensor spline

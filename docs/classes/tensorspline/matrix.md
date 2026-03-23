@@ -16,12 +16,12 @@ Evaluate the tensor-product basis matrix and optional derivatives.
 
 ## Declaration
 ```matlab
- B = matrix(X,tKnot,K,options)
+ B = matrix(X, knotPoints, S, options)
 ```
 ## Parameters
 + `X`  query locations as a point matrix
-+ `tKnot`  cell array of knot vectors
-+ `K`  spline order scalar or vector with one entry per dimension
++ `knotPoints`  knot vector in 1-D or cell array of knot vectors
++ `S`  spline degree scalar or vector with one entry per dimension
 + `options.D`  derivative order per dimension
 
 ## Returns
@@ -32,9 +32,21 @@ Evaluate the tensor-product basis matrix and optional derivatives.
   Use this to assemble a tensor-product design matrix for
   interpolation, regression, or basis inspection.
 
+  If `X` has rows `x_i`, then row `i` of the returned matrix is the
+  Kronecker product of the one-dimensional basis rows evaluated at `x_i`.
+  In other words,
+
+  $$
+  \mathbf{B}_{i,:} =
+  B^{(1)}(x_{i,1}) \otimes \cdots \otimes B^{(d)}(x_{i,d}),
+  $$
+
+  where each factor is the one-dimensional basis row in one coordinate
+  direction, optionally replaced by its derivative row.
+
   ```matlab
   [Xq, Yq] = ndgrid(xq, yq);
-  B = TensorSpline.matrix([Xq(:), Yq(:)], tKnot, [4 4]);
+  B = TensorSpline.matrix([Xq(:), Yq(:)], knotPoints, [3 3]);
   values = B * spline.xi(:);
   ```
 

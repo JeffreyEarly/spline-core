@@ -30,6 +30,9 @@ Return the indefinite integral along one tensor dimension.
   The integral is zero at the lower bound of the selected
   dimension while holding all other coordinates fixed.
 
+  This applies the one-dimensional B-spline integration formula along the
+  chosen tensor dimension and leaves the other dimensions unchanged.
+
   ```matlab
   F = cumsum(spline);
   Fy = cumsum(spline, 2);

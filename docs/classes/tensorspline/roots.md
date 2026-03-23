@@ -29,6 +29,10 @@ Return real roots of a one-dimensional tensor spline within its domain.
   Use this to locate zero crossings of a one-dimensional tensor spline
   over its support.
 
+  In one dimension this simply delegates to the underlying `BSpline`
+  piecewise-polynomial root finder after transferring the degree, knots,
+  coefficients, and affine output normalization.
+
   ```matlab
   tZero = roots(spline);
   ```

@@ -1,15 +1,15 @@
 ---
 layout: default
-title: points
+title: dataValues
 parent: ConstrainedSpline
 grand_parent: Classes
-nav_order: 15
+nav_order: 3
 mathjax: true
 ---
 
-#  points
+#  dataValues
 
-Observation locations as an N-by-D point matrix.
+Observation values as an N-by-1 vector.
 
 
 ---

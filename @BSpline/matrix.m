@@ -1,12 +1,17 @@
 function B = matrix(t, knotPoints, S, options)
 % Evaluate terminated B-spline basis functions and optional derivatives.
 %
-% Returns the basis splines of degree S evaluated at points t,
-% given knot points knotPoints. If you optionally provide D,
-% then D derivatives will be returned.
-%
 % Use this to assemble a design matrix for interpolation, regression, or
 % direct inspection of the basis functions.
+%
+% For `D=0`, the returned matrix satisfies
+%
+% $$
+% B_{ij} = B_{j,S}(t_i;\tau), \qquad x(t_i) \approx \sum_{j=1}^{M} B_{ij}\,\xi_j.
+% $$
+%
+% When `D > 0`, slice `B(:,:,d+1)` stores the basis values for derivative
+% order `d`, so `B(:,:,d+1) * xi` evaluates the `d`th derivative at `t`.
 %
 % ```matlab
 % B = BSpline.matrix(t, knotPoints, 3);
@@ -20,7 +25,7 @@ function B = matrix(t, knotPoints, S, options)
 % - Parameter knotPoints: spline knot points
 % - Parameter S: spline degree
 % - Parameter options.D: (optional) number of spline derivatives to return, max(D)=S
-% - Returns B: [numel(t) M D] where M = numel(knotPoints)-S-1
+% - Returns B: array of size `numel(t) x M x (D+1)` where `M = numel(knotPoints) - S - 1`
 arguments
     t (:,1) double {mustBeNumeric,mustBeReal}
     knotPoints (:,1) double {mustBeNumeric,mustBeReal}

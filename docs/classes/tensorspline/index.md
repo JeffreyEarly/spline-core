@@ -21,25 +21,37 @@ Tensor-product spline over multiple dimensions.
 
 ## Overview
 
-TensorSpline represents a tensor-product basis assembled from
-one-dimensional B-spline bases in each coordinate direction. It
-supports direct evaluation on one query array per coordinate
-together with mixed partial derivatives.
+`TensorSpline` is the multidimensional extension of `BSpline`. It
+stores one spline degree and one knot vector per dimension, together
+with a tensor-product coefficient array.
+
+The represented spline is
+
+$$
+f(x_1,\ldots,x_d) = x_{\mathrm{Mean}} + x_{\mathrm{Std}}
+\sum_{j_1=1}^{M_1} \cdots \sum_{j_d=1}^{M_d}
+\xi_{j_1,\ldots,j_d}
+\prod_{k=1}^{d} B_{j_k,S_k}(x_k;\tau_k),
+$$
+
+where each \(\tau_k\) is the knot vector for one coordinate
+direction. Evaluation is pointwise on matching-size query arrays:
+paired column vectors evaluate paired sample locations, while matching
+`ndgrid` arrays evaluate a tensor-product lattice.
 
 ## Basic usage
 
 Use `TensorSpline` when you already have knot vectors and
 tensor-product coefficients and want to evaluate the resulting
-spline on query arrays.
+spline on matching-size query arrays.
 
 ```matlab
-tKnot = {[0;0;0;0;1;1;1;1], [0;0;0;0;1;1;1;1]};
+knotPoints = {[0;0;0;0;1;1;1;1], [0;0;0;0;1;1;1;1]};
 xi = randn(16,1);
-spline = TensorSpline([4 4], tKnot, xi);
+spline = TensorSpline(S=[3 3], knotPoints=knotPoints, xi=xi);
 
-xq = linspace(0,1,40)';
-yq = linspace(0,1,40)';
-F = spline(xq, yq);
+[Xq,Yq] = ndgrid(linspace(0,1,40), linspace(0,1,40));
+F = spline(Xq, Yq);
 ```
 
 
@@ -47,19 +59,19 @@ F = spline(xq, yq);
 
 ## Topics
 + Create a spline
-  + [`TensorSpline`](/spline-core/classes/tensorspline/tensorspline.html) Create a tensor-product spline from per-dimension orders, knots, and coefficients.
+  + [`TensorSpline`](/spline-core/classes/tensorspline/tensorspline.html) Create a tensor-product spline from per-dimension degrees, knots, and coefficients.
 + Inspect spline properties
   + [`K`](/spline-core/classes/tensorspline/k.html) Spline order in each tensor dimension.
   + [`S`](/spline-core/classes/tensorspline/s.html) Polynomial degree in each tensor dimension.
   + [`basisSize`](/spline-core/classes/tensorspline/basissize.html) Number of basis functions in each dimension.
   + [`domain`](/spline-core/classes/tensorspline/domain.html) Minimum and maximum values of the spline domain in each dimension.
+  + [`knotPoints`](/spline-core/classes/tensorspline/knotpoints.html) Knot vectors defining the spline basis.
   + [`numDimensions`](/spline-core/classes/tensorspline/numdimensions.html) Number of tensor dimensions.
-  + [`tKnot`](/spline-core/classes/tensorspline/tknot.html) Knot vectors defining the spline basis.
   + [`xMean`](/spline-core/classes/tensorspline/xmean.html) Mean added back to zero-order evaluations.
   + [`xStd`](/spline-core/classes/tensorspline/xstd.html) Multiplicative scale applied to evaluations.
   + [`xi`](/spline-core/classes/tensorspline/xi.html) Tensor-product spline coefficients reshaped to basisSize.
 + Evaluate the spline
-  + [`feval`](/spline-core/classes/tensorspline/feval.html) Evaluate a tensor spline at the supplied points.
+  + [`feval`](/spline-core/classes/tensorspline/feval.html) Evaluate a tensor spline at matching-size query arrays.
   + [`subsref`](/spline-core/classes/tensorspline/subsref.html) Evaluate the tensor spline with function-call syntax or defer to built-in indexing.
   + [`valueAtPoints`](/spline-core/classes/tensorspline/valueatpoints.html) Evaluate the tensor spline or a mixed partial derivative.
 + Transform the spline

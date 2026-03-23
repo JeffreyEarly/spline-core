@@ -21,11 +21,27 @@ Interpolating spline on one-dimensional samples or rectilinear grids.
 
 ## Overview
 
+`InterpolatingSpline` is the exact-fit, grid-native specialization of
+`TensorSpline`. Use it when your values are already sampled on a
+one-dimensional grid or a rectilinear tensor grid and you want a
+spline that reproduces those samples exactly.
+
 Supported construction forms:
   spline = InterpolatingSpline(x,V)
   spline = InterpolatingSpline({x,y,...},V)
-  spline = InterpolatingSpline(grid,V,K=K)
   spline = InterpolatingSpline(grid,V,S=S)
+
+If \(\mathbf{B}\) is the tensor-product basis matrix on the supplied
+grid and \(\tilde{y}\) is the normalized data vector, the stored
+coefficients solve
+
+$$
+\mathbf{B}\xi = \tilde{y}, \qquad
+\tilde{y} = \frac{y - \bar{y}}{s_y},
+$$
+
+where `xMean = \bar{y}` and `xStd = s_y` are stored so later
+evaluation returns values on the original scale.
 
 ## Basic usage
 

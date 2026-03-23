@@ -1,15 +1,15 @@
 ---
 layout: default
-title: pointConstraints
+title: dataPoints
 parent: ConstrainedSpline
 grand_parent: Classes
-nav_order: 8
+nav_order: 2
 mathjax: true
 ---
 
-#  pointConstraints
+#  dataPoints
 
-Local point constraints used during fitting.
+Observation locations as an N-by-D point matrix.
 
 
 ---

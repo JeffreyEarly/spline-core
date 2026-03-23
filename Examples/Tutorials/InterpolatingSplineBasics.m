@@ -13,7 +13,7 @@ x = linspace(0, 20, 10)';
 y = sin(2*pi*x/10) + 0.15*cos(2*pi*x/5);
 xDense = linspace(min(x), max(x), 300)';
 
-f = InterpolatingSpline(x, y, K=4);
+f = InterpolatingSpline(x, y, S=3);
 yDense = f(xDense);
 
 figure(Position=[100 100 720 320])
@@ -34,7 +34,7 @@ y = linspace(-2, 2, 9)';
 [X, Y] = ndgrid(x, y);
 F = cos(pi*X).*exp(-0.5*Y.^2) + 0.25*X.*Y;
 
-tensorSpline = InterpolatingSpline({x, y}, F, K=[4 4]);
+tensorSpline = InterpolatingSpline({x, y}, F, S=[3 3]);
 
 xq = linspace(min(x), max(x), 81)';
 yq = linspace(min(y), max(y), 91)';
@@ -65,11 +65,11 @@ title("Interpolated Field")
 if exist("tutorialFigureCapture", "var") && isa(tutorialFigureCapture, "function_handle"), tutorialFigureCapture("tensor-grid-interpolation", Caption="A tensor-product interpolating spline evaluates naturally on a finer query grid."); end
 
 %% Mixed partial derivatives
-% Mixed partials use the same call syntax with a derivative-order vector.
-% Here `[1 0]` means differentiate once with respect to the first
-% dimension and leave the second dimension untouched.
+% Mixed partials use `valueAtPoints(..., D=...)`. Here `[1 0]` means
+% differentiate once with respect to the first dimension and leave the
+% second dimension untouched.
 
-dFdx = tensorSpline(Xq, Yq, [1 0]);
+dFdx = tensorSpline.valueAtPoints(Xq, Yq, D=[1 0]);
 
 figure(Position=[100 100 460 360])
 imagesc(yq, xq, dFdx)
@@ -79,4 +79,4 @@ colorbar
 xlabel("y")
 ylabel("x")
 title("First Derivative with Respect to x")
-if exist("tutorialFigureCapture", "var") && isa(tutorialFigureCapture, "function_handle"), tutorialFigureCapture("tensor-derivative", Caption="Derivative evaluation uses the same interpolant object and query syntax."); end
+if exist("tutorialFigureCapture", "var") && isa(tutorialFigureCapture, "function_handle"), tutorialFigureCapture("tensor-derivative", Caption="Derivative evaluation uses the same interpolant object through valueAtPoints(..., D=...)."); end

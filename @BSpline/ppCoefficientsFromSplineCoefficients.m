@@ -1,5 +1,21 @@
 function [C,tpp,Xtpp] = ppCoefficientsFromSplineCoefficients(xi, knotPoints, S, options)
-% Returns the piecewise polynomial coefficients in matrix C from spline coefficients in vector xi.
+% Convert spline coefficients into piecewise-polynomial interval coefficients.
+%
+% This helper rewrites the spline as local Taylor data over each interval.
+% If `u = t - tpp(i)` on interval `i`, the cached representation satisfies
+%
+% $$
+% f_i(u) = \sum_{m=0}^{S} \frac{c_{i,m}}{m!} u^m,
+% $$
+%
+% where the rows of `C` store the coefficients \(c_{i,m}\) in the order
+% expected by `polyval` after the factorial scaling used in
+% `evaluateFromPPCoefficients`.
+%
+% ```matlab
+% [C, tpp] = BSpline.ppCoefficientsFromSplineCoefficients(xi, knotPoints, 3);
+% xq = BSpline.evaluateFromPPCoefficients(tQuery, C, tpp);
+% ```
 %
 % - Topic: Represent piecewise polynomials
 % - Developer: true

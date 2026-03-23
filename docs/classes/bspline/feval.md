@@ -33,3 +33,5 @@ Evaluate a B-spline at the supplied points.
   ```matlab
   values = feval(spline, tQuery);
   ```
+
+

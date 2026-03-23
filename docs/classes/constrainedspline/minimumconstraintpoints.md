@@ -3,7 +3,7 @@ layout: default
 title: minimumConstraintPoints
 parent: ConstrainedSpline
 grand_parent: Classes
-nav_order: 13
+nav_order: 7
 mathjax: true
 ---
 
@@ -16,11 +16,11 @@ Return a minimal set of one-dimensional locations for universal derivative const
 
 ## Declaration
 ```matlab
- tc = minimumConstraintPoints(tKnot,K,T)
+ tc = minimumConstraintPoints(knotPoints, S, T)
 ```
 ## Parameters
-+ `tKnot`  one-dimensional knot sequence
-+ `K`  spline order
++ `knotPoints`  one-dimensional knot sequence
++ `S`  spline degree
 + `T`  constrained polynomial degree
 
 ## Returns
@@ -32,8 +32,12 @@ Return a minimal set of one-dimensional locations for universal derivative const
   set of 1-D points needed to constrain all segments at
   polynomial degree T.
 
+  If `D = S - T`, the returned locations provide enough one-dimensional
+  sample points to constrain every piecewise-polynomial segment through
+  derivative order `T` without oversampling all knots.
+
   ```matlab
-  tc = ConstrainedSpline.minimumConstraintPoints(tKnot, 4, 0);
+  tc = ConstrainedSpline.minimumConstraintPoints(knotPoints, 3, 0);
   ```
 
 

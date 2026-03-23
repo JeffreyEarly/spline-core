@@ -5,6 +5,10 @@ function tc = minimumConstraintPoints(knotPoints, S, T)
 % set of 1-D points needed to constrain all segments at
 % polynomial degree T.
 %
+% If `D = S - T`, the returned locations provide enough one-dimensional
+% sample points to constrain every piecewise-polynomial segment through
+% derivative order `T` without oversampling all knots.
+%
 % ```matlab
 % tc = ConstrainedSpline.minimumConstraintPoints(knotPoints, 3, 0);
 % ```

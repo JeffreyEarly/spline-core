@@ -26,8 +26,8 @@ xTrue = 0.15 + 0.85*(1 - exp(-4*t));
 xObs = xTrue + 0.05*randn(size(t));
 xObs([8 18 31]) = xObs([8 18 31]) - [0.09; 0.12; 0.07];
 
-freeFit = ConstrainedSpline(t, xObs, K=4, dataDOF=4);
-shapeConstrainedFit = ConstrainedSpline(t, xObs, K=4, dataDOF=4,  constraints=[  GlobalConstraint.positive()
+freeFit = ConstrainedSpline(t, xObs, S=3, splineDOF=12);
+shapeConstrainedFit = ConstrainedSpline(t, xObs, S=3, splineDOF=12,  constraints=[  GlobalConstraint.positive()
         GlobalConstraint.monotonicIncreasing()]);
 
 tDense = linspace(min(t), max(t), 400)';
@@ -56,7 +56,7 @@ Once the global monotonicity constraint is active, the first derivative is
 nonnegative throughout the fitted interval.
 
 ```matlab
-dShapeConstrained = shapeConstrainedFit(tDense, 1);
+dShapeConstrained = shapeConstrainedFit.valueAtPoints(tDense, D=1);
 
 figure(Position=[100 100 780 300])
 plot(tDense, dShapeConstrained, LineWidth=2)

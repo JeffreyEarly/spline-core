@@ -4,6 +4,18 @@ function B = matrix(X, knotPoints, S, options)
 % Use this to assemble a tensor-product design matrix for
 % interpolation, regression, or basis inspection.
 %
+% If `X` has rows `x_i`, then row `i` of the returned matrix is the
+% Kronecker product of the one-dimensional basis rows evaluated at `x_i`.
+% In other words,
+%
+% $$
+% \mathbf{B}_{i,:} =
+% B^{(1)}(x_{i,1}) \otimes \cdots \otimes B^{(d)}(x_{i,d}),
+% $$
+%
+% where each factor is the one-dimensional basis row in one coordinate
+% direction, optionally replaced by its derivative row.
+%
 % ```matlab
 % [Xq, Yq] = ndgrid(xq, yq);
 % B = TensorSpline.matrix([Xq(:), Yq(:)], knotPoints, [3 3]);

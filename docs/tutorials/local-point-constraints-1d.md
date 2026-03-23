@@ -28,7 +28,7 @@ t = linspace(0, 1, 32)';
 xTrue = 0.2 + 0.45*sin(2*pi*t) + 0.18*cos(5*pi*t);
 xObs = xTrue + 0.05*randn(size(t));
 
-freeFit = ConstrainedSpline(t, xObs, K=4, dataDOF=3);
+freeFit = ConstrainedSpline(t, xObs, S=3, splineDOF=11);
 tDense = linspace(min(t), max(t), 500)';
 xFree = freeFit(tDense);
 
@@ -36,7 +36,7 @@ caseDefinitions = struct(  "Title", {  "Value at one point",  "Zero slope at one
 
 constrainedFits = cell(size(caseDefinitions));
 for iCase = 1:numel(caseDefinitions)
-    constrainedFits{iCase} = ConstrainedSpline(t, xObs, K=4,  dataDOF=3,  constraints=caseDefinitions(iCase).Constraints);
+    constrainedFits{iCase} = ConstrainedSpline(t, xObs, S=3,  splineDOF=11,  constraints=caseDefinitions(iCase).Constraints);
 end
 
 figure(Position=[100 100 980 860])
@@ -96,8 +96,8 @@ a value and a zero-slope condition at the same point.
 ```matlab
 combinedFit = constrainedFits{4};
 combinedValue = combinedFit(tDense);
-combinedSlope = combinedFit(tDense, 1);
-combinedCurvature = combinedFit(tDense, 2);
+combinedSlope = combinedFit.valueAtPoints(tDense, D=1);
+combinedCurvature = combinedFit.valueAtPoints(tDense, D=2);
 constraintPoint = 0.42;
 
 figure(Position=[100 100 820 720])

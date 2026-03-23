@@ -1,13 +1,13 @@
 ---
 layout: default
-title: tKnot
+title: knotPoints
 parent: TensorSpline
 grand_parent: Classes
-nav_order: 20
+nav_order: 9
 mathjax: true
 ---
 
-#  tKnot
+#  knotPoints
 
 Knot vectors defining the spline basis.
 

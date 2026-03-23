@@ -6,6 +6,10 @@ function knotPoints = terminatedKnotPoints(knotPoints, S)
 % vector; in higher dimensions it accepts a cell array with one
 % knot vector per dimension.
 %
+% This operation increases the multiplicity of the first and last knot
+% values to `S+1`, which makes the spline basis terminate at the grid
+% endpoints.
+%
 % ```matlab
 % knotPoints = ConstrainedSpline.terminatedKnotPoints(knotPoints, 3);
 % ```

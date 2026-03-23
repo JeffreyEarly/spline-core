@@ -4,6 +4,11 @@ function poweredSpline = power(self, exponent)
 % This is useful for simple nonlinear transforms of a tensor spline when
 % an exact spline-space representation is not available.
 %
+% The implementation samples the spline on representative tensor support
+% points, applies the power to those sampled values, chooses a new tensor
+% basis, and refits the transformed samples. This is an approximation, not
+% exact spline-space algebra.
+%
 % ```matlab
 % squaredSpline = spline.^2;
 % amplitudeSpline = spline.^(1/2);

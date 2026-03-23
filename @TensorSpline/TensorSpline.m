@@ -1,10 +1,23 @@
 classdef TensorSpline < handle
     % Tensor-product spline over multiple dimensions.
     %
-    % TensorSpline represents a tensor-product basis assembled from
-    % one-dimensional B-spline bases in each coordinate direction. It
-    % supports pointwise evaluation on one matching-size query array
-    % per coordinate together with mixed partial derivatives.
+    % `TensorSpline` is the multidimensional extension of `BSpline`. It
+    % stores one spline degree and one knot vector per dimension, together
+    % with a tensor-product coefficient array.
+    %
+    % The represented spline is
+    %
+    % $$
+    % f(x_1,\ldots,x_d) = x_{\mathrm{Mean}} + x_{\mathrm{Std}}
+    % \sum_{j_1=1}^{M_1} \cdots \sum_{j_d=1}^{M_d}
+    % \xi_{j_1,\ldots,j_d}
+    % \prod_{k=1}^{d} B_{j_k,S_k}(x_k;\tau_k),
+    % $$
+    %
+    % where each \(\tau_k\) is the knot vector for one coordinate
+    % direction. Evaluation is pointwise on matching-size query arrays:
+    % paired column vectors evaluate paired sample locations, while matching
+    % `ndgrid` arrays evaluate a tensor-product lattice.
     %
     % ## Basic usage
     %
@@ -92,6 +105,14 @@ classdef TensorSpline < handle
             %
             % Use this constructor when you already know the per-dimension
             % knot vectors and tensor-product coefficients.
+            %
+            % The stored spline has the tensor-product form
+            %
+            % $$
+            % f(x_1,\ldots,x_d) = x_{\mathrm{Mean}} + x_{\mathrm{Std}}
+            % \sum_{j_1,\ldots,j_d} \xi_{j_1,\ldots,j_d}
+            % \prod_{k=1}^{d} B_{j_k,S_k}(x_k;\tau_k).
+            % $$
             %
             % ```matlab
             % spline = TensorSpline(S=[3 3], knotPoints=knotPoints, xi=xi);

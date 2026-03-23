@@ -9,19 +9,19 @@ mathjax: true
 
 #  BSpline
 
-Create a new B-spline representation from order, knots, and coefficients.
+Create a one-dimensional spline from degree, knots, and coefficients.
 
 
 ---
 
 ## Declaration
 ```matlab
- spline = BSpline(K,tKnot,xi)
+ spline = BSpline(options)
 ```
 ## Parameters
-+ `K`  spline order (degree S=K-1)
-+ `tKnot`  knot points
-+ `xi`  (optional) spline coefficients
++ `options.S`  spline degree
++ `options.knotPoints`  knot points
++ `options.xi`  (optional) spline coefficients
 + `options.Xtpp`  optional cached basis values at piecewise breakpoints
 + `options.xMean`  optional additive output offset
 + `options.xStd`  optional multiplicative output scale
@@ -31,17 +31,19 @@ Create a new B-spline representation from order, knots, and coefficients.
 
 ## Discussion
 
-  Optionally accepts cached breakpoint evaluations and affine
-  output normalization parameters used by derived spline classes.
+  Use this constructor when you already know the terminated knot
+  sequence `knotPoints` and the coefficient vector `xi`.
 
-  Use this constructor when you already have a knot sequence and
-  coefficient vector and want a spline object for evaluation or
-  algebraic manipulation.
+  The constructed spline is
+
+  $$
+  f(t) = x_{\mathrm{Mean}} + x_{\mathrm{Std}} \sum_{j=1}^{M} \xi_j B_{j,S}(t;\tau).
+  $$
 
   ```matlab
-  tKnot = [0; 0; 0; 0; 1; 1; 1; 1];
+  knotPoints = [0; 0; 0; 0; 1; 1; 1; 1];
   xi = [1; -0.5; 0.25; 0];
-  spline = BSpline(4, tKnot, xi);
+  spline = BSpline(S=3, knotPoints=knotPoints, xi=xi);
   x = spline(linspace(0,1,50)');
   ```
 

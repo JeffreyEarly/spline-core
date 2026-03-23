@@ -36,7 +36,6 @@ tutorialSources = {
     fullfile(rootDir, "Examples", "Tutorials", "LocalPointConstraints1D.m")
     fullfile(rootDir, "Examples", "Tutorials", "GlobalShapeConstraints.m")
     fullfile(rootDir, "Examples", "Tutorials", "MaskConstrainedFit.m")
-    fullfile(rootDir, "Examples", "Tutorials", "ScatteredDataFitting2D.m")
 };
 tutorialDocumentation = TutorialDocumentation.documentationFromSourceFiles(tutorialSources,  buildFolder=buildFolder,  websiteRootURL="spline-core/",  websiteFolder="tutorials",  sourceRoot=rootDir,  previousBuildFolder=previousBuildFolder,  executionPaths=string(rootDir));
 TutorialDocumentation.writeMarkdownIndex(tutorialDocumentation,  buildFolder=buildFolder,  websiteFolder="tutorials",  nav_order=5);

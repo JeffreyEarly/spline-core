@@ -3,7 +3,7 @@ layout: default
 title: subsref
 parent: BSpline
 grand_parent: Classes
-nav_order: 21
+nav_order: 22
 mathjax: true
 ---
 
@@ -38,3 +38,5 @@ Evaluate the spline with function-call syntax or defer to built-in indexing.
   x = spline(tQuery);
   dxdt = spline.valueAtPoints(tQuery, D=1);
   ```
+
+

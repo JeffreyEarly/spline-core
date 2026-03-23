@@ -3,13 +3,13 @@ layout: default
 title: feval
 parent: TensorSpline
 grand_parent: Classes
-nav_order: 9
+nav_order: 8
 mathjax: true
 ---
 
 #  feval
 
-Evaluate a tensor spline at the supplied points.
+Evaluate a tensor spline at matching-size query arrays.
 
 
 ---
@@ -28,8 +28,14 @@ Evaluate a tensor spline at the supplied points.
 
 ## Discussion
 
-  This is a thin wrapper around `valueAtPoints(...)`.
+  This is a thin wrapper around `valueAtPoints(...)`. Paired
+  column vectors give pointwise queries, while matching `ndgrid`
+  arrays give gridded evaluation on a tensor-product lattice.
 
   ```matlab
   values = feval(spline, xq, yq);
+  [Xq,Yq] = ndgrid(linspace(-1,1,40), linspace(0,2,50));
+  F = feval(spline, Xq, Yq);
   ```
+
+

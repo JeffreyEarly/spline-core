@@ -21,10 +21,10 @@ observations are corrupted by large outliers, a robust distribution can
 downweight them automatically through iteratively reweighted least
 squares.
 
-In one dimension, `K=N` and `splineDOF=N` reproduce the same
-least-squares polynomial fit as `polyfit(t,x,N-1)`. Here we choose a
-larger spline basis with `dataDOF=5` so the fit can track more local
-structure than a single cubic polynomial.
+In one dimension, `S=N-1` and `splineDOF=N` reproduce the same
+least-squares polynomial fit as `polyfit(t,x,N-1)`. Here we choose
+`splineDOF=12` so the fit can track more local structure than a single
+cubic polynomial.
 
 ```matlab
 rng(7)
@@ -34,8 +34,8 @@ xObs = xTrue + 0.08*randn(size(t));
 outlierIndex = [10 22 37 51];
 xObs(outlierIndex) = xObs(outlierIndex) + [0.75; -0.55; 0.65; -0.7];
 
-leastSquaresFit = ConstrainedSpline(t, xObs, K=4, dataDOF=5);
-robustFit = ConstrainedSpline(t, xObs, K=4, dataDOF=5,  distribution=StudentTDistribution(sigma=0.08, nu=3));
+leastSquaresFit = ConstrainedSpline(t, xObs, S=3, splineDOF=12);
+robustFit = ConstrainedSpline(t, xObs, S=3, splineDOF=12,  distribution=StudentTDistribution(sigma=0.08, nu=3));
 
 tDense = linspace(min(t), max(t), 400)';
 xTrueDense = exp(-3*tDense).*sin(4*pi*tDense);

@@ -5,6 +5,14 @@ function x_out = valueAtPoints(self, t, options)
 % `D=0` for spline values, `D=1` for the first
 % derivative, and so on.
 %
+% The returned array represents
+%
+% $$
+% f^{(D)}(t) = x_{\mathrm{Std}} \sum_{j=1}^{M} \xi_j B_{j,S}^{(D)}(t;\tau),
+% $$
+%
+% with `xMean` added back only when `D=0`.
+%
 % ```matlab
 % x = spline.valueAtPoints(tQuery);
 % d2x = spline.valueAtPoints(tQuery, D=2);
@@ -15,7 +23,6 @@ function x_out = valueAtPoints(self, t, options)
 % - Parameter self: BSpline instance
 % - Parameter t: evaluation points
 % - Parameter options.D: derivative order to evaluate
-% - Note: derivative orders above K-1 evaluate to zero.
 % - Returns x_out: array matching the shape of t
 arguments
     self (1,1) BSpline

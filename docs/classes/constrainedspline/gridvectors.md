@@ -1,15 +1,15 @@
 ---
 layout: default
-title: values
+title: gridVectors
 parent: ConstrainedSpline
 grand_parent: Classes
-nav_order: 19
+nav_order: 6
 mathjax: true
 ---
 
-#  values
+#  gridVectors
 
-Observation values as an N-by-1 vector.
+Grid vectors used to define the fitted rectilinear lattice.
 
 
 ---

@@ -1,10 +1,27 @@
 classdef InterpolatingSpline < TensorSpline
     % Interpolating spline on one-dimensional samples or rectilinear grids.
     %
+    % `InterpolatingSpline` is the exact-fit, grid-native specialization of
+    % `TensorSpline`. Use it when your values are already sampled on a
+    % one-dimensional grid or a rectilinear tensor grid and you want a
+    % spline that reproduces those samples exactly.
+    %
     % Supported construction forms:
     %   spline = InterpolatingSpline(x,V)
     %   spline = InterpolatingSpline({x,y,...},V)
     %   spline = InterpolatingSpline(grid,V,S=S)
+    %
+    % If \(\mathbf{B}\) is the tensor-product basis matrix on the supplied
+    % grid and \(\tilde{y}\) is the normalized data vector, the stored
+    % coefficients solve
+    %
+    % $$
+    % \mathbf{B}\xi = \tilde{y}, \qquad
+    % \tilde{y} = \frac{y - \bar{y}}{s_y},
+    % $$
+    %
+    % where `xMean = \bar{y}` and `xStd = s_y` are stored so later
+    % evaluation returns values on the original scale.
     %
     % ## Basic usage
     %
@@ -39,9 +56,24 @@ classdef InterpolatingSpline < TensorSpline
             % Supply a numeric vector in 1-D or a cell array of grid vectors
             % in higher dimensions together with the sampled value array.
             %
+            % The implementation builds one knot vector per dimension from
+            % the supplied grid vectors, standardizes the sampled values, and
+            % solves the interpolation system
+            %
+            % $$
+            % \mathbf{B}\xi = \tilde{y},
+            % $$
+            %
+            % where \(\mathbf{B}\) is the tensor-product basis matrix
+            % evaluated on the grid points.
+            %
             % ```matlab
+            % x = linspace(0,1,8)';
+            % y = linspace(-1,1,9)';
+            % [X,Y] = ndgrid(x, y);
+            % F = sin(2*pi*X).*cos(pi*Y);
             % spline = InterpolatingSpline({x, y}, F, S=[3 3]);
-            % Fq = spline(Xq, Yq);
+            % Fq = spline(X, Y);
             % ```
             %
             % - Topic: Create an interpolating spline
