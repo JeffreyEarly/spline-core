@@ -16,10 +16,10 @@ Create an interpolating spline on one-dimensional samples or a rectilinear grid.
 
 ## Declaration
 ```matlab
- self = InterpolatingSpline(X1,...,Xn,values,options)
+ self = InterpolatingSpline(grid,values,options)
 ```
 ## Parameters
-+ `X1,...,Xn`  grid vectors, one per dimension
++ `grid`  numeric vector in 1-D or cell array of grid vectors in higher dimensions
 + `values`  array of sampled values on the grid
 + `options.K`  spline order scalar or vector with one entry per dimension
 + `options.S`  spline degree scalar or vector with one entry per dimension
@@ -30,12 +30,12 @@ Create an interpolating spline on one-dimensional samples or a rectilinear grid.
 ## Discussion
 
   Use this constructor when your data already live on a
-  rectilinear grid and should be reproduced exactly by the
-  spline. Supply one grid input per dimension followed by the
-  sampled value array.
+  rectilinear grid and should be reproduced exactly by the spline.
+  Supply a numeric vector in 1-D or a cell array of grid vectors
+  in higher dimensions together with the sampled value array.
 
   ```matlab
-  spline = InterpolatingSpline(x, y, F, K=[4 4]);
+  spline = InterpolatingSpline({x, y}, F, K=[4 4]);
   Fq = spline(Xq, Yq);
   ```
 

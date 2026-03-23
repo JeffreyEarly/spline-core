@@ -111,7 +111,7 @@ y = linspace(0,2,7)';
 [X,Y] = ndgrid(x,y);
 F = X.^2 .* Y.^3 + 2*X.*Y - 5;
 
-tensorSpline = InterpolatingSpline(x, y, F, K=[4 4]);
+tensorSpline = InterpolatingSpline({x, y}, F, K=[4 4]);
 Fq = tensorSpline(X, Y);
 ```
 
@@ -122,9 +122,8 @@ dimension.
 ## Tensor-product fitting with noisy data
 
 `ConstrainedSpline` fits a tensor-product spline to noisy observations.
-With the current default settings it chooses a cubic spline in each
-dimension, chooses knot vectors from the observed coordinate values, and
-assumes unit Gaussian errors.
+Use the constructor for gridded observations and `fromPoints` for
+scattered point clouds.
 
 ```matlab
 x = linspace(-1,1,6)';
@@ -133,9 +132,7 @@ y = linspace(-2,2,7)';
 
 Ftrue = 1 + 2*X - Y + 0.5*X.^2.*Y - 0.25*X.*Y.^3;
 Fobs = Ftrue + 0.05*randn(size(Ftrue));
-P = [X(:), Y(:)];
-
-fit = ConstrainedSpline(P, Fobs(:));
+fit = ConstrainedSpline({x, y}, Fobs);
 
 xq = linspace(min(x),max(x),41)';
 yq = linspace(min(y),max(y),51)';
@@ -147,11 +144,19 @@ If you want a denser tensor basis or a robust error model, pass them as
 named options.
 
 ```matlab
-fit = ConstrainedSpline(P, Fobs(:), ...
+fit = ConstrainedSpline({x, y}, Fobs, ...
     K=[4 4], ...
     tKnot={BSpline.knotPointsForDataPoints(x,K=4,dataDOF=2), ...
            BSpline.knotPointsForDataPoints(y,K=4,dataDOF=2)}, ...
     distribution=StudentTDistribution(sigma=0.05,nu=3));
+```
+
+For genuinely scattered observations, switch to the explicit point-cloud
+entry point:
+
+```matlab
+fit = ConstrainedSpline.fromPoints(P, zObs, K=[4 4]);
+zFit = fit.evaluatePoints(P);
 ```
 
 Use the `constraints` option to pass any mix of `PointConstraint` and

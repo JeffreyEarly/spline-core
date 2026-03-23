@@ -19,7 +19,7 @@ constraints.
 | Familiar MATLAB tool | `Spline Core` alignment | What `Spline Core` adds |
 | --- | --- | --- |
 | `interp1` | `InterpolatingSpline(t, x, K=4)` | inspectable spline objects, derivatives, roots, knot access |
-| `griddedInterpolant` | `InterpolatingSpline(x, y, V, K=[4 4])` | tensor derivatives, basis access, same family as constrained fitting |
+| `griddedInterpolant` | `InterpolatingSpline({x, y}, V, K=[4 4])` | tensor derivatives, basis access, same family as constrained fitting |
 | `polyfit` | `ConstrainedSpline(t, x, K=N, splineDOF=N)` | data-driven spline spaces, robust fitting, local/global constraints |
 
 The rest of this page gives the side-by-side code and the main differences
@@ -57,7 +57,7 @@ F = griddedInterpolant({x, y}, V);
 Vq = F(Xq, Yq);
 
 % spline-core
-F = InterpolatingSpline(x, y, V, K=[4 4]);
+F = InterpolatingSpline({x, y}, V, K=[4 4]);
 Vq = F(Xq, Yq);
 ```
 

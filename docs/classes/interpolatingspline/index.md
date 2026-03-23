@@ -22,11 +22,10 @@ Interpolating spline on one-dimensional samples or rectilinear grids.
 ## Overview
 
 Supported construction forms:
-  spline = InterpolatingSpline(x1,...,xn,V)
-  spline = InterpolatingSpline(x1,...,xn,V,K=K)
-  spline = InterpolatingSpline(x1,...,xn,V,S=S)
-
-The grid inputs are vectors, one per dimension.
+  spline = InterpolatingSpline(x,V)
+  spline = InterpolatingSpline({x,y,...},V)
+  spline = InterpolatingSpline(grid,V,K=K)
+  spline = InterpolatingSpline(grid,V,S=S)
 
 ## Basic usage
 
@@ -37,7 +36,7 @@ exactly.
 ```matlab
 [X,Y] = ndgrid(linspace(0,1,8), linspace(-1,1,9));
 F = sin(2*pi*X).*cos(pi*Y);
-spline = InterpolatingSpline(X(:,1), Y(1,:), F);
+spline = InterpolatingSpline({X(:,1), Y(1,:)}, F);
 Fq = spline(X, Y);
 ```
 

@@ -26,10 +26,10 @@ f = InterpolatingSpline(t, x, K=4);
 ## Interpolate exact data on a rectilinear grid
 
 - Use [`InterpolatingSpline`](classes/interpolatingspline)
-- Pass one grid vector per dimension plus the value array
+- Pass a cell array of grid vectors plus the value array
 
 ```matlab
-f = InterpolatingSpline(x, y, F, K=[4 4]);
+f = InterpolatingSpline({x, y}, F, K=[4 4]);
 Fq = f(Xq, Yq);
 ```
 
@@ -76,7 +76,7 @@ fit = ConstrainedSpline(t, x, ...
 
 ```matlab
 constraint = PointConstraint.equalOnMask({x, y}, islandMask, D=[0 0], value=0);
-fit = ConstrainedSpline(P, values, constraints=constraint);
+fit = ConstrainedSpline({x, y}, values, constraints=constraint);
 ```
 
 ## Fit scattered observations in two dimensions
@@ -85,7 +85,7 @@ fit = ConstrainedSpline(P, values, constraints=constraint);
 - See [Scattered Data Fitting in 2D](tutorials/scattered-data-fitting-2d)
 
 ```matlab
-fit = ConstrainedSpline(P, zObs, K=[4 4], dataDOF=[2 2]);
+fit = ConstrainedSpline.fromPoints(P, zObs, K=[4 4]);
 Zq = fit(Xq, Yq);
 ```
 

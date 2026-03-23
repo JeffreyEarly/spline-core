@@ -2,11 +2,10 @@ classdef InterpolatingSpline < TensorSpline
     % Interpolating spline on one-dimensional samples or rectilinear grids.
     %
     % Supported construction forms:
-    %   spline = InterpolatingSpline(x1,...,xn,V)
-    %   spline = InterpolatingSpline(x1,...,xn,V,K=K)
-    %   spline = InterpolatingSpline(x1,...,xn,V,S=S)
-    %
-    % The grid inputs are vectors, one per dimension.
+    %   spline = InterpolatingSpline(x,V)
+    %   spline = InterpolatingSpline({x,y,...},V)
+    %   spline = InterpolatingSpline(grid,V,K=K)
+    %   spline = InterpolatingSpline(grid,V,S=S)
     %
     % ## Basic usage
     %
@@ -17,7 +16,7 @@ classdef InterpolatingSpline < TensorSpline
     % ```matlab
     % [X,Y] = ndgrid(linspace(0,1,8), linspace(-1,1,9));
     % F = sin(2*pi*X).*cos(pi*Y);
-    % spline = InterpolatingSpline(X(:,1), Y(1,:), F);
+    % spline = InterpolatingSpline({X(:,1), Y(1,:)}, F);
     % Fq = spline(X, Y);
     % ```
     %
@@ -33,90 +32,36 @@ classdef InterpolatingSpline < TensorSpline
     end
 
     methods
-        function self = InterpolatingSpline(varargin)
+        function self = InterpolatingSpline(grid, values, options)
             % Create an interpolating spline on one-dimensional samples or a rectilinear grid.
             %
             % Use this constructor when your data already live on a
-            % rectilinear grid and should be reproduced exactly by the
-            % spline. Supply one grid input per dimension followed by the
-            % sampled value array.
+            % rectilinear grid and should be reproduced exactly by the spline.
+            % Supply a numeric vector in 1-D or a cell array of grid vectors
+            % in higher dimensions together with the sampled value array.
             %
             % ```matlab
-            % spline = InterpolatingSpline(x, y, F, K=[4 4]);
+            % spline = InterpolatingSpline({x, y}, F, K=[4 4]);
             % Fq = spline(Xq, Yq);
             % ```
             %
             % - Topic: Create an interpolating spline
-            % - Declaration: self = InterpolatingSpline(X1,...,Xn,values,options)
-            % - Parameter X1,...,Xn: grid vectors, one per dimension
+            % - Declaration: self = InterpolatingSpline(grid,values,options)
+            % - Parameter grid: numeric vector in 1-D or cell array of grid vectors in higher dimensions
             % - Parameter values: array of sampled values on the grid
             % - Parameter options.K: spline order scalar or vector with one entry per dimension
             % - Parameter options.S: spline degree scalar or vector with one entry per dimension
             % - Returns self: InterpolatingSpline instance
-            firstNameValue = numel(varargin) + 1;
-            for iInput = 1:numel(varargin)
-                value = varargin{iInput};
-                if (ischar(value) && isrow(value)) || (isstring(value) && isscalar(value))
-                    firstNameValue = iInput;
-                    break;
-                end
+            arguments
+                grid
+                values {mustBeNumeric,mustBeReal,mustBeFinite}
+                options.K {mustBeNumeric,mustBeReal,mustBeFinite,mustBeInteger,mustBePositive} = 4
+                options.S {mustBeNumeric,mustBeReal} = []
             end
 
-            positionalInputs = varargin(1:firstNameValue-1);
-            if numel(positionalInputs) < 2
-                error('InterpolatingSpline:NotEnoughInputs',  'Specify one or more grid inputs followed by the sampled values.');
-            end
-
-            gridVectors = positionalInputs(1:end-1);
-            values = positionalInputs{end};
-            validateattributes(values, {'numeric'}, {'real','finite'});
-
-            numDimensions = numel(gridVectors);
-            for iDim = 1:numDimensions
-                validateattributes(gridVectors{iDim}, {'numeric'}, {'vector','real','finite'});
-                gridVectors{iDim} = reshape(gridVectors{iDim}, [], 1);
-            end
-
-            K = 4;
-            S = NaN;
-            nameValueInputs = varargin(firstNameValue:end);
-            if mod(numel(nameValueInputs), 2) ~= 0
-                error('InterpolatingSpline:InvalidOptions',  'Name-value arguments must come in pairs.');
-            end
-
-            for iInput = 1:2:numel(nameValueInputs)
-                name = nameValueInputs{iInput};
-                if ~(ischar(name) && isrow(name)) && ~(isstring(name) && isscalar(name))
-                    error('InterpolatingSpline:InvalidOptions',  'Option names must be text scalars.');
-                end
-
-                switch string(name)
-                    case "K"
-                        K = nameValueInputs{iInput + 1};
-                    case "S"
-                        S = nameValueInputs{iInput + 1};
-                    otherwise
-                        error('InterpolatingSpline:InvalidOptions',  'Unsupported option name "%s".', string(name));
-                end
-            end
-
-            K = TensorSpline.resolveSplineOrders(K, S, numDimensions, "InterpolatingSpline");
-
-            expectedSize = cellfun(@numel, gridVectors);
-            if numel(expectedSize) == 1
-                if ~(isvector(values) && numel(values) == expectedSize(1))
-                    error('InterpolatingSpline:SizeMismatch',  'values must have size matching the lengths of the supplied grid inputs.');
-                end
-            else
-                actualSize = size(values);
-                if numel(actualSize) < numel(expectedSize)
-                    actualSize = [actualSize, ones(1, numel(expectedSize) - numel(actualSize))];
-                end
-
-                if ~isequal(actualSize(1:numel(expectedSize)), expectedSize)
-                    error('InterpolatingSpline:SizeMismatch',  'values must have size matching the lengths of the supplied grid inputs.');
-                end
-            end
+            [gridVectors, numDimensions] = TensorSpline.normalizeGridInput(grid, "InterpolatingSpline");
+            TensorSpline.validateGridValues(values, gridVectors, "InterpolatingSpline");
+            K = TensorSpline.resolveSplineOrders(options.K, options.S, numDimensions, "InterpolatingSpline");
 
             tKnot = cell(1, numDimensions);
             for iDim = 1:numDimensions

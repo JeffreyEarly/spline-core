@@ -32,6 +32,36 @@ classdef InterpolatingSplineUnitTests < matlab.unittest.TestCase
             testCase.verifyError(@() InterpolatingSpline(t,x,K=5,S=3), 'InterpolatingSpline:ConflictingSplineOrder')
         end
 
+        function interpolatingSplineAcceptsGridCellInHigherDimensions(testCase)
+            import matlab.unittest.constraints.IsEqualTo
+            import matlab.unittest.constraints.AbsoluteTolerance
+
+            x = linspace(-1,1,6)';
+            y = linspace(0,2,7)';
+            [X,Y] = ndgrid(x,y);
+            F = X.^2 .* Y.^3 + 2*X.*Y - 5;
+
+            spline = InterpolatingSpline({x, y}, F, K=[4 4]);
+
+            testCase.assertThat(spline(X, Y), IsEqualTo(F, 'Within', AbsoluteTolerance(1e-10)))
+        end
+
+        function interpolatingSplineRejectsLegacyMultiPositionalGridConstructor(testCase)
+            x = linspace(-1,1,6)';
+            y = linspace(0,2,7)';
+            [X,Y] = ndgrid(x,y);
+            F = sin(pi*X) .* cos(0.5*pi*Y);
+            caught = [];
+
+            try
+                InterpolatingSpline(x, y, F, K=[4 4]);
+            catch exception
+                caught = exception;
+            end
+
+            testCase.verifyNotEmpty(caught)
+        end
+
         function plusAddsScalarOffset(testCase)
             import matlab.unittest.constraints.IsEqualTo
             import matlab.unittest.constraints.AbsoluteTolerance

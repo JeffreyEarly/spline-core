@@ -26,15 +26,15 @@ grid on
 if exist("tutorialFigureCapture", "var") && isa(tutorialFigureCapture, "function_handle"), tutorialFigureCapture("one-dimensional-interpolation", Caption="A cubic interpolating spline passes exactly through the sample points."); end
 
 %% Tensor-product interpolation on a rectilinear grid
-% The same interface extends to higher dimensions. Pass one grid vector per
-% dimension followed by the array of values on the tensor grid.
+% The same interface extends to higher dimensions. Pass a cell array of
+% grid vectors together with the array of values on the tensor grid.
 
 x = linspace(-1.5, 1.5, 7)';
 y = linspace(-2, 2, 9)';
 [X, Y] = ndgrid(x, y);
 F = cos(pi*X).*exp(-0.5*Y.^2) + 0.25*X.*Y;
 
-tensorSpline = InterpolatingSpline(x, y, F, K=[4 4]);
+tensorSpline = InterpolatingSpline({x, y}, F, K=[4 4]);
 
 xq = linspace(min(x), max(x), 81)';
 yq = linspace(min(y), max(y), 91)';

@@ -16,9 +16,9 @@ Source: `Examples/Tutorials/ScatteredDataFitting2D.m`
 ## Fit a tensor spline to scattered observations
 
 `InterpolatingSpline` in higher dimensions expects values on a
-rectilinear tensor grid, but `ConstrainedSpline` accepts an `N x D`
-point cloud directly. That makes it the right entry point for noisy
-scattered observations in two dimensions.
+rectilinear tensor grid, while scattered observations use
+`ConstrainedSpline.fromPoints`. That makes it the right entry point for
+noisy scattered observations in two dimensions.
 
 The tensor basis is still separable by coordinate direction, so we choose
 one knot vector for `x` and one for `y`. The helper
@@ -32,10 +32,7 @@ rng(11)
 numObservations = 450;
 P = -2 + 4*rand(numObservations, 2);
 
-truth = @(x, y) ...
-    1.1*exp(-((x+0.8).^2 + 1.3*(y-0.4).^2)) - ...
-    0.8*exp(-1.8*((x-0.7).^2 + 0.7*(y+0.5).^2)) + ...
-    0.2*x.*y;
+truth = @(x, y)  1.1*exp(-((x+0.8).^2 + 1.3*(y-0.4).^2)) -  0.8*exp(-1.8*((x-0.7).^2 + 0.7*(y+0.5).^2)) +  0.2*x.*y;
 
 zTrue = truth(P(:,1), P(:,2));
 zObs = zTrue + 0.06*randn(size(zTrue));
@@ -53,8 +50,8 @@ coarseTKnot = {
     BSpline.knotPointsForDataPoints(P(:,2), K=K(2), dataDOF=coarseDOF(2))
     };
 
-denseFit = ConstrainedSpline(P, zObs, K=K, tKnot=denseTKnot);
-coarseFit = ConstrainedSpline(P, zObs, K=K, tKnot=coarseTKnot);
+denseFit = ConstrainedSpline.fromPoints(P, zObs, K=K, tKnot=denseTKnot);
+coarseFit = ConstrainedSpline.fromPoints(P, zObs, K=K, tKnot=coarseTKnot);
 
 denseBasisSize = cellfun(@numel, denseTKnot).' - K;
 coarseBasisSize = cellfun(@numel, coarseTKnot).' - K;
@@ -119,11 +116,7 @@ plot(xTransect, zTransectDense, LineWidth=2)
 plot(xTransect, zTransectCoarse, LineWidth=2)
 xlabel("x")
 ylabel("z(x, 0)")
-legend( ...
-    "Truth", ...
-    sprintf("dataDOF [%d %d], basis [%d %d]", denseDOF(1), denseDOF(2), denseBasisSize(1), denseBasisSize(2)), ...
-    sprintf("dataDOF [%d %d], basis [%d %d]", coarseDOF(1), coarseDOF(2), coarseBasisSize(1), coarseBasisSize(2)), ...
-    Location="southoutside")
+legend(  "Truth",  sprintf("dataDOF [%d %d], basis [%d %d]", denseDOF(1), denseDOF(2), denseBasisSize(1), denseBasisSize(2)),  sprintf("dataDOF [%d %d], basis [%d %d]", coarseDOF(1), coarseDOF(2), coarseBasisSize(1), coarseBasisSize(2)),  Location="southoutside")
 grid on
 ```
 
@@ -143,7 +136,7 @@ tKnot = {
     BSpline.knotPointsForDataPoints(P(:,2), K=4, dataDOF=22)
     };
 
-fit = ConstrainedSpline(P, zObs, K=[4 4], tKnot=tKnot);
+fit = ConstrainedSpline.fromPoints(P, zObs, K=[4 4], tKnot=tKnot);
 ```
 
 where `P` is the `N x 2` observation matrix. The same idea extends to

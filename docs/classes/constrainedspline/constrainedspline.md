@@ -16,10 +16,10 @@ Create a tensor-product spline fit to noisy observations.
 
 ## Declaration
 ```matlab
- self = ConstrainedSpline(points,values,options)
+ self = ConstrainedSpline(grid,values,options)
 ```
 ## Parameters
-+ `points`  observation locations as a point matrix
++ `grid`  numeric vector in 1-D or cell array of grid vectors in higher dimensions
 + `values`  observation values
 + `options.K`  optional spline order scalar or vector with one entry per dimension
 + `options.S`  optional spline degree scalar or vector with one entry per dimension
@@ -34,14 +34,15 @@ Create a tensor-product spline fit to noisy observations.
 
 ## Discussion
 
-  Use this constructor with an `N x D` point matrix when
-  fitting noisy tensor-product data.
+  Use this constructor with a numeric vector in 1-D or a cell
+  array of grid vectors in higher dimensions when fitting noisy
+  tensor-product data sampled on a rectilinear grid.
 
   In one dimension, `K=N` together with `splineDOF=N` gives the
   same least-squares polynomial fit as `polyfit(t,x,N-1)`.
 
   ```matlab
-  spline = ConstrainedSpline(points, values, K=[4 4]);
+  spline = ConstrainedSpline({x, y}, values, K=[4 4]);
   valuesFit = spline(Xq, Yq);
   ```
 

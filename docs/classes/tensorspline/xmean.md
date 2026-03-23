@@ -3,7 +3,7 @@ layout: default
 title: xMean
 parent: TensorSpline
 grand_parent: Classes
-nav_order: 21
+nav_order: 22
 mathjax: true
 ---
 

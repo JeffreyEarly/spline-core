@@ -6,9 +6,9 @@
 
 %% Fit a tensor spline to scattered observations
 % `InterpolatingSpline` in higher dimensions expects values on a
-% rectilinear tensor grid, but `ConstrainedSpline` accepts an `N x D`
-% point cloud directly. That makes it the right entry point for noisy
-% scattered observations in two dimensions.
+% rectilinear tensor grid, while scattered observations use
+% `ConstrainedSpline.fromPoints`. That makes it the right entry point for
+% noisy scattered observations in two dimensions.
 %
 % The tensor basis is still separable by coordinate direction, so we choose
 % one knot vector for `x` and one for `y`. The helper
@@ -39,8 +39,8 @@ coarseTKnot = {
     BSpline.knotPointsForDataPoints(P(:,2), K=K(2), dataDOF=coarseDOF(2))
     };
 
-denseFit = ConstrainedSpline(P, zObs, K=K, tKnot=denseTKnot);
-coarseFit = ConstrainedSpline(P, zObs, K=K, tKnot=coarseTKnot);
+denseFit = ConstrainedSpline.fromPoints(P, zObs, K=K, tKnot=denseTKnot);
+coarseFit = ConstrainedSpline.fromPoints(P, zObs, K=K, tKnot=coarseTKnot);
 
 denseBasisSize = cellfun(@numel, denseTKnot).' - K;
 coarseBasisSize = cellfun(@numel, coarseTKnot).' - K;
@@ -116,7 +116,7 @@ if exist("tutorialFigureCapture", "var") && isa(tutorialFigureCapture, "function
 %     BSpline.knotPointsForDataPoints(P(:,2), K=4, dataDOF=22)
 %     };
 %
-% fit = ConstrainedSpline(P, zObs, K=[4 4], tKnot=tKnot);
+% fit = ConstrainedSpline.fromPoints(P, zObs, K=[4 4], tKnot=tKnot);
 % ```
 %
 % where `P` is the `N x 2` observation matrix. The same idea extends to

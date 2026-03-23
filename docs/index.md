@@ -17,8 +17,8 @@ spline framework for robust fitting and constraints.
 
 ## MATLAB, Extended
 
-- [`InterpolatingSpline`](classes/interpolatingspline) plays a role similar to `interp1` in 1D and `griddedInterpolant` on rectilinear grids.
-- [`ConstrainedSpline`](classes/constrainedspline) can recover the same least-squares polynomial fit as `polyfit` in 1D when `K=N` and `splineDOF=N`.
+- [`InterpolatingSpline`](classes/interpolatingspline) plays a role similar to `interp1` in 1D and `griddedInterpolant`.
+- [`ConstrainedSpline`](classes/constrainedspline) can recover the same least-squares polynomial fit as `polyfit`.
 - In 1D, spline knots are chosen from the sample locations, so irregularly spaced data are handled naturally.
 - `ConstrainedSpline` supports robust fitting, local point constraints, and global positivity or monotonicity constraints in the same API.
 

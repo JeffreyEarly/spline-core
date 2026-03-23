@@ -24,7 +24,7 @@ The `InterpolatingSpline` class is useful for interpolating smooth functions. In
 ```matlab
 x = linspace(0,20,10)';
 y = sin(2*pi*x/10);
-spline = InterpolatingSpline(t,x)
+spline = InterpolatingSpline(x,y)
 ```
 and now you can evaluate the interpolated value,
 ```matlab
@@ -33,7 +33,7 @@ y_dense = spline(x_dense);
 ```
 By default the class uses cubic spline, but you can initialize with whatever order of spline you want, e.g.,
 ```matlab
-spline = InterpolatingSpline(t,x,'K',5)
+spline = InterpolatingSpline(x,y,K=5)
 ```
 
 
@@ -144,8 +144,8 @@ relative_error = max(abs(residual))/max(abs(y)) % returns O(1e-16)
 ```
 However, unlike Matlab's implementation, this class lets you specify the order of the spline to something other than cubic (K=4). For example, we can do a K=2 fit (which is just linear interpolation), but also a (K=5) fit.
 ```matlab
-spline_2 = InterpolatingSpline(x,y,'K',2);
-spline_5 = InterpolatingSpline(x,y,'K',5);
+spline_2 = InterpolatingSpline(x,y,K=2);
+spline_5 = InterpolatingSpline(x,y,K=5);
 
 figure
 plot(x_dense,f(x_dense)), hold on

@@ -109,53 +109,7 @@ classdef BSpline < handle
     end
     
     methods
-        function varargout = subsref(self, index)
-            % Evaluate the spline with function-call syntax or defer to built-in indexing.
-            %
-            % Parentheses indexing `spline(t)` is redirected to
-            % `valueAtPoints`, while dot indexing behaves like the default
-            % MATLAB handle-class implementation.
-            %
-            % Use `spline(t)` for values and `spline(t,n)` for derivatives.
-            %
-            % ```matlab
-            % x = spline(tQuery);
-            % dxdt = spline(tQuery, 1);
-            % ```
-            %
-            % - Topic: Evaluate the spline
-            % - Declaration: varargout = subsref(self,index)
-            % - Parameter self: BSpline instance
-            % - Parameter index: MATLAB subscript structure
-            % - Returns varargout: indexed property access or spline values
-            idx = index(1).subs;
-            switch index(1).type
-                %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% FEVAL / COMPOSE %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-                case '()'
-                    if length(idx) >= 1
-                        t = idx{1};
-                    end
-
-                    if length(idx) >= 2
-                        NumDerivatives = idx{2};
-                    else
-                        NumDerivatives = 0;
-                    end
-
-                    varargout{1} = self.valueAtPoints(t, NumDerivatives);
-
-                    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% GET %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-                case '.'
-                    [varargout{1:nargout}] = builtin('subsref',self,index);
-
-                    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% RESTRICT %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-                case '{}'
-                    error('The BSpline class does not know what to do with {}.');
-                otherwise
-                    error('Unexpected syntax');
-            end
-
-        end
+        varargout = subsref(self, index)
     end
 
     methods
@@ -264,93 +218,13 @@ classdef BSpline < handle
             tKnot = self.tKnot_;
         end
         
-        function x_out = valueAtPoints( self, t, NumDerivatives)
-            % Evaluate the spline or one of its derivatives at arbitrary points.
-            %
-            % This is the main explicit evaluation method. Pass
-            % `NumDerivatives = 0` for spline values, `1` for the first
-            % derivative, and so on.
-            %
-            % ```matlab
-            % x = spline.valueAtPoints(tQuery);
-            % d2x = spline.valueAtPoints(tQuery, 2);
-            % ```
-            %
-            % - Topic: Evaluate the spline
-            % - Declaration: x_out = valueAtPoints(self,t,NumDerivatives)
-            % - Parameter self: BSpline instance
-            % - Parameter t: evaluation points
-            % - Parameter NumDerivatives: derivative order to evaluate
-            % - Note: derivative orders above K-1 evaluate to zero.
-            % - Returns x_out: array matching the shape of t
-            arguments
-                self (1,1) BSpline
-                t {mustBeNumeric,mustBeReal}
-                NumDerivatives (1,1) double {mustBeInteger,mustBeNonnegative} = 0
-            end
-            if NumDerivatives > self.K-1
-                x_out = zeros(size(t), 'like', t);
-                return;
-            end
-            x_out = BSpline.evaluateFromPPCoefficients(t,self.C,self.t_pp,NumDerivatives);
-            if ~isempty(self.xStd)
-                x_out = self.xStd*x_out;
-            end
-            if ~isempty(self.xMean) && NumDerivatives == 0
-                x_out = x_out + self.xMean;
-            end
-        end
-        
-        function tKnotDidChange(self)
-            % Clear cached piecewise-polynomial data after knot updates.
-            %
-            % - Topic: Maintain cached state
-            % - Developer: true
-            % - Declaration: tKnotDidChange(self)
-            % - Parameter self: BSpline instance
-            self.Xtpp = [];
-            self.C = [];
-            self.t_pp = [];
-            self.xi_ = [];
-        end
-        
-        function splineCoefficientsDidChange(self)
-            % Refresh cached polynomial coefficients after coefficient updates.
-            %
-            % - Topic: Maintain cached state
-            % - Developer: true
-            % - Declaration: splineCoefficientsDidChange(self)
-            % - Parameter self: BSpline instance
-            if isempty(self.xi_)
-                self.C = [];
-                self.t_pp = [];
-                self.Xtpp = [];
-                return;
-            end
-            [self.C,self.t_pp,self.Xtpp] = BSpline.ppCoefficientsFromSplineCoefficients( self.xi_, self.tKnot_, self.K, Xtpp=self.Xtpp );
-        end
+        x_out = valueAtPoints(self, t, NumDerivatives)
+        tKnotDidChange(self)
+        splineCoefficientsDidChange(self)
     end
 
     methods (Access = private)
-        function transformedSpline = affineOutputTransform(self, scale, offset)
-            % Apply an affine transform to spline outputs without refitting.
-            %
-            % - Topic: Transform the spline
-            % - Declaration: transformedSpline = affineOutputTransform(self,scale,offset)
-            % - Parameter self: BSpline instance
-            % - Parameter scale: output scale factor
-            % - Parameter offset: output offset
-            % - Returns transformedSpline: BSpline with adjusted output normalization
-            arguments
-                self (1,1) BSpline
-                scale (1,1) double
-                offset (1,1) double
-            end
-
-            transformedSpline = BSpline(self.K,self.tKnot,self.xi);
-            transformedSpline.xStd = scale*self.xStd;
-            transformedSpline.xMean = scale*self.xMean + offset;
-        end
+        transformedSpline = affineOutputTransform(self, scale, offset)
     end
     
     methods (Static)

@@ -28,10 +28,10 @@ optional local point constraints and global shape constraints.
 ## Basic usage
 
 Use `ConstrainedSpline` when you want to fit a tensor-product
-spline to noisy multivariate data.
+spline to noisy values on a one-dimensional grid or rectilinear grid.
 
 ```matlab
-spline = ConstrainedSpline(points, values);
+spline = ConstrainedSpline({x, y}, values);
 valuesFit = spline(Xq, Yq);
 ```
 
@@ -41,6 +41,8 @@ valuesFit = spline(Xq, Yq);
 ## Topics
 + Create a constrained tensor spline
   + [`ConstrainedSpline`](/spline-core/classes/constrainedspline/constrainedspline.html) Create a tensor-product spline fit to noisy observations.
++ Fit scattered data
+  + [`fromPoints`](/spline-core/classes/constrainedspline/frompoints.html) Create a tensor-product spline fit from scattered point observations.
 + Inspect fit results
   + [`distribution`](/spline-core/classes/constrainedspline/distribution.html) Error model used while fitting the tensor spline.
   + [`globalConstraints`](/spline-core/classes/constrainedspline/globalconstraints.html) Global shape constraints used during fitting.

@@ -24,7 +24,7 @@ or if you need robust fitting or constraints, start with
 | Build or inspect a 1D spline basis directly | [`BSpline`](classes/bspline) | none directly | You work with knots, coefficients, basis matrices, roots, and transforms explicitly. |
 | Interpolate exact 1D data | [`InterpolatingSpline`](classes/interpolatingspline) | `interp1`, `spline` | Returns a spline object rather than only values. |
 | Interpolate exact data on a rectilinear grid | [`InterpolatingSpline`](classes/interpolatingspline) | `griddedInterpolant` | Same basic problem, but with the same spline object model as the rest of the package. |
-| Fit noisy data in 1D or higher dimensions | [`ConstrainedSpline`](classes/constrainedspline) | `polyfit` for simple 1D polynomial fits | Extends naturally to splines, robust fitting, and constraints. |
+| Fit noisy gridded or scattered data | [`ConstrainedSpline`](classes/constrainedspline) | `polyfit` for simple 1D polynomial fits | Extends naturally to splines, robust fitting, constraints, and explicit scattered-data fitting. |
 | Add local value or derivative constraints | [`ConstrainedSpline`](classes/constrainedspline) with [`PointConstraint`](classes/constraints/pointconstraint) | none directly | Constrain the fitted spline at specific points. |
 | Add global positivity or monotonicity constraints | [`ConstrainedSpline`](classes/constrainedspline) with [`GlobalConstraint`](classes/constraints/globalconstraint) | none directly | Constrain the fit over the whole model domain. |
 | Work with tensor-product spline objects directly | [`TensorSpline`](classes/tensorspline) | none directly | Lower-level tensor basis, evaluation, and transforms. |
@@ -52,6 +52,10 @@ t = sort(rand(50,1));
 x = exp(t) + 0.05*randn(size(t));
 fit = ConstrainedSpline(t, x, K=4, dataDOF=2);
 ```
+
+In higher dimensions, use `ConstrainedSpline({x, y}, values, ...)` for
+rectilinear grids and `ConstrainedSpline.fromPoints(P, values, ...)` for
+scattered observations.
 
 ## If You Are Coming from MATLAB
 
