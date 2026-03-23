@@ -133,7 +133,15 @@ classdef ConstrainedSpline < TensorSpline
 
             K = TensorSpline.resolveSplineOrders(options.K, options.S, numDimensions, "ConstrainedSpline");
             dataDOF = TensorSpline.normalizeOrders(options.dataDOF, numDimensions);
-            splineDOF = ConstrainedSpline.normalizeOptionalOrders(options.splineDOF, numDimensions);
+            splineDOF = options.splineDOF;
+            if ~isempty(splineDOF)
+                splineDOF = reshape(splineDOF, 1, []);
+                if isscalar(splineDOF)
+                    splineDOF = repmat(splineDOF, 1, numDimensions);
+                elseif numel(splineDOF) ~= numDimensions
+                    error('ConstrainedSpline:InvalidDegreeOfFreedomOption', 'dataDOF and splineDOF must be scalar or have one element per dimension.');
+                end
+            end
             if isempty(tKnot)
                 tKnot = ConstrainedSpline.defaultKnotCell(pointMatrix, K, dataDOF, splineDOF);
             end
@@ -151,10 +159,23 @@ classdef ConstrainedSpline < TensorSpline
             Xbasis = TensorSpline.matrix(pointMatrix, tKnot, K);
             rho_X = [];
             if ~isempty(distribution.rho)
-                rho_X = distribution.rho(ConstrainedSpline.pairwiseDistanceMatrix(pointMatrix));
+                delta = permute(pointMatrix, [1 3 2]) - permute(pointMatrix, [3 1 2]);
+                rho_X = distribution.rho(sqrt(sum(delta.^2, 3)));
             end
 
-            [Aeq,beq,Aineq,bineq] = ConstrainedSpline.compileConstraints(  pointConstraints, globalConstraints, tKnot, K);
+            basisSize = reshape(cellfun(@numel, tKnot), 1, []) - reshape(K, 1, []);
+            numCoefficients = prod(basisSize);
+            Aeq = sparse([], [], [], 0, numCoefficients);
+            beq = zeros(0,1);
+            Aineq = sparse([], [], [], 0, numCoefficients);
+            bineq = zeros(0,1);
+
+            [pointAeq, pointBeq, pointAineq, pointBineq] = ConstrainedSpline.compilePointConstraints(pointConstraints, tKnot, K);
+            [globalAineq, globalBineq] = ConstrainedSpline.compileGlobalConstraints(globalConstraints, tKnot, K);
+            Aeq = [Aeq; pointAeq];
+            beq = [beq; pointBeq];
+            Aineq = [Aineq; pointAineq; globalAineq];
+            bineq = [bineq; pointBineq; globalBineq];
 
             [coefficients,CmInv,W] = ConstrainedSpline.tensorModelSolution(  observedValues, Xbasis, distribution, rho_X, Aeq, beq, Aineq, bineq);
 
@@ -408,45 +429,6 @@ classdef ConstrainedSpline < TensorSpline
                     tKnot{iDim} = BSpline.knotPointsForDataPoints(coordinateValues,  K=K(iDim), dataDOF=dataDOF(iDim));
                 end
             end
-        end
-
-        function values = normalizeOptionalOrders(values, numDimensions)
-            % Normalize an optional per-dimension nonnegative integer vector.
-            if isempty(values)
-                return;
-            end
-
-            validateattributes(values, {'numeric'}, {'vector','real','finite','nonnegative','integer'});
-            values = reshape(values, 1, []);
-            if isscalar(values)
-                values = repmat(values, 1, numDimensions);
-            elseif numel(values) ~= numDimensions
-                error('ConstrainedSpline:InvalidDegreeOfFreedomOption',  'dataDOF and splineDOF must be scalar or have one element per dimension.');
-            end
-        end
-
-        function D = pairwiseDistanceMatrix(X)
-            % Compute pairwise Euclidean distances between observation points.
-            delta = permute(X, [1 3 2]) - permute(X, [3 1 2]);
-            D = sqrt(sum(delta.^2, 3));
-        end
-
-        function [Aeq, beq, Aineq, bineq] = compileConstraints(pointConstraints, globalConstraints, tKnot, K)
-            % Compile point and global constraints into linear systems.
-            basisSize = reshape(cellfun(@numel, tKnot), 1, []) - reshape(K, 1, []);
-            numCoefficients = prod(basisSize);
-            Aeq = sparse([], [], [], 0, numCoefficients);
-            beq = zeros(0,1);
-            Aineq = sparse([], [], [], 0, numCoefficients);
-            bineq = zeros(0,1);
-
-            [pointAeq, pointBeq, pointAineq, pointBineq] =  ConstrainedSpline.compilePointConstraints(pointConstraints, tKnot, K);
-            [globalAineq, globalBineq] =  ConstrainedSpline.compileGlobalConstraints(globalConstraints, tKnot, K);
-
-            Aeq = [Aeq; pointAeq];
-            beq = [beq; pointBeq];
-            Aineq = [Aineq; pointAineq; globalAineq];
-            bineq = [bineq; pointBineq; globalBineq];
         end
 
         function [Aeq, beq, Aineq, bineq] = compilePointConstraints(pointConstraints, tKnot, K)
