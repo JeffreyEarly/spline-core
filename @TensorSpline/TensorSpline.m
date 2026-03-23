@@ -3,23 +3,22 @@ classdef TensorSpline < handle
     %
     % TensorSpline represents a tensor-product basis assembled from
     % one-dimensional B-spline bases in each coordinate direction. It
-    % supports direct evaluation on one query array per coordinate
-    % together with mixed partial derivatives.
+    % supports pointwise evaluation on one matching-size query array
+    % per coordinate together with mixed partial derivatives.
     %
     % ## Basic usage
     %
     % Use `TensorSpline` when you already have knot vectors and
     % tensor-product coefficients and want to evaluate the resulting
-    % spline on query arrays.
+    % spline on matching-size query arrays.
     %
     % ```matlab
     % knotPoints = {[0;0;0;0;1;1;1;1], [0;0;0;0;1;1;1;1]};
     % xi = randn(16,1);
     % spline = TensorSpline(S=[3 3], knotPoints=knotPoints, xi=xi);
     %
-    % xq = linspace(0,1,40)';
-    % yq = linspace(0,1,40)';
-    % F = spline(xq, yq);
+    % [Xq,Yq] = ndgrid(linspace(0,1,40), linspace(0,1,40));
+    % F = spline(Xq, Yq);
     % ```
     %
     % - Topic: Create a spline
@@ -96,7 +95,8 @@ classdef TensorSpline < handle
             %
             % ```matlab
             % spline = TensorSpline(S=[3 3], knotPoints=knotPoints, xi=xi);
-            % values = spline(xq, yq);
+            % [Xq,Yq] = ndgrid(linspace(0,1,40), linspace(0,1,40));
+            % values = spline(Xq, Yq);
             % ```
             %
             % - Topic: Create a spline

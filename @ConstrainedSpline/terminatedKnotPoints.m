@@ -1,5 +1,5 @@
 function knotPoints = terminatedKnotPoints(knotPoints, S)
-% Ensure each knot vector has K repeated knots at its boundaries.
+% Ensure each knot vector has S+1 repeated knots at its boundaries.
 %
 % Use this helper when you want to terminate a manually supplied
 % knot sequence before fitting. In 1-D it accepts a numeric knot

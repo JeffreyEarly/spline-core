@@ -2,11 +2,15 @@ function values = valueAtPoints(self, X, options)
 % Evaluate the tensor spline or a mixed partial derivative.
 %
 % This is the primary explicit evaluation method. Supply one
-% matching-size query array per tensor dimension.
+% matching-size query array per tensor dimension. Paired column
+% vectors give pointwise queries, while matching ndgrid arrays give
+% gridded evaluation over a tensor-product lattice.
 %
 % ```matlab
-% values = spline(xq, yq);
+% values = spline.valueAtPoints(xq, yq);
 % dFdx = spline.valueAtPoints(xq, yq, D=[1 0]);
+% [Xq,Yq] = ndgrid(linspace(-1,1,40), linspace(0,2,50));
+% F = spline.valueAtPoints(Xq, Yq);
 % ```
 %
 % - Topic: Evaluate the spline

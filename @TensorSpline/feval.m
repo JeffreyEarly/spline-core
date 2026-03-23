@@ -1,10 +1,14 @@
 function values = feval(spline, X, options)
-% Evaluate a tensor spline at the supplied points.
+% Evaluate a tensor spline at matching-size query arrays.
 %
-% This is a thin wrapper around `valueAtPoints(...)`.
+% This is a thin wrapper around `valueAtPoints(...)`. Paired
+% column vectors give pointwise queries, while matching ndgrid
+% arrays give gridded evaluation.
 %
 % ```matlab
 % values = feval(spline, xq, yq);
+% [Xq,Yq] = ndgrid(linspace(-1,1,40), linspace(0,2,50));
+% F = feval(spline, Xq, Yq);
 % ```
 %
 % - Topic: Evaluate the spline

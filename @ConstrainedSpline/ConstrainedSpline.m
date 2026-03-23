@@ -265,7 +265,6 @@ classdef ConstrainedSpline < TensorSpline
 
     methods (Static, Access = private)
         [xi,CmInv,W] = tensorModelSolution(values, designMatrix, distribution, rho_X, Aeq, beq, Aineq, bineq)
-        [constraintArguments, constrainedValues] = constraintArguments(constraints, sampleValues, options)
 
         % Constraint compilation.
         [Aeq, beq, Aineq, bineq] = compilePointConstraints(pointConstraints, tKnot, K)
