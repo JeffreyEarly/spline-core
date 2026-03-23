@@ -30,9 +30,3 @@ spline framework for robust fitting and constraints.
 | [`ConstrainedSpline`](classes/constrainedspline) | noisy-data fitting, robust fitting, and local or global constraints |
 | [`BSpline`](classes/bspline) | low-level one-dimensional spline basis construction and analysis |
 | [`TensorSpline`](classes/tensorspline) | low-level tensor-product spline construction and analysis |
-
-## One Distinction
-
-In more than one dimension, `InterpolatingSpline` performs exact
-interpolation on rectilinear tensor grids, while `ConstrainedSpline` fits
-tensor-product models to scattered or gridded observations.

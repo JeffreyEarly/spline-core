@@ -32,7 +32,7 @@ xTrueDense = exp(-3*tDense).*sin(4*pi*tDense);
 xLeastSquares = leastSquaresFit(tDense);
 xRobust = robustFit(tDense);
 
-figure(Position=[100 100 780 360])
+figure(Position=[100 100 900 300])
 plot(tDense, xTrueDense, "k--", LineWidth=1.5), hold on
 plot(tDense, xLeastSquares, LineWidth=2)
 plot(tDense, xRobust, LineWidth=2)
@@ -41,7 +41,7 @@ scatter(t(outlierIndex), xObs(outlierIndex), 65, "o", LineWidth=1.5)
 xlabel("t")
 ylabel("x(t)")
 legend("Truth", "Least squares", "Robust Student-t fit", "Observations", "Tagged outliers", ...
-    Location="southoutside")
+    Location="northeast")
 grid on
 if exist("tutorialFigureCapture", "var") && isa(tutorialFigureCapture, "function_handle"), tutorialFigureCapture("robust-fit-comparison", Caption="A Student-t fit stays closer to the underlying signal when several observations are large outliers."); end
 
