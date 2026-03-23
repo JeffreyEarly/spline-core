@@ -52,7 +52,9 @@ classdef ConstrainedSpline < TensorSpline
         %
         % - Topic: Inspect fit results
         globalConstraints
+    end
 
+    properties (SetAccess = private, Hidden)
         % Inverse coefficient covariance or normal-equation system matrix.
         %
         % - Topic: Inspect fit results
@@ -123,7 +125,7 @@ classdef ConstrainedSpline < TensorSpline
                 options.knotPoints = []
                 options.splineDOF {mustBeNumeric,mustBeReal,mustBeFinite,mustBeInteger,mustBeNonnegative} = []
                 options.distribution = []
-                options.constraints = []
+                options.constraints SplineConstraint = SplineConstraint.empty(0,1)
             end
 
             if iscell(grid)
@@ -210,7 +212,8 @@ classdef ConstrainedSpline < TensorSpline
                 tKnot{iDim} = ConstrainedSpline.terminatedKnotPoints(tKnot{iDim}, S(iDim));
             end
 
-            [pointConstraints, globalConstraints] = ConstrainedSpline.normalizeConstraintInputs(  options.constraints, numDimensions);
+            constraints = reshape(options.constraints, [], 1);
+            [pointConstraints, globalConstraints] = ConstrainedSpline.normalizeConstraintInputs(constraints, numDimensions);
 
             Xbasis = TensorSpline.matrix(pointMatrix, tKnot, S);
             rho_X = [];
@@ -256,13 +259,14 @@ classdef ConstrainedSpline < TensorSpline
     end
 
     methods (Static)
-        [xi,CmInv,W] = tensorModelSolution(values, designMatrix, distribution, rho_X, Aeq, beq, Aineq, bineq)
         knotPoints = terminatedKnotPoints(knotPoints, S)
         tc = minimumConstraintPoints(knotPoints, S, T)
-        [constraintArguments, constrainedValues] = constraintArguments(constraints, sampleValues, options)
     end
 
     methods (Static, Access = private)
+        [xi,CmInv,W] = tensorModelSolution(values, designMatrix, distribution, rho_X, Aeq, beq, Aineq, bineq)
+        [constraintArguments, constrainedValues] = constraintArguments(constraints, sampleValues, options)
+
         % Constraint compilation.
         [Aeq, beq, Aineq, bineq] = compilePointConstraints(pointConstraints, tKnot, K)
         [Aineq, bineq] = compileGlobalConstraints(globalConstraints, tKnot, K)

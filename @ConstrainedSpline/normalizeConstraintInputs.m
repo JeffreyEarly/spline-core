@@ -1,13 +1,9 @@
 function [pointConstraints, globalConstraints] = normalizeConstraintInputs(constraints, numDimensions)
-% Normalize mixed constraint inputs into separate arrays.
+% Split typed constraint inputs into point and global arrays.
 if isempty(constraints)
     pointConstraints = PointConstraint.empty(0,1);
     globalConstraints = GlobalConstraint.empty(0,1);
     return;
-end
-
-if ~isa(constraints, 'SplineConstraint')
-    error('ConstrainedSpline:InvalidConstraints',  'constraints must be a SplineConstraint array.');
 end
 
 constraints = reshape(constraints, [], 1);

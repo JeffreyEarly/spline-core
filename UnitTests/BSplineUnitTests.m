@@ -149,6 +149,28 @@ classdef BSplineUnitTests < matlab.unittest.TestCase
             testCase.verifyEqual(spline.xMean, 4)
             testCase.verifyEqual(spline.xStd, 5)
         end
+
+        function powerPreservesPositivityForNearlyNonnegativeSupportValues(testCase)
+            t = linspace(0,1,9)';
+            x = [0.3214; 0.0927; 0.1944; 0.0228; 0.0278; 0.5334; 0.9278; 0.0508; 0.3518];
+            exponent = 1.376389;
+            knotPoints = BSpline.knotPointsForDataPoints(t, S=3);
+            spline = BSpline(S=3, knotPoints=knotPoints, xi=BSpline.matrix(t, knotPoints, 3)\x);
+
+            poweredSpline = spline.^exponent;
+
+            supportPoints = BSpline.pointsOfSupport(spline.knotPoints, spline.S);
+            supportValues = spline.valueAtPoints(supportPoints);
+            supportValues(abs(supportValues) < 2*eps) = 0;
+            poweredK = ceil(exponent*spline.K);
+            poweredKnotPoints = BSpline.knotPointsForDataPoints(supportPoints, S=poweredK-1);
+            X = BSpline.matrix(supportPoints, poweredKnotPoints, poweredK-1);
+            unconstrainedSpline = BSpline(S=poweredK-1, knotPoints=poweredKnotPoints, xi=X\(supportValues.^exponent));
+            tq = linspace(0,1,1001)';
+
+            testCase.verifyLessThan(min(unconstrainedSpline(tq)), -1e-3)
+            testCase.verifyGreaterThanOrEqual(min(poweredSpline(tq)), -1e-10)
+        end
     end
 
 end

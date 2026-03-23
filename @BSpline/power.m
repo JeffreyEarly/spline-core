@@ -30,9 +30,10 @@ values(abs(values) < 2*eps) = 0;
 poweredK = ceil(exponent*spline.K);
 knotPoints = BSpline.knotPointsForDataPoints(supportPoints, S=poweredK-1);
 poweredValues = values.^exponent;
-[constraintArguments, poweredValues] = ConstrainedSpline.constraintArguments(  [], poweredValues, enforcePositiveIfPossible=true, numDimensions=1);
-if ~isempty(constraintArguments)
-    fittedSpline = ConstrainedSpline(supportPoints, poweredValues, S=poweredK-1, knotPoints=knotPoints, constraintArguments{:});
+tolerance = 10*eps(max(1, max(abs(poweredValues))));
+if all(isfinite(poweredValues)) && all(poweredValues >= -tolerance)
+    poweredValues = max(poweredValues, 0);
+    fittedSpline = ConstrainedSpline(supportPoints, poweredValues, S=poweredK-1, knotPoints=knotPoints, constraints=GlobalConstraint.positive());
     poweredSpline = BSpline(S=poweredK-1, knotPoints=fittedSpline.knotPoints, xi=fittedSpline.xi(:));
 else
     X = BSpline.matrix(supportPoints, knotPoints, poweredK-1);
