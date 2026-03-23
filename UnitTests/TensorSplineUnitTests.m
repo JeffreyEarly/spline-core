@@ -70,6 +70,17 @@ classdef TensorSplineUnitTests < matlab.unittest.TestCase
             testCase.assertThat(values, IsEqualTo(F, 'Within', AbsoluteTolerance(1e-10)))
         end
 
+        function tensorSplineRejectsPointMatrixEvaluationSyntax(testCase)
+            x = linspace(-1,1,6)';
+            y = linspace(0,2,7)';
+            [X,Y] = ndgrid(x,y);
+            F = X.^2 + Y;
+
+            spline = InterpolatingSpline(x, y, F, K=[4 4]);
+
+            testCase.verifyError(@() spline([X(:), Y(:)]), 'TensorSpline:InvalidEvaluationInput')
+        end
+
         function tensorInterpolatingSplineRejectsNdgridConstructorInputs(testCase)
             x = linspace(-1,1,6)';
             y = linspace(0,2,7)';
@@ -203,10 +214,13 @@ classdef TensorSplineUnitTests < matlab.unittest.TestCase
             F = X.^2 + Y + 2;
             spline = InterpolatingSpline(x, y, F, K=[4 4]);
             squaredSpline = spline.^2;
-            supportPoints = TensorSpline.pointsOfSupport(spline.tKnot, spline.K);
+            [supportPoints, supportVectors] = TensorSpline.pointsOfSupport(spline.tKnot, spline.K);
+            [Xsup, Ysup] = ndgrid(supportVectors{:});
+            expected = reshape(TensorSpline.matrix(supportPoints, spline.tKnot, spline.K) * spline.xi(:), cellfun(@numel, supportVectors));
+            expected = spline.xStd * expected + spline.xMean;
 
-            testCase.assertThat(squaredSpline(supportPoints), ...
-                IsEqualTo(spline(supportPoints).^2, 'Within', AbsoluteTolerance(1e-10)))
+            testCase.assertThat(squaredSpline(Xsup, Ysup), ...
+                IsEqualTo(expected.^2, 'Within', AbsoluteTolerance(1e-10)))
         end
 
         function tensorSplineSqrtMatchesSquareRootValuesOnSupport(testCase)
@@ -219,10 +233,13 @@ classdef TensorSplineUnitTests < matlab.unittest.TestCase
             F = (X + 1).^2 + (Y + 2).^2;
             spline = InterpolatingSpline(x, y, F, K=[4 4]);
             rootedSpline = sqrt(spline);
-            supportPoints = TensorSpline.pointsOfSupport(spline.tKnot, spline.K);
+            [supportPoints, supportVectors] = TensorSpline.pointsOfSupport(spline.tKnot, spline.K);
+            [Xsup, Ysup] = ndgrid(supportVectors{:});
+            expected = reshape(TensorSpline.matrix(supportPoints, spline.tKnot, spline.K) * spline.xi(:), cellfun(@numel, supportVectors));
+            expected = spline.xStd * expected + spline.xMean;
 
-            testCase.assertThat(rootedSpline(supportPoints), ...
-                IsEqualTo(sqrt(spline(supportPoints)), 'Within', AbsoluteTolerance(1e-10)))
+            testCase.assertThat(rootedSpline(Xsup, Ysup), ...
+                IsEqualTo(sqrt(expected), 'Within', AbsoluteTolerance(1e-10)))
         end
     end
 end

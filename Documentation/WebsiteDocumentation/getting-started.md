@@ -119,8 +119,9 @@ y = linspace(-2,2,7)';
 
 Ftrue = 1 + 2*X - Y + 0.5*X.^2.*Y - 0.25*X.*Y.^3;
 Fobs = Ftrue + 0.05*randn(size(Ftrue));
+P = [X(:), Y(:)];
 
-fit = ConstrainedSpline({X,Y}, Fobs);
+fit = ConstrainedSpline(P, Fobs(:));
 
 xq = linspace(min(x),max(x),41)';
 yq = linspace(min(y),max(y),51)';
@@ -132,7 +133,7 @@ If you want a denser tensor basis or a robust error model, pass them as
 named options.
 
 ```matlab
-fit = ConstrainedSpline({X,Y}, Fobs, ...
+fit = ConstrainedSpline(P, Fobs(:), ...
     K=[4 4], ...
     tKnot={BSpline.knotPointsForDataPoints(x,K=4,dataDOF=2), ...
            BSpline.knotPointsForDataPoints(y,K=4,dataDOF=2)}, ...

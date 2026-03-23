@@ -38,10 +38,8 @@ c2 = GlobalConstraint.monotonicIncreasing(dimension=2);
 
 ## Topics
 + Specify global constraints
-  + [`GlobalConstraint`](/spline-core/classes/constraints/globalconstraint/globalconstraint.html) Create a global constraint specification.
   + [`monotonicDecreasing`](/spline-core/classes/constraints/globalconstraint/monotonicdecreasing.html) Create a monotone-decreasing constraint along one dimension.
   + [`monotonicIncreasing`](/spline-core/classes/constraints/globalconstraint/monotonicincreasing.html) Create a monotone-increasing constraint along one dimension.
-  + [`none`](/spline-core/classes/constraints/globalconstraint/none.html) Create an explicit no-op global constraint.
   + [`positive`](/spline-core/classes/constraints/globalconstraint/positive.html) Create a positivity constraint.
 + Inspect global constraint properties
   + [`dimension`](/spline-core/classes/constraints/globalconstraint/dimension.html) Tensor dimension associated with the constraint, when applicable.

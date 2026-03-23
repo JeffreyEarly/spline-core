@@ -35,7 +35,7 @@ Return representative support points for a tensor-product spline basis.
 
   ```matlab
   [supportPoints, supportVectors] = TensorSpline.pointsOfSupport(tKnot, [4 4]);
-  values = spline(supportPoints);
+  values = spline(supportVectors{:});
   ```
 
 

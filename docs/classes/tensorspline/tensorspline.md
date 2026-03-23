@@ -35,7 +35,7 @@ Create a tensor-product spline from per-dimension orders, knots, and coefficient
 
   ```matlab
   spline = TensorSpline([4 4], tKnot, xi);
-  values = spline(queryPoints);
+  values = spline(xq, yq);
   ```
 
 

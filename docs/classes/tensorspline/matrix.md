@@ -33,7 +33,8 @@ Evaluate the tensor-product basis matrix and optional derivatives.
   interpolation, regression, or basis inspection.
 
   ```matlab
-  B = TensorSpline.matrix(queryPoints, tKnot, [4 4]);
+  [Xq, Yq] = ndgrid(xq, yq);
+  B = TensorSpline.matrix([Xq(:), Yq(:)], tKnot, [4 4]);
   values = B * spline.xi(:);
   ```
 

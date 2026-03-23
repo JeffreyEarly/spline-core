@@ -20,7 +20,7 @@ classdef GlobalConstraint < SplineConstraint
         % Shape-constraint kind.
         %
         % - Topic: Inspect global constraint properties
-        shape (1,1) string = "none"
+        shape (1,1) string = ""
 
         % Tensor dimension associated with the constraint, when applicable.
         %
@@ -28,47 +28,14 @@ classdef GlobalConstraint < SplineConstraint
         dimension = double.empty(1,0)
     end
 
-    methods
-        function self = GlobalConstraint(shape, options)
-            % Create a global constraint specification.
-            %
-            % Use the static helper methods `positive`,
-            % `monotonicIncreasing`, and `monotonicDecreasing` for the
-            % intended public construction style.
-            %
-            % - Topic: Specify global constraints
-            % - Declaration: self = GlobalConstraint(shape,options)
-            % - Parameter shape: one of "none", "positive", "monotonicIncreasing", or "monotonicDecreasing"
-            % - Parameter options.dimension: tensor dimension for directional constraints
-            % - Returns self: GlobalConstraint instance
+    methods (Access = private)
+        function self = GlobalConstraint(shape, dimension)
             arguments
-                shape {mustBeTextScalar, mustBeMember(shape, ["none", "positive", "monotonicIncreasing", "monotonicDecreasing"])} = "none"
-                options.dimension = double.empty(1,0)
+                shape {mustBeTextScalar,mustBeMember(shape,["positive","monotonicIncreasing","monotonicDecreasing"])}
+                dimension = double.empty(1,0)
             end
 
-            shape = string(shape);
-
-            if ~isempty(options.dimension)
-                validateattributes(options.dimension, {'numeric'}, ...
-                    {'scalar','real','finite','integer','positive'});
-            end
-
-            switch shape
-                case {"none", "positive"}
-                    if ~isempty(options.dimension)
-                        error('GlobalConstraint:UnexpectedDimension', ...
-                            'Dimension is not used for this global constraint.');
-                    end
-                    dimension = double.empty(1,0);
-                case {"monotonicIncreasing", "monotonicDecreasing"}
-                    if isempty(options.dimension)
-                        error('GlobalConstraint:MissingDimension', ...
-                            'Dimension must be specified for directional global constraints.');
-                    end
-                    dimension = options.dimension;
-            end
-
-            self.shape = shape;
+            self.shape = string(shape);
             self.dimension = dimension;
         end
     end
@@ -84,7 +51,7 @@ classdef GlobalConstraint < SplineConstraint
             % - Topic: Specify global constraints
             % - Declaration: self = positive()
             % - Returns self: positivity GlobalConstraint
-            self = GlobalConstraint("positive");
+            self = GlobalConstraint("positive", double.empty(1,0));
         end
 
         function self = monotonicIncreasing(options)
@@ -102,7 +69,7 @@ classdef GlobalConstraint < SplineConstraint
                 options.dimension (1,1) double {mustBeInteger,mustBePositive} = 1
             end
 
-            self = GlobalConstraint("monotonicIncreasing", dimension=options.dimension);
+            self = GlobalConstraint("monotonicIncreasing", options.dimension);
         end
 
         function self = monotonicDecreasing(options)
@@ -120,20 +87,7 @@ classdef GlobalConstraint < SplineConstraint
                 options.dimension (1,1) double {mustBeInteger,mustBePositive} = 1
             end
 
-            self = GlobalConstraint("monotonicDecreasing", dimension=options.dimension);
-        end
-
-        function self = none()
-            % Create an explicit no-op global constraint.
-            %
-            % ```matlab
-            % c = GlobalConstraint.none();
-            % ```
-            %
-            % - Topic: Specify global constraints
-            % - Declaration: self = none()
-            % - Returns self: no-op GlobalConstraint
-            self = GlobalConstraint("none");
+            self = GlobalConstraint("monotonicDecreasing", options.dimension);
         end
     end
 end

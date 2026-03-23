@@ -23,14 +23,14 @@ Tensor-product spline over multiple dimensions.
 
 TensorSpline represents a tensor-product basis assembled from
 one-dimensional B-spline bases in each coordinate direction. It
-supports direct evaluation on point clouds or query grids together
-with mixed partial derivatives.
+supports direct evaluation on one query array per coordinate
+together with mixed partial derivatives.
 
 ## Basic usage
 
 Use `TensorSpline` when you already have knot vectors and
 tensor-product coefficients and want to evaluate the resulting
-spline on points or grids.
+spline on query arrays.
 
 ```matlab
 tKnot = {[0;0;0;0;1;1;1;1], [0;0;0;0;1;1;1;1]};

@@ -22,9 +22,5 @@ classdef GlobalConstraintUnitTests < matlab.unittest.TestCase
             testCase.verifyEqual(constraint.dimension, 2)
         end
 
-        function positiveConstraintRejectsUnexpectedDimension(testCase)
-            testCase.verifyError(@() GlobalConstraint("positive", dimension=1), ...
-                'GlobalConstraint:UnexpectedDimension')
-        end
     end
 end

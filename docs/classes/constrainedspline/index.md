@@ -32,7 +32,7 @@ spline to noisy multivariate data.
 
 ```matlab
 spline = ConstrainedSpline(points, values);
-valuesFit = spline(points);
+valuesFit = spline(Xq, Yq);
 ```
 
 

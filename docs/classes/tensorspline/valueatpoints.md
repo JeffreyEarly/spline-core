@@ -20,7 +20,7 @@ Evaluate the tensor spline or a mixed partial derivative.
 ```
 ## Parameters
 + `self`  TensorSpline instance
-+ `X1,...,Xn`  query locations as a point matrix or one array per dimension
++ `X1,...,Xn`  query locations as one array per dimension
 + `derivativeOrders`  derivative order per dimension
 
 ## Returns
@@ -28,11 +28,9 @@ Evaluate the tensor spline or a mixed partial derivative.
 
 ## Discussion
 
-  Evaluate either on an `N x D` point matrix or with one query
-  input per tensor dimension.
+  Evaluate with one query input per tensor dimension.
 
   ```matlab
-  values = spline(queryPoints);
   values = spline(xq, yq);
   ```
 
