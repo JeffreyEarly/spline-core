@@ -29,9 +29,9 @@ Evaluate the tensor spline or a mixed partial derivative.
 ## Discussion
 
   Evaluate with one query input per tensor dimension.
-
+ 
   ```matlab
   values = spline(xq, yq);
   ```
-
-
+ 
+            

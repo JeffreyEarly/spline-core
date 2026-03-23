@@ -14,6 +14,17 @@ package keeps those familiar workflows inside a consistent spline-object
 model that also supports low-level basis access, robust fitting, and
 constraints.
 
+## At a glance
+
+| Familiar MATLAB tool | `Spline Core` alignment | What `Spline Core` adds |
+| --- | --- | --- |
+| `interp1` | `InterpolatingSpline(t, x, K=4)` | inspectable spline objects, derivatives, roots, knot access |
+| `griddedInterpolant` | `InterpolatingSpline(x, y, V, K=[4 4])` | tensor derivatives, basis access, same family as constrained fitting |
+| `polyfit` | `ConstrainedSpline(t, x, K=N, splineDOF=N)` | data-driven spline spaces, robust fitting, local/global constraints |
+
+The rest of this page gives the side-by-side code and the main differences
+for each case.
+
 ## `interp1` and one-dimensional interpolation
 
 If your mental model is `interp1`, the alignment is straightforward:

@@ -31,5 +31,5 @@ Create a pointwise equality constraint.
   ```matlab
   c = PointConstraint.equal(tc, D=2, value=0);
   ```
-
-
+ 
+            

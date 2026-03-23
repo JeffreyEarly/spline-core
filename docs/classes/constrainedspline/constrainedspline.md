@@ -36,13 +36,13 @@ Create a tensor-product spline fit to noisy observations.
 
   Use this constructor with an `N x D` point matrix when
   fitting noisy tensor-product data.
-
+ 
   In one dimension, `K=N` together with `splineDOF=N` gives the
   same least-squares polynomial fit as `polyfit(t,x,N-1)`.
-
+ 
   ```matlab
   spline = ConstrainedSpline(points, values, K=[4 4]);
   valuesFit = spline(Xq, Yq);
   ```
-
-
+ 
+                        

@@ -16,4 +16,4 @@ Spline order in each tensor dimension.
 
 ## Discussion
 
-
+  

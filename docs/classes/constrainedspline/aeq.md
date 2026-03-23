@@ -18,4 +18,4 @@ Linear equality constraints applied to the coefficient solve.
 
 ## Discussion
 
-
+    

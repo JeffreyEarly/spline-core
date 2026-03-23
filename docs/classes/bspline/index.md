@@ -20,28 +20,28 @@ Create, evaluate, and manipulate terminated B-spline representations.
 <div class="language-matlab highlighter-rouge"><div class="highlight"><pre class="highlight"><code>classdef BSpline < handle</code></pre></div></div>
 
 ## Overview
-
+ 
 BSpline stores a spline basis order, knot sequence, and spline
 coefficients together with cached piecewise-polynomial coefficients for
 efficient evaluation, differentiation, and algebraic transforms.
-
+ 
 ## Basic usage
-
+ 
 In most workflows you first build a knot sequence from sample
 locations, assemble the spline basis matrix, solve for coefficients,
 and then evaluate the resulting spline object.
-
+ 
 ```matlab
 t = linspace(0,1,20)';
 x = sin(2*pi*t);
 tKnot = BSpline.knotPointsForDataPoints(t, K=4);
 X = BSpline.matrix(t, tKnot, 4);
 spline = BSpline(4, tKnot, X\x);
-
+ 
 xq = spline(linspace(0,1,100)');
 ```
-
-
+ 
+             
 
 
 

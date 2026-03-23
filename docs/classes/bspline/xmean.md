@@ -16,4 +16,4 @@ Mean added back to zero-order spline evaluations.
 
 ## Discussion
 
-
+  

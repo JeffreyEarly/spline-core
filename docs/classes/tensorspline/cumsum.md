@@ -29,10 +29,10 @@ Return the indefinite integral along one tensor dimension.
 
   The integral is zero at the lower bound of the selected
   dimension while holding all other coordinates fixed.
-
+ 
   ```matlab
   F = cumsum(spline);
   Fy = cumsum(spline, 2);
   ```
-
-
+ 
+          

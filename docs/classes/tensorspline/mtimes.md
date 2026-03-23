@@ -30,5 +30,5 @@ Multiply tensor-spline outputs by a scalar.
   ```matlab
   scaledSpline = 2.5 * spline;
   ```
-
-
+ 
+          

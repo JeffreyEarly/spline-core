@@ -97,6 +97,18 @@ robustFit = ConstrainedSpline(t, x, ...
     distribution=StudentTDistribution(sigma=0.1, nu=3));
 ```
 
+## A Second Difference: Tensor Constraints
+
+The same framework also supports constraints over many points at once. For
+example, a masked region on a tensor grid can be converted into local
+value and derivative constraints and then fit in one solve.
+
+<img src="tutorials/mask-constrained-fit/mask-constrained-fit.png" alt="Tensor fit with constraints applied over a masked region" width="700">
+
+This is a good example of the package's scope: it is not just a collection
+of interpolation routines, but a spline framework for fitting and
+constraining models built from the same underlying basis.
+
 ## One Important Modeling Boundary
 
 In more than one dimension:

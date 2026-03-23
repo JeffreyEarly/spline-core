@@ -31,9 +31,9 @@ Create a pointwise equality constraint from a logical mask.
 
   Use this when a constrained region is naturally described by
   a logical mask on a rectilinear grid.
-
+ 
   ```matlab
   c = PointConstraint.equalOnMask({x,y}, mask, D=[0 0], value=0);
   ```
-
-
+ 
+              

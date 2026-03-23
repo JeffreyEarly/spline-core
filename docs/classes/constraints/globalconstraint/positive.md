@@ -26,5 +26,5 @@ Create a positivity constraint.
   ```matlab
   c = GlobalConstraint.positive();
   ```
-
-
+ 
+      

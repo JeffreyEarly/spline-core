@@ -18,4 +18,4 @@ Right-hand side for equality constraints.
 
 ## Discussion
 
-
+    

@@ -31,5 +31,5 @@ Create a pointwise equality or bound constraint.
 
   Use the static helper methods `equal`, `lowerBound`, and
   `upperBound` for the intended public construction style.
-
-
+ 
+              

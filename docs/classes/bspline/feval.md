@@ -29,9 +29,9 @@ Evaluate a B-spline at the supplied points.
 
   This is equivalent to `spline(x)` and is useful when you prefer an
   explicit function-call form.
-
+ 
   ```matlab
   values = feval(spline, tQuery);
   ```
-
-
+ 
+          

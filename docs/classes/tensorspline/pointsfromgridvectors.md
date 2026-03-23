@@ -29,10 +29,10 @@ Convert rectilinear grid vectors into an explicit point matrix.
 
   Use this helper to convert rectilinear grid vectors into the
   point-matrix format accepted by `TensorSpline.matrix`.
-
+ 
   ```matlab
   [points, gridSize] = TensorSpline.pointsFromGridVectors({x,y});
   B = TensorSpline.matrix(points, tKnot, [4 4]);
   ```
-
-
+ 
+          

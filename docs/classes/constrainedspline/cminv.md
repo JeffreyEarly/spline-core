@@ -18,4 +18,4 @@ Inverse coefficient covariance or normal-equation system matrix.
 
 ## Discussion
 
-
+    

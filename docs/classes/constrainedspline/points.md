@@ -16,4 +16,4 @@ Observation locations as an N-by-D point matrix.
 
 ## Discussion
 
-
+  

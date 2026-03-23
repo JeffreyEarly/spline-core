@@ -32,10 +32,10 @@ Create a tensor-product spline from per-dimension orders, knots, and coefficient
 
   Use this constructor when you already know the per-dimension
   knot vectors and tensor-product coefficients.
-
+ 
   ```matlab
   spline = TensorSpline([4 4], tKnot, xi);
   values = spline(xq, yq);
   ```
-
-
+ 
+                

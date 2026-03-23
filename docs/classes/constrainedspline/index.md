@@ -20,22 +20,22 @@ Tensor-product spline fit through noisy data values.
 <div class="language-matlab highlighter-rouge"><div class="highlight"><pre class="highlight"><code>classdef ConstrainedSpline < TensorSpline</code></pre></div></div>
 
 ## Overview
-
+ 
 ConstrainedSpline fits a tensor-product spline basis to noisy
 observations using iteratively reweighted least squares together with
 optional local point constraints and global shape constraints.
-
+ 
 ## Basic usage
-
+ 
 Use `ConstrainedSpline` when you want to fit a tensor-product
 spline to noisy multivariate data.
-
+ 
 ```matlab
 spline = ConstrainedSpline(points, values);
 valuesFit = spline(Xq, Yq);
 ```
-
-
+ 
+          
 
 
 ## Topics

@@ -33,4 +33,4 @@ Returns the piecewise polynomial coefficients in matrix C from spline coefficien
 
 ## Discussion
 
-
+                    

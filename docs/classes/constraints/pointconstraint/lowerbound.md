@@ -31,5 +31,5 @@ Create a pointwise lower-bound constraint.
   ```matlab
   c = PointConstraint.lowerBound(P, D=[0 1], value=0);
   ```
-
-
+ 
+            

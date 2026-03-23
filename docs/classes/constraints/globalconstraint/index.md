@@ -20,20 +20,20 @@ Specify a global shape constraint for a constrained spline fit.
 <div class="language-matlab highlighter-rouge"><div class="highlight"><pre class="highlight"><code>classdef GlobalConstraint</code></pre></div></div>
 
 ## Overview
-
+ 
 Use `GlobalConstraint` to describe semantic whole-domain constraints
 such as positivity or monotonicity. These objects are intended to be
 compiled into linear coefficient inequalities by constrained fitting
 classes.
-
+ 
 ## Basic usage
-
+ 
 ```matlab
 c1 = GlobalConstraint.positive();
 c2 = GlobalConstraint.monotonicIncreasing(dimension=2);
 ```
-
-
+ 
+  
 
 
 ## Topics

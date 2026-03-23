@@ -32,5 +32,5 @@ Create a pointwise lower-bound constraint from a logical mask.
   ```matlab
   c = PointConstraint.lowerBoundOnMask({x,y}, mask, D=[0 1], value=0);
   ```
-
-
+ 
+              

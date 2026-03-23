@@ -16,4 +16,4 @@ Tensor-product spline coefficients reshaped to basisSize.
 
 ## Discussion
 
-
+  

@@ -18,4 +18,4 @@ Basis values and derivatives sampled at piecewise breakpoints.
 
 ## Discussion
 
-
+    

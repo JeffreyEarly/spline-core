@@ -16,4 +16,4 @@ Number of basis functions in each dimension.
 
 ## Discussion
 
-
+  

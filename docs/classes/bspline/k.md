@@ -16,4 +16,4 @@ Spline order K, where polynomial degree is S = K - 1.
 
 ## Discussion
 
-
+  
