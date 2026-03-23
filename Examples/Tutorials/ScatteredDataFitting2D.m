@@ -21,10 +21,7 @@ rng(11)
 numObservations = 450;
 P = -2 + 4*rand(numObservations, 2);
 
-truth = @(x, y) ...
-    1.1*exp(-((x+0.8).^2 + 1.3*(y-0.4).^2)) - ...
-    0.8*exp(-1.8*((x-0.7).^2 + 0.7*(y+0.5).^2)) + ...
-    0.2*x.*y;
+truth = @(x, y)  1.1*exp(-((x+0.8).^2 + 1.3*(y-0.4).^2)) -  0.8*exp(-1.8*((x-0.7).^2 + 0.7*(y+0.5).^2)) +  0.2*x.*y;
 
 zTrue = truth(P(:,1), P(:,2));
 zObs = zTrue + 0.06*randn(size(zTrue));
@@ -103,11 +100,7 @@ plot(xTransect, zTransectDense, LineWidth=2)
 plot(xTransect, zTransectCoarse, LineWidth=2)
 xlabel("x")
 ylabel("z(x, 0)")
-legend( ...
-    "Truth", ...
-    sprintf("dataDOF [%d %d], basis [%d %d]", denseDOF(1), denseDOF(2), denseBasisSize(1), denseBasisSize(2)), ...
-    sprintf("dataDOF [%d %d], basis [%d %d]", coarseDOF(1), coarseDOF(2), coarseBasisSize(1), coarseBasisSize(2)), ...
-    Location="southoutside")
+legend(  "Truth",  sprintf("dataDOF [%d %d], basis [%d %d]", denseDOF(1), denseDOF(2), denseBasisSize(1), denseBasisSize(2)),  sprintf("dataDOF [%d %d], basis [%d %d]", coarseDOF(1), coarseDOF(2), coarseBasisSize(1), coarseBasisSize(2)),  Location="southoutside")
 grid on
 
 if exist("tutorialFigureCapture", "var") && isa(tutorialFigureCapture, "function_handle"), tutorialFigureCapture("scattered-fit-transect", Caption="Larger dataDOF produces fewer splines per coordinate direction, which reduces model size and yields a smoother scattered-data fit."); end

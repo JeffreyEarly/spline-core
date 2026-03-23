@@ -16,9 +16,7 @@ xObs = xTrue + 0.05*randn(size(t));
 xObs([8 18 31]) = xObs([8 18 31]) - [0.09; 0.12; 0.07];
 
 freeFit = ConstrainedSpline(t, xObs, K=4, dataDOF=4);
-shapeConstrainedFit = ConstrainedSpline(t, xObs, K=4, dataDOF=4, ...
-    constraints=[ ...
-        GlobalConstraint.positive()
+shapeConstrainedFit = ConstrainedSpline(t, xObs, K=4, dataDOF=4,  constraints=[  GlobalConstraint.positive()
         GlobalConstraint.monotonicIncreasing()]);
 
 tDense = linspace(min(t), max(t), 400)';
@@ -33,8 +31,7 @@ plot(tDense, xShapeConstrained, LineWidth=2)
 scatter(t, xObs, 28, "filled", MarkerFaceAlpha=0.65)
 xlabel("t")
 ylabel("x(t)")
-legend("Truth", "Unconstrained fit", "Positive monotone fit", "Observations", ...
-    Location="southoutside")
+legend("Truth", "Unconstrained fit", "Positive monotone fit", "Observations",  Location="southoutside")
 grid on
 if exist("tutorialFigureCapture", "var") && isa(tutorialFigureCapture, "function_handle"), tutorialFigureCapture("positive-monotone-fit", Caption="GlobalConstraint objects enforce whole-domain positivity and monotonicity in a single fit."); end
 

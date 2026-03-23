@@ -53,11 +53,70 @@ classdef InterpolatingSpline < TensorSpline
             % - Parameter options.K: spline order scalar or vector with one entry per dimension
             % - Parameter options.S: spline degree scalar or vector with one entry per dimension
             % - Returns self: InterpolatingSpline instance
-            [gridVectors, values, options] = InterpolatingSpline.parseConstructorInputs(varargin{:});
+            firstNameValue = numel(varargin) + 1;
+            for iInput = 1:numel(varargin)
+                value = varargin{iInput};
+                if (ischar(value) && isrow(value)) || (isstring(value) && isscalar(value))
+                    firstNameValue = iInput;
+                    break;
+                end
+            end
+
+            positionalInputs = varargin(1:firstNameValue-1);
+            if numel(positionalInputs) < 2
+                error('InterpolatingSpline:NotEnoughInputs',  'Specify one or more grid inputs followed by the sampled values.');
+            end
+
+            gridVectors = positionalInputs(1:end-1);
+            values = positionalInputs{end};
+            validateattributes(values, {'numeric'}, {'real','finite'});
 
             numDimensions = numel(gridVectors);
-            K = InterpolatingSpline.splineOrderFromOptions(options, numDimensions);
-            InterpolatingSpline.validateValueArraySize(values, gridVectors);
+            for iDim = 1:numDimensions
+                validateattributes(gridVectors{iDim}, {'numeric'}, {'vector','real','finite'});
+                gridVectors{iDim} = reshape(gridVectors{iDim}, [], 1);
+            end
+
+            K = 4;
+            S = NaN;
+            nameValueInputs = varargin(firstNameValue:end);
+            if mod(numel(nameValueInputs), 2) ~= 0
+                error('InterpolatingSpline:InvalidOptions',  'Name-value arguments must come in pairs.');
+            end
+
+            for iInput = 1:2:numel(nameValueInputs)
+                name = nameValueInputs{iInput};
+                if ~(ischar(name) && isrow(name)) && ~(isstring(name) && isscalar(name))
+                    error('InterpolatingSpline:InvalidOptions',  'Option names must be text scalars.');
+                end
+
+                switch string(name)
+                    case "K"
+                        K = nameValueInputs{iInput + 1};
+                    case "S"
+                        S = nameValueInputs{iInput + 1};
+                    otherwise
+                        error('InterpolatingSpline:InvalidOptions',  'Unsupported option name "%s".', string(name));
+                end
+            end
+
+            K = TensorSpline.resolveSplineOrders(K, S, numDimensions, "InterpolatingSpline");
+
+            expectedSize = cellfun(@numel, gridVectors);
+            if numel(expectedSize) == 1
+                if ~(isvector(values) && numel(values) == expectedSize(1))
+                    error('InterpolatingSpline:SizeMismatch',  'values must have size matching the lengths of the supplied grid inputs.');
+                end
+            else
+                actualSize = size(values);
+                if numel(actualSize) < numel(expectedSize)
+                    actualSize = [actualSize, ones(1, numel(expectedSize) - numel(actualSize))];
+                end
+
+                if ~isequal(actualSize(1:numel(expectedSize)), expectedSize)
+                    error('InterpolatingSpline:SizeMismatch',  'values must have size matching the lengths of the supplied grid inputs.');
+                end
+            end
 
             tKnot = cell(1, numDimensions);
             for iDim = 1:numDimensions
@@ -80,134 +139,6 @@ classdef InterpolatingSpline < TensorSpline
 
             self@TensorSpline(K, tKnot, xi, xMean=xMean, xStd=xStd);
             self.gridVectors = gridVectors;
-        end
-    end
-
-    methods (Static, Access = private)
-        function [gridVectors, values, options] = parseConstructorInputs(varargin)
-            % Parse constructor inputs into grid vectors, values, and options.
-            firstNameValue = InterpolatingSpline.firstNameValueIndex(varargin);
-            positionalInputs = varargin(1:firstNameValue-1);
-            nameValueInputs = varargin(firstNameValue:end);
-            [gridInputs, values] = InterpolatingSpline.parsePositionalInputs(positionalInputs{:});
-            options = InterpolatingSpline.parseNameValueOptions(nameValueInputs{:});
-            gridVectors = InterpolatingSpline.normalizeConstructorGridInputs(gridInputs, values);
-        end
-
-        function [gridInputs, values] = parsePositionalInputs(varargin)
-            % Parse required positional inputs into grids and sampled values.
-            if numel(varargin) < 2
-                error('InterpolatingSpline:NotEnoughInputs', ...
-                    'Specify one or more grid inputs followed by the sampled values.');
-            end
-
-            gridInputs = varargin(1:end-1);
-            values = InterpolatingSpline.parseValues(varargin{end});
-        end
-
-        function firstNameValue = firstNameValueIndex(inputs)
-            % Return the index where trailing name-value pairs begin.
-            firstNameValue = numel(inputs) + 1;
-            for iInput = 1:numel(inputs)
-                if InterpolatingSpline.isNameLike(inputs{iInput})
-                    firstNameValue = iInput;
-                    return;
-                end
-            end
-        end
-
-        function tf = isNameLike(value)
-            % True for scalar text values that can name a trailing option.
-            tf = (ischar(value) && isrow(value)) || (isstring(value) && isscalar(value));
-        end
-
-        function values = parseValues(values)
-            % Validate sampled values.
-            arguments
-                values {mustBeNumeric,mustBeReal,mustBeFinite}
-            end
-        end
-
-        function options = parseNameValueOptions(options)
-            % Parse constructor name-value options.
-            arguments
-                options.K = 4
-                options.S = NaN
-            end
-        end
-
-        function gridVectors = normalizeConstructorGridInputs(gridInputs, values)
-            % Normalize constructor grid inputs from vectors.
-            numDimensions = numel(gridInputs);
-            if ~all(cellfun(@isvector, gridInputs))
-                error('InterpolatingSpline:InvalidGridInputs', ...
-                    'Grid inputs must be vectors, one per dimension.');
-            end
-
-            gridVectors = InterpolatingSpline.normalizeGridVectors(gridInputs, numDimensions);
-        end
-
-        function K = splineOrderFromOptions(options, numDimensions)
-            % Resolve spline order from mutually exclusive K and S options.
-            if isnan(options.S)
-                K = options.K;
-            else
-                if ~(isscalar(options.K) && options.K == 4)
-                    error('InterpolatingSpline:ConflictingSplineOrder', 'Specify either K or S, but not both.');
-                end
-                K = options.S + 1;
-            end
-
-            K = InterpolatingSpline.normalizeOrderVector(K, numDimensions);
-        end
-
-        function K = normalizeOrderVector(K, numDimensions)
-            % Normalize spline-order input to one order per dimension.
-            validateattributes(K, {'numeric'}, {'vector','real','finite','positive','integer'});
-            if isscalar(K)
-                K = repmat(K, 1, numDimensions);
-            else
-                K = reshape(K, 1, []);
-                if numel(K) ~= numDimensions
-                    error('InterpolatingSpline:InvalidOrderVector', ...
-                        'K must be scalar or have one element per dimension.');
-                end
-            end
-        end
-
-        function gridVectors = normalizeGridVectors(gridVectors, numDimensions)
-            % Normalize and validate interpolation grid vectors.
-            if ~iscell(gridVectors) || numel(gridVectors) ~= numDimensions
-                error('InterpolatingSpline:InvalidGridVectors', ...
-                    'Grid inputs must supply one vector per dimension.');
-            end
-
-            for iDim = 1:numDimensions
-                validateattributes(gridVectors{iDim}, {'numeric'}, {'vector','real','finite'});
-                gridVectors{iDim} = reshape(gridVectors{iDim}, [], 1);
-            end
-        end
-
-        function validateValueArraySize(values, gridVectors)
-            % Validate that the sample array matches the supplied grid vectors.
-            expectedSize = cellfun(@numel, gridVectors);
-            if numel(expectedSize) == 1
-                if ~(isvector(values) && numel(values) == expectedSize(1))
-                    error('InterpolatingSpline:SizeMismatch', ...
-                        'values must have size matching the lengths of the supplied grid inputs.');
-                end
-                return;
-            end
-
-            actualSize = size(values);
-            if numel(actualSize) < numel(expectedSize)
-                actualSize = [actualSize, ones(1, numel(expectedSize) - numel(actualSize))];
-            end
-
-            if ~isequal(actualSize(1:numel(expectedSize)), expectedSize)
-                error('InterpolatingSpline:SizeMismatch', ...
-                    'values must have size matching the lengths of the supplied grid inputs.');
-            end
         end
     end
 end

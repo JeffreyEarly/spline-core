@@ -24,8 +24,7 @@ outlierIndex = [10 22 37 51];
 xObs(outlierIndex) = xObs(outlierIndex) + [0.75; -0.55; 0.65; -0.7];
 
 leastSquaresFit = ConstrainedSpline(t, xObs, K=4, dataDOF=5);
-robustFit = ConstrainedSpline(t, xObs, K=4, dataDOF=5, ...
-    distribution=StudentTDistribution(sigma=0.08, nu=3));
+robustFit = ConstrainedSpline(t, xObs, K=4, dataDOF=5,  distribution=StudentTDistribution(sigma=0.08, nu=3));
 
 tDense = linspace(min(t), max(t), 400)';
 xTrueDense = exp(-3*tDense).*sin(4*pi*tDense);
@@ -40,8 +39,7 @@ scatter(t, xObs, 28, "filled", MarkerFaceAlpha=0.65)
 scatter(t(outlierIndex), xObs(outlierIndex), 65, "o", LineWidth=1.5)
 xlabel("t")
 ylabel("x(t)")
-legend("Truth", "Least squares", "Robust Student-t fit", "Observations", "Tagged outliers", ...
-    Location="northeast")
+legend("Truth", "Least squares", "Robust Student-t fit", "Observations", "Tagged outliers",  Location="northeast")
 grid on
 if exist("tutorialFigureCapture", "var") && isa(tutorialFigureCapture, "function_handle"), tutorialFigureCapture("robust-fit-comparison", Caption="A Student-t fit stays closer to the underlying signal when several observations are large outliers."); end
 

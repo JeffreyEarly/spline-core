@@ -120,8 +120,7 @@ classdef TensorSpline < handle
 
             validateattributes(xi, {'numeric'}, {'real','finite'});
             if numel(xi) ~= prod(basisSize)
-                error('TensorSpline:InvalidCoefficientCount', ...
-                    'xi must contain exactly prod(basisSize) coefficients.');
+                error('TensorSpline:InvalidCoefficientCount',  'xi must contain exactly prod(basisSize) coefficients.');
             end
 
             self.K = K;
@@ -402,6 +401,21 @@ classdef TensorSpline < handle
     end
 
     methods (Static, Hidden)
+        function K = resolveSplineOrders(K, S, numDimensions, errorPrefix)
+            % Resolve mutually exclusive spline order and degree inputs.
+            if isempty(S) || (isscalar(S) && isnan(S))
+                K = TensorSpline.normalizeOrders(K, numDimensions);
+                return;
+            end
+
+            validateattributes(S, {'numeric'}, {'vector','real','finite','nonnegative','integer'});
+            if ~(isscalar(K) && K == 4)
+                error(errorPrefix + ":ConflictingSplineOrder",  'Specify either K or S, but not both.');
+            end
+
+            K = TensorSpline.normalizeOrders(S + 1, numDimensions);
+        end
+
         function K = normalizeOrders(K, numDimensions)
             % Normalize spline-order input to one order per dimension.
             validateattributes(K, {'numeric'}, {'vector','real','finite','positive','integer'});
@@ -454,8 +468,7 @@ classdef TensorSpline < handle
         function [pointMatrix, outputSize] = normalizeQueryInputs(queryInputs, numDimensions)
             % Normalize one query input per dimension.
             if numel(queryInputs) ~= numDimensions
-                error('TensorSpline:InvalidEvaluationInput', ...
-                    'Supply exactly one query input per spline dimension.');
+                error('TensorSpline:InvalidEvaluationInput',  'Supply exactly one query input per spline dimension.');
             end
 
             validateattributes(queryInputs{1}, {'numeric'}, {'real'});
@@ -465,8 +478,7 @@ classdef TensorSpline < handle
             for iDim = 1:numDimensions
                 validateattributes(queryInputs{iDim}, {'numeric'}, {'real'});
                 if ~isequal(size(queryInputs{iDim}), outputSize)
-                    error('TensorSpline:InvalidQueryArrays', ...
-                        'All query inputs must have the same size.');
+                    error('TensorSpline:InvalidQueryArrays',  'All query inputs must have the same size.');
                 end
                 pointMatrix(:,iDim) = queryInputs{iDim}(:);
             end
@@ -485,14 +497,12 @@ classdef TensorSpline < handle
                 elseif derivativeOrders == 0
                     derivativeOrders = zeros(1, numDimensions);
                 else
-                    error('TensorSpline:InvalidDerivativeOrders', ...
-                        'Derivative orders must be a vector with one element per dimension.');
+                    error('TensorSpline:InvalidDerivativeOrders',  'Derivative orders must be a vector with one element per dimension.');
                 end
             else
                 derivativeOrders = reshape(derivativeOrders, 1, []);
                 if numel(derivativeOrders) ~= numDimensions
-                    error('TensorSpline:InvalidDerivativeOrders', ...
-                        'Derivative orders must have one element per dimension.');
+                    error('TensorSpline:InvalidDerivativeOrders',  'Derivative orders must have one element per dimension.');
                 end
             end
         end

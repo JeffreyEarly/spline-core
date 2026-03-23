@@ -40,8 +40,7 @@ classdef PointConstraintUnitTests < matlab.unittest.TestCase
         function multidimensionalScalarDerivativeOrderIsRejected(testCase)
             points = [0 0; 1 1];
 
-            testCase.verifyError(@() PointConstraint.equal(points, D=1, value=0), ...
-                'PointConstraint:AmbiguousDerivativeOrders')
+            testCase.verifyError(@() PointConstraint.equal(points, D=1, value=0),  'PointConstraint:AmbiguousDerivativeOrders')
         end
 
         function equalityConstraintCanBeBuiltFromOneDimensionalMask(testCase)
@@ -73,8 +72,7 @@ classdef PointConstraintUnitTests < matlab.unittest.TestCase
             y = [10; 20; 30];
             mask = true(3,3);
 
-            testCase.verifyError(@() PointConstraint.equalOnMask({x,y}, mask, D=[0 0], value=0), ...
-                'PointConstraint:InvalidMaskSize')
+            testCase.verifyError(@() PointConstraint.equalOnMask({x,y}, mask, D=[0 0], value=0),  'PointConstraint:InvalidMaskSize')
         end
 
         function gridArrayMaskInputIsRejected(testCase)
@@ -83,8 +81,7 @@ classdef PointConstraintUnitTests < matlab.unittest.TestCase
             [X,Y] = ndgrid(x,y);
             mask = [false true false; true false true];
 
-            testCase.verifyError(@() PointConstraint.lowerBoundOnMask({X,Y}, mask, D=[1 0], value=5), ...
-                'PointConstraint:InvalidGrid')
+            testCase.verifyError(@() PointConstraint.lowerBoundOnMask({X,Y}, mask, D=[1 0], value=5),  'PointConstraint:InvalidGrid')
         end
 
         function pointAndGlobalConstraintsCanFormMixedArray(testCase)

@@ -128,11 +128,10 @@ classdef ConstrainedSpline < TensorSpline
             observedValues = reshape(values, [], 1);
 
             if numel(observedValues) ~= size(pointMatrix,1)
-                error('ConstrainedSpline:SizeMismatch', ...
-                    'values must have one value for each observation point.');
+                error('ConstrainedSpline:SizeMismatch',  'values must have one value for each observation point.');
             end
 
-            K = ConstrainedSpline.splineOrderFromOptions(options, numDimensions);
+            K = TensorSpline.resolveSplineOrders(options.K, options.S, numDimensions, "ConstrainedSpline");
             dataDOF = TensorSpline.normalizeOrders(options.dataDOF, numDimensions);
             splineDOF = ConstrainedSpline.normalizeOptionalOrders(options.splineDOF, numDimensions);
             if isempty(tKnot)
@@ -147,8 +146,7 @@ classdef ConstrainedSpline < TensorSpline
                 tKnot{iDim} = ConstrainedSpline.terminatedKnotPoints(tKnot{iDim}, K(iDim));
             end
 
-            [pointConstraints, globalConstraints] = ConstrainedSpline.normalizeConstraintInputs( ...
-                options.constraints, numDimensions);
+            [pointConstraints, globalConstraints] = ConstrainedSpline.normalizeConstraintInputs(  options.constraints, numDimensions);
 
             Xbasis = TensorSpline.matrix(pointMatrix, tKnot, K);
             rho_X = [];
@@ -156,11 +154,9 @@ classdef ConstrainedSpline < TensorSpline
                 rho_X = distribution.rho(ConstrainedSpline.pairwiseDistanceMatrix(pointMatrix));
             end
 
-            [Aeq,beq,Aineq,bineq] = ConstrainedSpline.compileConstraints( ...
-                pointConstraints, globalConstraints, tKnot, K);
+            [Aeq,beq,Aineq,bineq] = ConstrainedSpline.compileConstraints(  pointConstraints, globalConstraints, tKnot, K);
 
-            [coefficients,CmInv,W] = ConstrainedSpline.tensorModelSolution( ...
-                observedValues, Xbasis, distribution, rho_X, Aeq, beq, Aineq, bineq);
+            [coefficients,CmInv,W] = ConstrainedSpline.tensorModelSolution(  observedValues, Xbasis, distribution, rho_X, Aeq, beq, Aineq, bineq);
 
             self@TensorSpline(K, tKnot, coefficients(:));
             self.distribution = distribution;
@@ -193,12 +189,14 @@ classdef ConstrainedSpline < TensorSpline
             % - Parameter self: ConstrainedSpline instance
             % - Returns S: smoothing matrix
             if ~isempty(self.Aeq) || ~isempty(self.Aineq)
-                error('ConstrainedSpline:UnavailableSmoothingMatrix', ...
-                    'smoothingMatrix is only available for unconstrained tensor fits.');
+                error('ConstrainedSpline:UnavailableSmoothingMatrix',  'smoothingMatrix is only available for unconstrained tensor fits.');
             end
 
             if size(self.W,1) == length(self.values) && size(self.W,2) == 1
                 S = (self.X*ConstrainedSpline.leftSolve(self.CmInv, self.X.')).*(self.W.');
+            elseif isa(self.W, 'decomposition')
+                S = self.X*ConstrainedSpline.leftSolve(self.CmInv, self.X.');
+                S = (self.W \ S.').';
             else
                 S = (self.X*ConstrainedSpline.leftSolve(self.CmInv, self.X.'))*self.W;
             end
@@ -241,8 +239,7 @@ classdef ConstrainedSpline < TensorSpline
             repeats = 1;
             while rel_error > 0.01 && repeats < 250
                 [normalMatrix, rhs] = ConstrainedSpline.weightedNormalEquations(designMatrix, values, W);
-                [xi, CmInv] = ConstrainedSpline.constrainedWeightedSolution( ...
-                    normalMatrix, rhs, Aeq, beq, Aineq, bineq);
+                [xi, CmInv] = ConstrainedSpline.constrainedWeightedSolution(  normalMatrix, rhs, Aeq, beq, Aineq, bineq);
 
                 sigma2 = distribution.w(values - designMatrix*xi);
                 rel_error = max(abs((sigma2-sigma2_previous)./sigma2), [], 'all');
@@ -281,8 +278,7 @@ classdef ConstrainedSpline < TensorSpline
             end
 
             if ~iscell(tKnot)
-                error('ConstrainedSpline:InvalidKnotCell', ...
-                    'tKnot must be a knot vector in 1-D or a cell array with one knot vector per dimension.');
+                error('ConstrainedSpline:InvalidKnotCell',  'tKnot must be a knot vector in 1-D or a cell array with one knot vector per dimension.');
             end
 
             numDimensions = numel(tKnot);
@@ -352,9 +348,7 @@ classdef ConstrainedSpline < TensorSpline
             [pointConstraints, globalConstraints] = ConstrainedSpline.normalizeConstraintInputs(constraints, options.numDimensions);
             constrainedValues = sampleValues;
 
-            if options.enforcePositiveIfPossible && isempty(globalConstraints) ...
-                    && all(isfinite(constrainedValues)) ...
-                    && all(constrainedValues >= -10*eps(max(1, max(abs(constrainedValues)))))
+            if options.enforcePositiveIfPossible && isempty(globalConstraints)  && all(isfinite(constrainedValues))  && all(constrainedValues >= -10*eps(max(1, max(abs(constrainedValues)))))
                 globalConstraints = GlobalConstraint.positive();
                 constrainedValues = max(constrainedValues, 0);
             end
@@ -387,28 +381,11 @@ classdef ConstrainedSpline < TensorSpline
             elseif iscell(tKnot)
                 tKnot = TensorSpline.normalizeKnotCell(tKnot, numel(tKnot));
             else
-                error('ConstrainedSpline:InvalidKnotCell', ...
-                    'tKnot must be a knot vector in 1-D or a cell array with one knot vector per dimension.');
+                error('ConstrainedSpline:InvalidKnotCell',  'tKnot must be a knot vector in 1-D or a cell array with one knot vector per dimension.');
             end
 
             numDimensions = numel(tKnot);
             [pointMatrix, ~] = TensorSpline.normalizePointMatrixInput(points, numDimensions);
-        end
-
-        function K = splineOrderFromOptions(options, numDimensions)
-            % Resolve spline order from mutually exclusive K and S options.
-            if isempty(options.S)
-                K = options.K;
-            else
-                validateattributes(options.S, {'numeric'}, {'vector','real','finite','nonnegative','integer'});
-                if ~(isscalar(options.K) && options.K == 4)
-                    error('ConstrainedSpline:ConflictingSplineOrder', ...
-                        'Specify either K or S, but not both.');
-                end
-                K = options.S + 1;
-            end
-
-            K = TensorSpline.normalizeOrders(K, numDimensions);
         end
 
         function tKnot = defaultKnotCell(X, K, dataDOF, splineDOF)
@@ -426,11 +403,9 @@ classdef ConstrainedSpline < TensorSpline
                 end
 
                 if useSplineDOF
-                    tKnot{iDim} = BSpline.knotPointsForDataPoints(coordinateValues, ...
-                        K=K(iDim), splineDOF=splineDOF(iDim));
+                    tKnot{iDim} = BSpline.knotPointsForDataPoints(coordinateValues,  K=K(iDim), splineDOF=splineDOF(iDim));
                 else
-                    tKnot{iDim} = BSpline.knotPointsForDataPoints(coordinateValues, ...
-                        K=K(iDim), dataDOF=dataDOF(iDim));
+                    tKnot{iDim} = BSpline.knotPointsForDataPoints(coordinateValues,  K=K(iDim), dataDOF=dataDOF(iDim));
                 end
             end
         end
@@ -446,8 +421,7 @@ classdef ConstrainedSpline < TensorSpline
             if isscalar(values)
                 values = repmat(values, 1, numDimensions);
             elseif numel(values) ~= numDimensions
-                error('ConstrainedSpline:InvalidDegreeOfFreedomOption', ...
-                    'dataDOF and splineDOF must be scalar or have one element per dimension.');
+                error('ConstrainedSpline:InvalidDegreeOfFreedomOption',  'dataDOF and splineDOF must be scalar or have one element per dimension.');
             end
         end
 
@@ -466,10 +440,8 @@ classdef ConstrainedSpline < TensorSpline
             Aineq = sparse([], [], [], 0, numCoefficients);
             bineq = zeros(0,1);
 
-            [pointAeq, pointBeq, pointAineq, pointBineq] = ...
-                ConstrainedSpline.compilePointConstraints(pointConstraints, tKnot, K);
-            [globalAineq, globalBineq] = ...
-                ConstrainedSpline.compileGlobalConstraints(globalConstraints, tKnot, K);
+            [pointAeq, pointBeq, pointAineq, pointBineq] =  ConstrainedSpline.compilePointConstraints(pointConstraints, tKnot, K);
+            [globalAineq, globalBineq] =  ConstrainedSpline.compileGlobalConstraints(globalConstraints, tKnot, K);
 
             Aeq = [Aeq; pointAeq];
             beq = [beq; pointBeq];
@@ -491,8 +463,7 @@ classdef ConstrainedSpline < TensorSpline
                 [groupOrders, ~, groupIndex] = unique(constraint.D, 'rows', 'stable');
                 for iGroup = 1:size(groupOrders, 1)
                     isGroup = groupIndex == iGroup;
-                    B = sparse(TensorSpline.matrix( ...
-                        constraint.points(isGroup,:), tKnot, K, D=groupOrders(iGroup,:)));
+                    B = sparse(TensorSpline.matrix(  constraint.points(isGroup,:), tKnot, K, D=groupOrders(iGroup,:)));
                     values = constraint.value(isGroup);
 
                     switch constraint.relation
@@ -506,8 +477,7 @@ classdef ConstrainedSpline < TensorSpline
                             Aineq = [Aineq; B];
                             bineq = [bineq; values];
                         otherwise
-                            error('ConstrainedSpline:InvalidConstraintRelation', ...
-                                'Unsupported point-constraint relation.');
+                            error('ConstrainedSpline:InvalidConstraintRelation',  'Unsupported point-constraint relation.');
                     end
                 end
             end
@@ -526,14 +496,11 @@ classdef ConstrainedSpline < TensorSpline
                     case "positive"
                         constraintMatrix = -speye(numCoefficients);
                     case "monotonicIncreasing"
-                        constraintMatrix = ConstrainedSpline.monotonicDifferenceMatrix( ...
-                            basisSize, constraint.dimension, "increasing");
+                        constraintMatrix = ConstrainedSpline.monotonicDifferenceMatrix(  basisSize, constraint.dimension, "increasing");
                     case "monotonicDecreasing"
-                        constraintMatrix = ConstrainedSpline.monotonicDifferenceMatrix( ...
-                            basisSize, constraint.dimension, "decreasing");
+                        constraintMatrix = ConstrainedSpline.monotonicDifferenceMatrix(  basisSize, constraint.dimension, "decreasing");
                     otherwise
-                        error('ConstrainedSpline:UnsupportedGlobalConstraint', ...
-                            'Unsupported global constraint shape.');
+                        error('ConstrainedSpline:UnsupportedGlobalConstraint',  'Unsupported global constraint shape.');
                 end
 
                 Aineq = [Aineq; constraintMatrix];
@@ -567,8 +534,7 @@ classdef ConstrainedSpline < TensorSpline
                 case "decreasing"
                     rowValues = [-ones(numRows,1); ones(numRows,1)];
                 otherwise
-                    error('ConstrainedSpline:InvalidMonotonicDirection', ...
-                        'direction must be "increasing" or "decreasing".');
+                    error('ConstrainedSpline:InvalidMonotonicDirection',  'direction must be "increasing" or "decreasing".');
             end
 
             rowIndex = [(1:numRows)'; (1:numRows)'];
@@ -579,7 +545,11 @@ classdef ConstrainedSpline < TensorSpline
         function [normalMatrix, rhs] = weightedNormalEquations(X, x, W)
             % Assemble weighted normal equations.
             XT = X';
-            if size(W,1) == length(x) && size(W,2) == length(x)
+            if isa(W, 'decomposition')
+                weightedX = W \ X;
+                normalMatrix = XT*weightedX;
+                rhs = XT*(W \ x);
+            elseif size(W,1) == length(x) && size(W,2) == length(x)
                 normalMatrix = XT*W*X;
                 rhs = XT*W*x;
             elseif isscalar(W)
@@ -623,8 +593,7 @@ classdef ConstrainedSpline < TensorSpline
             options = optimoptions('quadprog', 'Display', 'off', 'Algorithm', 'interior-point-convex');
             [xi, ~, exitflag] = quadprog(2*H, -2*rhs, Aineq, bineq, Aeq, beq, [], [], [], options);
             if exitflag <= 0
-                error('ConstrainedSpline:OptimizationFailed', ...
-                    'The constrained tensor-spline fit failed to converge.');
+                error('ConstrainedSpline:OptimizationFailed',  'The constrained tensor-spline fit failed to converge.');
             end
 
             systemMatrix = normalMatrix;
@@ -634,7 +603,7 @@ classdef ConstrainedSpline < TensorSpline
             % Build the observation-weight matrix from per-observation variances.
             if ~isempty(rho_X)
                 Sigma2 = (sqrt(sigma2) * sqrt(sigma2).') .* rho_X;
-                W = inv(Sigma2);
+                W = decomposition(Sigma2);
             else
                 W = 1./sigma2;
             end
@@ -648,13 +617,13 @@ classdef ConstrainedSpline < TensorSpline
             end
 
             if issparse(A)
-                reciprocalCondition = rcond(full(A));
-            else
-                reciprocalCondition = rcond(A);
+                x = A\b;
+                return;
             end
 
-            if reciprocalCondition < eps(class(full(A)))
-                x = pinv(full(A)) * b;
+            reciprocalCondition = rcond(A);
+            if reciprocalCondition < eps(class(A))
+                x = pinv(A) * b;
             else
                 x = A\b;
             end
@@ -669,8 +638,7 @@ classdef ConstrainedSpline < TensorSpline
             end
 
             if ~isa(constraints, 'SplineConstraint')
-                error('ConstrainedSpline:InvalidConstraints', ...
-                    'constraints must be a SplineConstraint array.');
+                error('ConstrainedSpline:InvalidConstraints',  'constraints must be a SplineConstraint array.');
             end
 
             constraints = reshape(constraints, [], 1);
@@ -689,16 +657,13 @@ classdef ConstrainedSpline < TensorSpline
 
             for iConstraint = 1:numel(pointConstraints)
                 if ~isempty(numDimensions) && pointConstraints(iConstraint).numDimensions ~= numDimensions
-                    error('ConstrainedSpline:PointConstraintDimensionMismatch', ...
-                        'Each point constraint must match the spline dimensionality.');
+                    error('ConstrainedSpline:PointConstraintDimensionMismatch',  'Each point constraint must match the spline dimensionality.');
                 end
             end
 
             for iConstraint = 1:numel(globalConstraints)
-                if ~isempty(numDimensions) && ~isempty(globalConstraints(iConstraint).dimension) ...
-                        && globalConstraints(iConstraint).dimension > numDimensions
-                    error('ConstrainedSpline:GlobalConstraintDimensionMismatch', ...
-                        'Global constraint dimensions must not exceed the spline dimensionality.');
+                if ~isempty(numDimensions) && ~isempty(globalConstraints(iConstraint).dimension)  && globalConstraints(iConstraint).dimension > numDimensions
+                    error('ConstrainedSpline:GlobalConstraintDimensionMismatch',  'Global constraint dimensions must not exceed the spline dimensionality.');
                 end
             end
         end

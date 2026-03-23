@@ -30,13 +30,9 @@ values(abs(values) < 2*eps) = 0;
 poweredOrder = ceil(exponent*spline.K);
 tKnot = BSpline.knotPointsForDataPoints(supportPoints,K=poweredOrder);
 poweredValues = values.^exponent;
-[constraintArguments, poweredValues] = ConstrainedSpline.constraintArguments( ...
-    [], poweredValues, enforcePositiveIfPossible=true, numDimensions=1);
+[constraintArguments, poweredValues] = ConstrainedSpline.constraintArguments(  [], poweredValues, enforcePositiveIfPossible=true, numDimensions=1);
 if ~isempty(constraintArguments)
-    fittedSpline = ConstrainedSpline(supportPoints, poweredValues, ...
-        K=poweredOrder, ...
-        tKnot=tKnot, ...
-        constraintArguments{:});
+    fittedSpline = ConstrainedSpline(supportPoints, poweredValues,  K=poweredOrder,  tKnot=tKnot,  constraintArguments{:});
     poweredSpline = BSpline(poweredOrder, fittedSpline.tKnot, fittedSpline.xi(:));
 else
     X = BSpline.matrix(supportPoints,tKnot,poweredOrder);

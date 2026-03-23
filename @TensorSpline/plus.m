@@ -20,13 +20,11 @@ if ~isa(f, 'TensorSpline')
 end
 
 if ~isa(f, 'TensorSpline')
-    error('TensorSpline:plus:UnsupportedOperand', ...
-        'One operand must be a TensorSpline.');
+    error('TensorSpline:plus:UnsupportedOperand',  'One operand must be a TensorSpline.');
 elseif isempty(g)
     f = [];
 elseif isnumeric(g) && isscalar(g)
     f = TensorSpline(f.K, f.tKnot_, f.xi, xMean=f.xMean + g, xStd=f.xStd);
 else
-    error('TensorSpline:plus:UnsupportedOperand', ...
-        'Only scalar numeric offsets are supported.');
+    error('TensorSpline:plus:UnsupportedOperand',  'Only scalar numeric offsets are supported.');
 end

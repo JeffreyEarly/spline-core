@@ -15,10 +15,7 @@ tKnot = [min(t); min(t); 0.75; 1.25; max(t); max(t)];
 tq = linspace(min(t), max(t), 400)';
 
 leastSquaresSpline = ConstrainedSpline(t, x, K=K, tKnot=tKnot);
-robustSpline = ConstrainedSpline(t, x, ...
-    K=K, ...
-    tKnot=tKnot, ...
-    distribution=distribution);
+robustSpline = ConstrainedSpline(t, x,  K=K,  tKnot=tKnot,  distribution=distribution);
 
 figure(Position=[100 100 860 520])
 tiledlayout(2, 1, TileSpacing="compact")
@@ -31,8 +28,7 @@ scatter(t, x, 45, "filled")
 grid on
 ylabel("Value")
 title("Robust spline fitting with outliers")
-legend("Truth", "Least squares", "Student-t robust fit", "Samples", ...
-    Location="southoutside")
+legend("Truth", "Least squares", "Student-t robust fit", "Samples",  Location="southoutside")
 
 nexttile
 stem(t, robustSpline.W, "filled", LineWidth=1.2), hold on

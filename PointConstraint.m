@@ -278,8 +278,7 @@ classdef PointConstraint < SplineConstraint
                     return;
                 end
 
-                error('PointConstraint:InvalidDerivativeOrders', ...
-                    'For one-dimensional constraints, D must be scalar or have one entry per point.');
+                error('PointConstraint:InvalidDerivativeOrders',  'For one-dimensional constraints, D must be scalar or have one entry per point.');
             end
 
             if isvector(D)
@@ -290,8 +289,7 @@ classdef PointConstraint < SplineConstraint
                 end
 
                 if isscalar(D)
-                    error('PointConstraint:AmbiguousDerivativeOrders', ...
-                        'For multi-dimensional constraints, scalar D is ambiguous. Supply one derivative order per dimension.');
+                    error('PointConstraint:AmbiguousDerivativeOrders',  'For multi-dimensional constraints, scalar D is ambiguous. Supply one derivative order per dimension.');
                 end
             end
 
@@ -300,8 +298,7 @@ classdef PointConstraint < SplineConstraint
                 return;
             end
 
-            error('PointConstraint:InvalidDerivativeOrders', ...
-                'D must be a 1-by-numDimensions vector or an N-by-numDimensions matrix.');
+            error('PointConstraint:InvalidDerivativeOrders',  'D must be a 1-by-numDimensions vector or an N-by-numDimensions matrix.');
         end
 
         function values = normalizeValues(value, numPoints)
@@ -313,8 +310,7 @@ classdef PointConstraint < SplineConstraint
             end
 
             if numel(value) ~= numPoints
-                error('PointConstraint:InvalidValueSize', ...
-                    'value must be scalar or provide one entry per constrained point.');
+                error('PointConstraint:InvalidValueSize',  'value must be scalar or provide one entry per constrained point.');
             end
 
             values = reshape(double(value), [], 1);
@@ -324,13 +320,11 @@ classdef PointConstraint < SplineConstraint
             % Convert a masked grid description into an explicit point matrix.
             if iscell(grid)
                 if isempty(grid)
-                    error('PointConstraint:InvalidGrid', ...
-                        'grid must not be empty.');
+                    error('PointConstraint:InvalidGrid',  'grid must not be empty.');
                 end
 
                 if ~all(cellfun(@isvector, grid))
-                    error('PointConstraint:InvalidGrid', ...
-                        'grid must be a vector or a cell array of grid vectors.');
+                    error('PointConstraint:InvalidGrid',  'grid must be a vector or a cell array of grid vectors.');
                 end
 
                 [allPoints, gridSize] = TensorSpline.pointsFromGridVectors(grid);
@@ -353,13 +347,11 @@ classdef PointConstraint < SplineConstraint
             elseif isequal(size(mask), expectedSize)
                 mask = logical(mask);
             else
-                error('PointConstraint:InvalidMaskSize', ...
-                    'mask must match the supplied grid size.');
+                error('PointConstraint:InvalidMaskSize',  'mask must match the supplied grid size.');
             end
 
             if ~any(mask, 'all')
-                error('PointConstraint:EmptyMask', ...
-                    'mask must select at least one constrained point.');
+                error('PointConstraint:EmptyMask',  'mask must select at least one constrained point.');
             end
         end
     end

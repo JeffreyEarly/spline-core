@@ -20,12 +20,10 @@ arguments
 end
 
 if dim > self.numDimensions
-    error('TensorSpline:InvalidDimension', ...
-        'dim must not exceed the number of spline dimensions.');
+    error('TensorSpline:InvalidDimension',  'dim must not exceed the number of spline dimensions.');
 end
 
-[xi, tKnotDim, Kdim] = TensorSpline.integrateAlongDimension( ...
-    self.xi, self.tKnot_{dim}, self.K(dim), dim, self.xMean, self.xStd);
+[xi, tKnotDim, Kdim] = TensorSpline.integrateAlongDimension(  self.xi, self.tKnot_{dim}, self.K(dim), dim, self.xMean, self.xStd);
 
 K = self.K;
 K(dim) = Kdim;

@@ -32,8 +32,7 @@ end
 
 if ~isnan(options.splineDOF)
     if options.dataDOF ~= 1
-        error('BSpline:knotPointsForDataPoints:ConflictingDegreeOfFreedomOptions', ...
-            'Specify either dataDOF or splineDOF, but not both.');
+        error('BSpline:knotPointsForDataPoints:ConflictingDegreeOfFreedomOptions',  'Specify either dataDOF or splineDOF, but not both.');
     end
     targetSplines = max(options.splineDOF, options.K);
     dataDOF = ceil(numel(t)/targetSplines);

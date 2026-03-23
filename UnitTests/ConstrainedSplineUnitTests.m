@@ -187,9 +187,7 @@ classdef ConstrainedSplineUnitTests < matlab.unittest.TestCase
             t = linspace(-1,1,9)';
             x = t;
 
-            spline = ConstrainedSpline(t, x, ...
-                distribution=NormalDistribution(1), ...
-                constraints=PointConstraint.equal(0, D=1, value=0));
+            spline = ConstrainedSpline(t, x,  distribution=NormalDistribution(1),  constraints=PointConstraint.equal(0, D=1, value=0));
 
             testCase.verifyLessThan(abs(spline(0, 1)), 1e-10)
         end
@@ -224,11 +222,7 @@ classdef ConstrainedSplineUnitTests < matlab.unittest.TestCase
             points = [X(mask), Y(mask)];
             constraint = PointConstraint.equal(points, D=[0 0], value=0);
 
-            spline = ConstrainedSpline(P, F(:), ...
-                K=[4 4], ...
-                tKnot=tKnot, ...
-                distribution=NormalDistribution(1), ...
-                constraints=constraint);
+            spline = ConstrainedSpline(P, F(:),  K=[4 4],  tKnot=tKnot,  distribution=NormalDistribution(1),  constraints=constraint);
 
             testCase.verifyLessThan(max(abs(spline(points(:,1), points(:,2)))), 1e-10)
         end
@@ -241,9 +235,7 @@ classdef ConstrainedSplineUnitTests < matlab.unittest.TestCase
             mask = (X.^2 + Y.^2) <= 0.2^2;
             P = [X(:), Y(:)];
 
-            spline = ConstrainedSpline(P, F(:), ...
-                distribution=NormalDistribution(1), ...
-                constraints=PointConstraint.equalOnMask({x,y}, mask, D=[0 0], value=0));
+            spline = ConstrainedSpline(P, F(:),  distribution=NormalDistribution(1),  constraints=PointConstraint.equalOnMask({x,y}, mask, D=[0 0], value=0));
 
             maskedPoints = [X(mask), Y(mask)];
             testCase.verifyLessThan(max(abs(spline(maskedPoints(:,1), maskedPoints(:,2)))), 1e-8)
@@ -254,9 +246,7 @@ classdef ConstrainedSplineUnitTests < matlab.unittest.TestCase
             x = t.^2 - 0.35;
             tq = linspace(min(t), max(t), 101)';
 
-            spline = ConstrainedSpline(t, x, ...
-                distribution=NormalDistribution(1), ...
-                constraints=GlobalConstraint.positive());
+            spline = ConstrainedSpline(t, x,  distribution=NormalDistribution(1),  constraints=GlobalConstraint.positive());
 
             testCase.verifyGreaterThanOrEqual(min(spline(tq)), -1e-10)
         end
@@ -273,11 +263,7 @@ classdef ConstrainedSplineUnitTests < matlab.unittest.TestCase
                 BSpline.knotPointsForDataPoints(y, K=4)
             };
 
-            spline = ConstrainedSpline(P, F(:), ...
-                K=[4 4], ...
-                tKnot=tKnot, ...
-                distribution=NormalDistribution(1), ...
-                constraints=GlobalConstraint.monotonicIncreasing(dimension=2));
+            spline = ConstrainedSpline(P, F(:),  K=[4 4],  tKnot=tKnot,  distribution=NormalDistribution(1),  constraints=GlobalConstraint.monotonicIncreasing(dimension=2));
 
             xq = linspace(min(x), max(x), 13)';
             yq = linspace(min(y), max(y), 19)';
@@ -292,9 +278,7 @@ classdef ConstrainedSplineUnitTests < matlab.unittest.TestCase
             x = 0.2 + 0.8*(1 - exp(-4*t)) + 0.03*sin(8*pi*t);
             tq = linspace(min(t), max(t), 151)';
 
-            spline = ConstrainedSpline(t, x, ...
-                distribution=NormalDistribution(1), ...
-                constraints=GlobalConstraint.monotonicIncreasing());
+            spline = ConstrainedSpline(t, x,  distribution=NormalDistribution(1),  constraints=GlobalConstraint.monotonicIncreasing());
 
             testCase.verifyGreaterThanOrEqual(min(diff(spline(tq))), -1e-10)
         end
@@ -303,12 +287,9 @@ classdef ConstrainedSplineUnitTests < matlab.unittest.TestCase
             t = linspace(-1,1,9)';
             x = t.^2 - 0.2;
 
-            spline = ConstrainedSpline(t, x, ...
-                distribution=NormalDistribution(1), ...
-                constraints=GlobalConstraint.positive());
+            spline = ConstrainedSpline(t, x,  distribution=NormalDistribution(1),  constraints=GlobalConstraint.positive());
 
-            testCase.verifyError(@() spline.smoothingMatrix(), ...
-                'ConstrainedSpline:UnavailableSmoothingMatrix')
+            testCase.verifyError(@() spline.smoothingMatrix(),  'ConstrainedSpline:UnavailableSmoothingMatrix')
         end
     end
 end

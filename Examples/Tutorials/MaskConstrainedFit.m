@@ -15,21 +15,16 @@ x = linspace(-2, 2, 35)';
 y = linspace(-2, 2, 41)';
 [X, Y] = ndgrid(x, y);
 
-Ftrue = exp(-((X+0.7).^2 + 0.7*(Y+0.2).^2)) + ...
-    0.65*exp(-1.2*((X-0.6).^2 + (Y-0.7).^2));
+Ftrue = exp(-((X+0.7).^2 + 0.7*(Y+0.2).^2)) +  0.65*exp(-1.2*((X-0.6).^2 + (Y-0.7).^2));
 Fobs = Ftrue + 0.04*randn(size(Ftrue));
 
 islandMask = (X.^2 + Y.^2) <= 0.38^2;
 P = [X(:), Y(:)];
 FobsVector = Fobs(:);
 
-freeFit = ConstrainedSpline(P, FobsVector, K=[4 4], ...
-    tKnot={linspace(min(x), max(x), 16)', linspace(min(y), max(y), 18)'});
+freeFit = ConstrainedSpline(P, FobsVector, K=[4 4],  tKnot={linspace(min(x), max(x), 16)', linspace(min(y), max(y), 18)'});
 
-maskedFit = ConstrainedSpline(P, FobsVector, K=[4 4], ...
-    tKnot={linspace(min(x), max(x), 16)', linspace(min(y), max(y), 18)'}, ...
-    constraints=[ ...
-        PointConstraint.equalOnMask({x, y}, islandMask, D=[0 0], value=0)
+maskedFit = ConstrainedSpline(P, FobsVector, K=[4 4],  tKnot={linspace(min(x), max(x), 16)', linspace(min(y), max(y), 18)'},  constraints=[  PointConstraint.equalOnMask({x, y}, islandMask, D=[0 0], value=0)
         PointConstraint.equalOnMask({x, y}, islandMask, D=[1 0], value=0)
         PointConstraint.equalOnMask({x, y}, islandMask, D=[0 1], value=0)]);
 
