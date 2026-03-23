@@ -30,10 +30,10 @@ Evaluate the tensor spline or a mixed partial derivative.
 
   Evaluate either on an `N x D` point matrix or with one query
   input per tensor dimension.
- 
+
   ```matlab
   values = spline(queryPoints);
   values = spline(xq, yq);
   ```
- 
-            
+
+

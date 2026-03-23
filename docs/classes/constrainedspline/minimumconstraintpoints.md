@@ -1,42 +1,39 @@
 ---
 layout: default
-title: MinimumConstraintPoints
+title: minimumConstraintPoints
 parent: ConstrainedSpline
 grand_parent: Classes
-nav_order: 5
+nav_order: 12
 mathjax: true
 ---
 
-#  MinimumConstraintPoints
+#  minimumConstraintPoints
 
-Return a minimal set of locations for universal derivative constraints.
+Return a minimal set of one-dimensional locations for universal derivative constraints.
 
 
 ---
 
 ## Declaration
 ```matlab
- tc = MinimumConstraintPoints(tKnot,K,T)
+ tc = minimumConstraintPoints(tKnot,K,T)
 ```
 ## Parameters
-+ `tKnot`  knot sequence
++ `tKnot`  one-dimensional knot sequence
 + `K`  spline order
 + `T`  constrained polynomial degree
 
 ## Returns
-+ `tc`  constraint locations
++ `tc`  one-dimensional constraint locations
 
 ## Discussion
 
   For a terminated spline of order K, this chooses the smallest
-  set of points needed to constrain all segments at polynomial
-  degree T.
- 
-  Use this helper to choose the smallest set of constraint
-  locations needed to control a terminated spline at degree `T`.
- 
+  set of 1-D points needed to constrain all segments at
+  polynomial degree T.
+
   ```matlab
-  tc = ConstrainedSpline.MinimumConstraintPoints(tKnot, 4, 0);
+  tc = ConstrainedSpline.minimumConstraintPoints(tKnot, 4, 0);
   ```
- 
-            
+
+

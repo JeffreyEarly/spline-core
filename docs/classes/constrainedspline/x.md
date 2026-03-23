@@ -1,19 +1,21 @@
 ---
 layout: default
-title: x
+title: X
 parent: ConstrainedSpline
 grand_parent: Classes
-nav_order: 15
+nav_order: 6
 mathjax: true
 ---
 
-#  x
+#  X
 
-Observation values used to fit the spline.
+Design matrix for the observation locations.
+
+> Developer documentation: this item describes internal implementation details.
 
 
 ---
 
 ## Discussion
 
-  
+

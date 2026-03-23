@@ -68,29 +68,54 @@ evalin('base', 'rehash');
 websiteRootURL = "spline-core/";
 classFolderName = 'Class documentation';
 websiteFolder = 'classes';
-classes = {'BSpline','TensorSpline','InterpolatingSpline','ConstrainedSpline','ConstrainedTensorSpline','ShapeConstraint','SplineConstraint','PointConstraint','GlobalConstraint'};
-classDocumentation = ClassDocumentation.empty(length(classes),0);
-for iName=1:length(classes)
+constraintFolderName = 'Constraint classes';
+constraintWebsiteFolder = 'classes/constraints';
+classes = {'BSpline','TensorSpline','InterpolatingSpline','ConstrainedSpline'};
+constraintClasses = {'SplineConstraint','PointConstraint','GlobalConstraint'};
+allClasses = [classes, constraintClasses];
+classDocumentation = ClassDocumentation.empty(length(allClasses),0);
+for iName=1:length(allClasses)
+    className = allClasses{iName};
     excludedSuperclasses = {'handle', 'matlab.mixin.Heterogeneous', 'CAAnnotatedClass'};
     excludedMethodNames = string.empty(0,1);
-    switch classes{iName}
-        case {'InterpolatingSpline','ConstrainedSpline','ConstrainedTensorSpline','ShapeConstraint'}
+    switch className
+        case {'InterpolatingSpline','ConstrainedSpline'}
             excludedSuperclasses = {'handle'};
     end
-    switch classes{iName}
-        case 'ShapeConstraint'
-            excludedMethodNames = ["cellstr","char","colon","empty","eq","intersect","isequal","isequaln","ismember","ne","setdiff","setxor","strcmp","strcmpi","string","strncmp","strncmpi","union"];
+    currentWebsiteFolder = websiteFolder;
+    currentParent = classFolderName;
+    currentNavOrder = iName;
+    if ismember(className, constraintClasses)
+        currentWebsiteFolder = constraintWebsiteFolder;
+        currentParent = constraintFolderName;
+        currentNavOrder = iName - numel(classes);
     end
 
-    classDocumentation(iName) = ClassDocumentation(classes{iName}, ...
-        nav_order=iName, ...
+    classDocumentation(iName) = ClassDocumentation(className, ...
+        nav_order=currentNavOrder, ...
         websiteRootURL=websiteRootURL, ...
         buildFolder=buildFolder, ...
-        websiteFolder=websiteFolder, ...
-        parent=classFolderName, ...
+        websiteFolder=currentWebsiteFolder, ...
+        parent=currentParent, ...
         excludedSuperclasses=excludedSuperclasses, ...
         excludedMethodNames=excludedMethodNames);
 end
 arrayfun(@(a) a.writeToFile(),classDocumentation)
+trimTrailingWhitespaceInMarkdown(buildFolder)
 
+end
+
+function trimTrailingWhitespaceInMarkdown(rootFolder)
+markdownFiles = dir(fullfile(rootFolder, "**", "*.md"));
+for iFile = 1:numel(markdownFiles)
+    filePath = fullfile(markdownFiles(iFile).folder, markdownFiles(iFile).name);
+    fileText = fileread(filePath);
+    trimmedText = regexprep(fileText, '[ \t]+(\r?\n)', '$1');
+    if ~strcmp(fileText, trimmedText)
+        fid = fopen(filePath, "w");
+        assert(fid ~= -1, "Could not open markdown file for writing");
+        fwrite(fid, trimmedText);
+        fclose(fid);
+    end
+end
 end

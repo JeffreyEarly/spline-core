@@ -16,4 +16,4 @@ Spline coefficients as an Mx1 vector.
 
 ## Discussion
 
-  
+

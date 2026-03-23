@@ -16,4 +16,4 @@ Minimum and maximum values of the spline domain.
 
 ## Discussion
 
-  
+

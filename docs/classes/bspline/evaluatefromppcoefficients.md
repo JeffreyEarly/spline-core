@@ -31,4 +31,4 @@ Returns the value of the function with derivative D represented by PP coefficien
 
 ## Discussion
 
-                
+

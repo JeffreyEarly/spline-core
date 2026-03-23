@@ -5,7 +5,7 @@
 % NavOrder: 3
 
 %% Create noisy observations with outliers
-% `ConstrainedTensorSpline` fits noisy data rather than interpolating it
+% `ConstrainedSpline` fits noisy data rather than interpolating it
 % exactly. By default the fit uses ordinary least squares. When a few
 % observations are corrupted by large outliers, a robust distribution can
 % downweight them automatically through iteratively reweighted least
@@ -23,8 +23,8 @@ xObs = xTrue + 0.08*randn(size(t));
 outlierIndex = [10 22 37 51];
 xObs(outlierIndex) = xObs(outlierIndex) + [0.75; -0.55; 0.65; -0.7];
 
-leastSquaresFit = ConstrainedTensorSpline(t, xObs, K=4, dataDOF=5);
-robustFit = ConstrainedTensorSpline(t, xObs, K=4, dataDOF=5, ...
+leastSquaresFit = ConstrainedSpline(t, xObs, K=4, dataDOF=5);
+robustFit = ConstrainedSpline(t, xObs, K=4, dataDOF=5, ...
     distribution=StudentTDistribution(sigma=0.08, nu=3));
 
 tDense = linspace(min(t), max(t), 400)';

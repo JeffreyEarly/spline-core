@@ -3,7 +3,7 @@ layout: default
 title: smoothingMatrix
 parent: ConstrainedSpline
 grand_parent: Classes
-nav_order: 12
+nav_order: 15
 mathjax: true
 ---
 
@@ -26,12 +26,12 @@ Return the smoothing matrix that maps observations to fitted values.
 
 ## Discussion
 
-  Use this to inspect how the fitted values depend linearly on
-  the observed samples for the final weighted fit.
- 
+  Use this to inspect the linear action of the final weighted
+  fit on the observed data.
+
   ```matlab
   S = spline.smoothingMatrix();
-  xFit = S * spline.x;
+  valuesFit = S * spline.values;
   ```
- 
-        
+
+

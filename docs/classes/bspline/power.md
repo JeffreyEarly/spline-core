@@ -30,10 +30,10 @@ Raise spline values to a real scalar power by refitting support values.
 
   This is useful for simple nonlinear transforms of a spline when an exact
   spline-space representation is not available.
- 
+
   ```matlab
   squaredSpline = spline.^2;
   reciprocalRootSpline = spline.^(-0.5);
   ```
- 
-            
+
+

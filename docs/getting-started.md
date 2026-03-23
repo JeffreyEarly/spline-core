@@ -64,7 +64,7 @@ legend("InterpolatingSpline","Samples")
 
 ## Constrained fits
 
-`ConstrainedTensorSpline` extends the same idea to noisy fitting. In one
+`ConstrainedSpline` extends the same idea to noisy fitting. In one
 dimension it is intended to feel like the fitting counterpart to
 `InterpolatingSpline`: you can pass a sample vector directly, let the class
 choose knots from the data, and then add local or global constraints when
@@ -73,7 +73,7 @@ needed.
 ```matlab
 t = linspace(0,1,50)';
 x = exp(t) + 0.05*randn(size(t));
-fit = ConstrainedTensorSpline(t, x, ...
+fit = ConstrainedSpline(t, x, ...
     K=4, ...
     dataDOF=2, ...
     constraints=GlobalConstraint.monotonicIncreasing());
@@ -82,7 +82,7 @@ fit = ConstrainedTensorSpline(t, x, ...
 The class documentation provides the full method-level reference for basis
 construction, evaluation, constrained fitting, and shape constraints.
 
-If you want `ConstrainedTensorSpline` to reduce to the same least-squares
+If you want `ConstrainedSpline` to reduce to the same least-squares
 polynomial fit as `polyfit(t,x,N-1)`, use `K=N` and `splineDOF=N`. For
 example, `K=4, splineDOF=4` gives the cubic least-squares fit.
 
@@ -107,7 +107,7 @@ dimension.
 
 ## Tensor-product fitting with noisy data
 
-`ConstrainedTensorSpline` fits a tensor-product spline to noisy observations.
+`ConstrainedSpline` fits a tensor-product spline to noisy observations.
 With the current default settings it chooses a cubic spline in each
 dimension, chooses knot vectors from the observed coordinate values, and
 assumes unit Gaussian errors.
@@ -120,7 +120,7 @@ y = linspace(-2,2,7)';
 Ftrue = 1 + 2*X - Y + 0.5*X.^2.*Y - 0.25*X.*Y.^3;
 Fobs = Ftrue + 0.05*randn(size(Ftrue));
 
-fit = ConstrainedTensorSpline({X,Y}, Fobs);
+fit = ConstrainedSpline({X,Y}, Fobs);
 
 xq = linspace(min(x),max(x),41)';
 yq = linspace(min(y),max(y),51)';
@@ -132,7 +132,7 @@ If you want a denser tensor basis or a robust error model, pass them as
 named options.
 
 ```matlab
-fit = ConstrainedTensorSpline({X,Y}, Fobs, ...
+fit = ConstrainedSpline({X,Y}, Fobs, ...
     K=[4 4], ...
     tKnot={BSpline.knotPointsForDataPoints(x,K=4,dataDOF=2), ...
            BSpline.knotPointsForDataPoints(y,K=4,dataDOF=2)}, ...

@@ -29,9 +29,9 @@ Return a spline approximation to the square root of the spline output.
 
   This is a convenience wrapper around `spline.^(1/2)` and is most useful
   when the spline is nonnegative over its domain.
- 
+
   ```matlab
   amplitudeSpline = sqrt(energySpline);
   ```
- 
-          
+
+

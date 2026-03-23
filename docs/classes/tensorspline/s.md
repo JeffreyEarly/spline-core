@@ -16,4 +16,4 @@ Polynomial degree in each tensor dimension.
 
 ## Discussion
 
-  
+

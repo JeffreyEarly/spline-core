@@ -6,7 +6,7 @@
 
 %% Fit a tensor spline to scattered observations
 % `InterpolatingSpline` in higher dimensions expects values on a
-% rectilinear tensor grid, but `ConstrainedTensorSpline` accepts an `N x D`
+% rectilinear tensor grid, but `ConstrainedSpline` accepts an `N x D`
 % point cloud directly. That makes it the right entry point for noisy
 % scattered observations in two dimensions.
 %
@@ -42,8 +42,8 @@ coarseTKnot = {
     BSpline.knotPointsForDataPoints(P(:,2), K=K(2), dataDOF=coarseDOF(2))
     };
 
-denseFit = ConstrainedTensorSpline(P, zObs, K=K, tKnot=denseTKnot);
-coarseFit = ConstrainedTensorSpline(P, zObs, K=K, tKnot=coarseTKnot);
+denseFit = ConstrainedSpline(P, zObs, K=K, tKnot=denseTKnot);
+coarseFit = ConstrainedSpline(P, zObs, K=K, tKnot=coarseTKnot);
 
 denseBasisSize = cellfun(@numel, denseTKnot).' - K;
 coarseBasisSize = cellfun(@numel, coarseTKnot).' - K;
@@ -83,7 +83,7 @@ xlabel("y")
 ylabel("x")
 title(sprintf("Fit with dataDOF = [%d %d]", coarseDOF(1), coarseDOF(2)))
 
-if exist("tutorialFigureCapture", "var") && isa(tutorialFigureCapture, "function_handle"), tutorialFigureCapture("scattered-fit-fields", Caption="ConstrainedTensorSpline fits a tensor-product surface directly to scattered 2D observations. The per-dimension dataDOF choice controls the knot density and therefore the flexibility of the fitted field."); end
+if exist("tutorialFigureCapture", "var") && isa(tutorialFigureCapture, "function_handle"), tutorialFigureCapture("scattered-fit-fields", Caption="ConstrainedSpline fits a tensor-product surface directly to scattered 2D observations. The per-dimension dataDOF choice controls the knot density and therefore the flexibility of the fitted field."); end
 
 %% Compare dense and coarse knot choices on a transect
 % The denser fit uses more splines per coordinate direction, while the
@@ -123,7 +123,7 @@ if exist("tutorialFigureCapture", "var") && isa(tutorialFigureCapture, "function
 %     BSpline.knotPointsForDataPoints(P(:,2), K=4, dataDOF=22)
 %     };
 %
-% fit = ConstrainedTensorSpline(P, zObs, K=[4 4], tKnot=tKnot);
+% fit = ConstrainedSpline(P, zObs, K=[4 4], tKnot=tKnot);
 % ```
 %
 % where `P` is the `N x 2` observation matrix. The same idea extends to

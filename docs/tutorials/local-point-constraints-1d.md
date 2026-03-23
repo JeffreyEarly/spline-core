@@ -28,7 +28,7 @@ t = linspace(0, 1, 32)';
 xTrue = 0.2 + 0.45*sin(2*pi*t) + 0.18*cos(5*pi*t);
 xObs = xTrue + 0.05*randn(size(t));
 
-freeFit = ConstrainedTensorSpline(t, xObs, K=4, dataDOF=3);
+freeFit = ConstrainedSpline(t, xObs, K=4, dataDOF=3);
 tDense = linspace(min(t), max(t), 500)';
 xFree = freeFit(tDense);
 
@@ -49,7 +49,7 @@ caseDefinitions = struct( ...
 
 constrainedFits = cell(size(caseDefinitions));
 for iCase = 1:numel(caseDefinitions)
-    constrainedFits{iCase} = ConstrainedTensorSpline(t, xObs, K=4, ...
+    constrainedFits{iCase} = ConstrainedSpline(t, xObs, K=4, ...
         dataDOF=3, ...
         constraints=caseDefinitions(iCase).Constraints);
 end
@@ -170,5 +170,5 @@ PointConstraint.equal([t1; t2; t3], D=1, Value=0)
 ```
 
 Those constraint objects are then passed as the `constraints`
-option to `ConstrainedTensorSpline`.
+option to `ConstrainedSpline`.
 

@@ -33,10 +33,10 @@ Create an interpolating spline on one-dimensional samples or a rectilinear grid.
   rectilinear grid and should be reproduced exactly by the
   spline. Supply one grid input per dimension followed by the
   sampled value array.
- 
+
   ```matlab
   spline = InterpolatingSpline(x, y, F, K=[4 4]);
   Fq = spline(Xq, Yq);
   ```
- 
-              
+
+

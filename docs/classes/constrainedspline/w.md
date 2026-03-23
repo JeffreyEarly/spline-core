@@ -3,7 +3,7 @@ layout: default
 title: W
 parent: ConstrainedSpline
 grand_parent: Classes
-nav_order: 7
+nav_order: 5
 mathjax: true
 ---
 
@@ -18,4 +18,4 @@ Weight matrix or weights used by the fit.
 
 ## Discussion
 
-    
+

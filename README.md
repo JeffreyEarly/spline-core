@@ -42,10 +42,10 @@ Overview
 
 The `BSpline` class is a primitive class that creates b-splines given some set of knot points, and then evaluates the splines given some set of coefficients for the splines. This class is just for generating b-splines and doesn't do anything with data.
 
-The following three classes all directly inherit from `BSpline`  class,
+The main user-facing spline classes are,
 
 - An `InterpolatingSpline` uses local b-splines to interpolate between data points. The (K-1)th derivative of a K order spline is piecewise continuous. This is a generalization of Matlab's cubic spline interpolation function.
-- The `ConstrainedSpline` class does a least-squares fit to given data points with a chosen set of b-splines. Constraints can be added at any point in the domain and the class can also accommodate non-gaussian errors.
+- The `ConstrainedSpline` class does a least-squares fit to given data points with a chosen tensor-product spline basis. Constraints can be added at any point in the domain and the class can also accommodate non-gaussian errors.
 - A `SmoothingSpline` can be used to smooth noisy data and attempt to recover the "true" underlying function.
 
 The `BivariateSmoothingSpline` essentially takes  (t,x,y) as input data and creates smoothing splines for both x, y *after* removing a mean  `ConstrainedSpline` fit from both directions. The idea is to make the data stationary and therefore treat tension parameter optimization isotropically. 
@@ -163,4 +163,3 @@ The `InterpolatingSpline` class takes name/value pairs at initialization to set 
 
 - `'K'` spline order, default is 4.
 - `'S'` spline degree (order-1), default is 3.
-

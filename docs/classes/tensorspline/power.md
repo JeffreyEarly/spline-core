@@ -29,10 +29,10 @@ Raise tensor-spline values to a positive scalar power by refitting support value
 
   This is useful for simple nonlinear transforms of a tensor spline when
   an exact spline-space representation is not available.
- 
+
   ```matlab
   squaredSpline = spline.^2;
   amplitudeSpline = spline.^(1/2);
   ```
- 
-          
+
+

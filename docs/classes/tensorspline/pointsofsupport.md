@@ -32,10 +32,10 @@ Return representative support points for a tensor-product spline basis.
   Use these points when you need one representative location per tensor
   basis function, for example when constructing transformed splines from
   sampled values.
- 
+
   ```matlab
   [supportPoints, supportVectors] = TensorSpline.pointsOfSupport(tKnot, [4 4]);
   values = spline(supportPoints);
   ```
- 
-              
+
+
