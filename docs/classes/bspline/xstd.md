@@ -16,4 +16,4 @@ Multiplicative scale applied to spline evaluations.
 
 ## Discussion
 
-
+  

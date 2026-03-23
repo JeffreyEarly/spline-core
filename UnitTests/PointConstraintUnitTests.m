@@ -68,20 +68,6 @@ classdef PointConstraintUnitTests < matlab.unittest.TestCase
             testCase.verifyEqual(constraint.D, repmat([0 1], nnz(mask), 1))
         end
 
-        function lowerBoundConstraintCanBeBuiltFromGridArrayMask(testCase)
-            x = [0; 1];
-            y = [10; 20; 30];
-            [X,Y] = ndgrid(x,y);
-            mask = [false true false; true false true];
-
-            constraint = PointConstraint.lowerBoundOnMask({X,Y}, mask, D=[1 0], value=5);
-
-            testCase.verifyEqual(constraint.points, [X(mask), Y(mask)])
-            testCase.verifyEqual(constraint.D, repmat([1 0], nnz(mask), 1))
-            testCase.verifyEqual(constraint.value, 5*ones(nnz(mask),1))
-            testCase.verifyEqual(constraint.relation, ">=")
-        end
-
         function maskSizeMustMatchGrid(testCase)
             x = [0; 1];
             y = [10; 20; 30];
@@ -89,6 +75,16 @@ classdef PointConstraintUnitTests < matlab.unittest.TestCase
 
             testCase.verifyError(@() PointConstraint.equalOnMask({x,y}, mask, D=[0 0], value=0), ...
                 'PointConstraint:InvalidMaskSize')
+        end
+
+        function gridArrayMaskInputIsRejected(testCase)
+            x = [0; 1];
+            y = [10; 20; 30];
+            [X,Y] = ndgrid(x,y);
+            mask = [false true false; true false true];
+
+            testCase.verifyError(@() PointConstraint.lowerBoundOnMask({X,Y}, mask, D=[1 0], value=5), ...
+                'PointConstraint:InvalidGrid')
         end
 
         function pointAndGlobalConstraintsCanFormMixedArray(testCase)

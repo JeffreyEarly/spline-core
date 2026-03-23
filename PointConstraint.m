@@ -188,7 +188,7 @@ classdef PointConstraint < SplineConstraint
             %
             % - Topic: Specify point constraints
             % - Declaration: self = equalOnMask(grid,mask,options)
-            % - Parameter grid: vector or cell array of grid vectors or matching grid arrays
+            % - Parameter grid: vector or cell array of grid vectors
             % - Parameter mask: logical mask selecting constrained locations
             % - Parameter options.D: derivative orders as a scalar, row vector, or N-by-D matrix
             % - Parameter options.value: scalar or one target value per selected point
@@ -212,7 +212,7 @@ classdef PointConstraint < SplineConstraint
             %
             % - Topic: Specify point constraints
             % - Declaration: self = lowerBoundOnMask(grid,mask,options)
-            % - Parameter grid: vector or cell array of grid vectors or matching grid arrays
+            % - Parameter grid: vector or cell array of grid vectors
             % - Parameter mask: logical mask selecting constrained locations
             % - Parameter options.D: derivative orders as a scalar, row vector, or N-by-D matrix
             % - Parameter options.value: scalar or one bound value per selected point
@@ -236,7 +236,7 @@ classdef PointConstraint < SplineConstraint
             %
             % - Topic: Specify point constraints
             % - Declaration: self = upperBoundOnMask(grid,mask,options)
-            % - Parameter grid: vector or cell array of grid vectors or matching grid arrays
+            % - Parameter grid: vector or cell array of grid vectors
             % - Parameter mask: logical mask selecting constrained locations
             % - Parameter options.D: derivative orders as a scalar, row vector, or N-by-D matrix
             % - Parameter options.value: scalar or one bound value per selected point
@@ -328,31 +328,14 @@ classdef PointConstraint < SplineConstraint
                         'grid must not be empty.');
                 end
 
-                isVectorGrid = cellfun(@isvector, grid);
-                if all(isVectorGrid)
-                    [allPoints, gridSize] = TensorSpline.pointsFromGridVectors(grid);
-                    normalizedMask = PointConstraint.normalizeMask(mask, gridSize);
-                    pointMatrix = allPoints(normalizedMask(:), :);
-                    return;
-                end
-
-                if any(isVectorGrid)
+                if ~all(cellfun(@isvector, grid))
                     error('PointConstraint:InvalidGrid', ...
-                        'grid must be either all vectors or all matching arrays.');
+                        'grid must be a vector or a cell array of grid vectors.');
                 end
 
-                outputSize = size(grid{1});
-                normalizedMask = PointConstraint.normalizeMask(mask, outputSize);
-                numDimensions = numel(grid);
-                pointMatrix = zeros(nnz(normalizedMask), numDimensions);
-                for iDim = 1:numDimensions
-                    validateattributes(grid{iDim}, {'numeric'}, {'real','finite'});
-                    if ~isequal(size(grid{iDim}), outputSize)
-                        error('PointConstraint:InvalidGrid', ...
-                            'All grid arrays must have the same size.');
-                    end
-                    pointMatrix(:,iDim) = grid{iDim}(normalizedMask);
-                end
+                [allPoints, gridSize] = TensorSpline.pointsFromGridVectors(grid);
+                normalizedMask = PointConstraint.normalizeMask(mask, gridSize);
+                pointMatrix = allPoints(normalizedMask(:), :);
                 return;
             end
 

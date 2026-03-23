@@ -111,8 +111,6 @@ canonicalTKnot = BSpline.knotPointsForDataPoints(tData, K=canonicalOrder);
 canonicalBasis = BSpline.matrix(tData, canonicalTKnot, canonicalOrder);
 canonicalSpline = BSpline(canonicalOrder, canonicalTKnot, canonicalBasis \ xData);
 
-canonicalTKnot
-
 %% Compare the direct BSpline construction with InterpolatingSpline
 % The two paths below are equivalent in one dimension. The first is the
 % convenience constructor, and the second exposes the underlying
@@ -120,7 +118,6 @@ canonicalTKnot
 
 directInterpolant = InterpolatingSpline(tData, xData, K=canonicalOrder);
 maxDifference = max(abs(directInterpolant(tQuery) - canonicalSpline(tQuery)));
-maxDifference
 
 %% Build a single B-spline basis function and its derivatives
 % The interpolants above are linear combinations of B-spline basis

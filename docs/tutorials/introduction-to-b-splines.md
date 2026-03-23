@@ -127,8 +127,6 @@ canonicalOrder = 4;
 canonicalTKnot = BSpline.knotPointsForDataPoints(tData, K=canonicalOrder);
 canonicalBasis = BSpline.matrix(tData, canonicalTKnot, canonicalOrder);
 canonicalSpline = BSpline(canonicalOrder, canonicalTKnot, canonicalBasis \ xData);
-
-canonicalTKnot
 ```
 
 ## Compare the direct BSpline construction with InterpolatingSpline
@@ -140,7 +138,6 @@ convenience constructor, and the second exposes the underlying
 ```matlab
 directInterpolant = InterpolatingSpline(tData, xData, K=canonicalOrder);
 maxDifference = max(abs(directInterpolant(tQuery) - canonicalSpline(tQuery)));
-maxDifference
 ```
 
 ## Build a single B-spline basis function and its derivatives

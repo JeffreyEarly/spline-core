@@ -660,49 +660,6 @@ classdef ConstrainedSpline < TensorSpline
             end
         end
 
-        function pointConstraints = normalizePointConstraints(pointConstraints, numDimensions)
-            % Normalize and validate point-constraint specifications.
-            if isempty(pointConstraints)
-                pointConstraints = PointConstraint.empty(0,1);
-                return;
-            end
-
-            if ~isa(pointConstraints, 'PointConstraint')
-                error('ConstrainedSpline:InvalidPointConstraints', ...
-                    'pointConstraints must be a PointConstraint array.');
-            end
-
-            pointConstraints = reshape(pointConstraints, [], 1);
-            for iConstraint = 1:numel(pointConstraints)
-                if ~isempty(numDimensions) && pointConstraints(iConstraint).numDimensions ~= numDimensions
-                    error('ConstrainedSpline:PointConstraintDimensionMismatch', ...
-                        'Each point constraint must match the spline dimensionality.');
-                end
-            end
-        end
-
-        function globalConstraints = normalizeGlobalConstraints(globalConstraints, numDimensions)
-            % Normalize and validate global-constraint specifications.
-            if isempty(globalConstraints)
-                globalConstraints = GlobalConstraint.empty(0,1);
-                return;
-            end
-
-            if ~isa(globalConstraints, 'GlobalConstraint')
-                error('ConstrainedSpline:InvalidGlobalConstraints', ...
-                    'globalConstraints must be a GlobalConstraint array.');
-            end
-
-            globalConstraints = reshape(globalConstraints, [], 1);
-            for iConstraint = 1:numel(globalConstraints)
-                if ~isempty(numDimensions) && ~isempty(globalConstraints(iConstraint).dimension) ...
-                        && globalConstraints(iConstraint).dimension > numDimensions
-                    error('ConstrainedSpline:GlobalConstraintDimensionMismatch', ...
-                        'Global constraint dimensions must not exceed the spline dimensionality.');
-                end
-            end
-        end
-
         function [pointConstraints, globalConstraints] = normalizeConstraintInputs(constraints, numDimensions)
             % Normalize mixed constraint inputs into separate arrays.
             if isempty(constraints)
@@ -730,8 +687,20 @@ classdef ConstrainedSpline < TensorSpline
                 globalConstraints = GlobalConstraint.empty(0,1);
             end
 
-            pointConstraints = ConstrainedSpline.normalizePointConstraints(pointConstraints, numDimensions);
-            globalConstraints = ConstrainedSpline.normalizeGlobalConstraints(globalConstraints, numDimensions);
+            for iConstraint = 1:numel(pointConstraints)
+                if ~isempty(numDimensions) && pointConstraints(iConstraint).numDimensions ~= numDimensions
+                    error('ConstrainedSpline:PointConstraintDimensionMismatch', ...
+                        'Each point constraint must match the spline dimensionality.');
+                end
+            end
+
+            for iConstraint = 1:numel(globalConstraints)
+                if ~isempty(numDimensions) && ~isempty(globalConstraints(iConstraint).dimension) ...
+                        && globalConstraints(iConstraint).dimension > numDimensions
+                    error('ConstrainedSpline:GlobalConstraintDimensionMismatch', ...
+                        'Global constraint dimensions must not exceed the spline dimensionality.');
+                end
+            end
         end
     end
 end

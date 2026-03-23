@@ -19,7 +19,7 @@ Create a pointwise upper-bound constraint from a logical mask.
  self = upperBoundOnMask(grid,mask,options)
 ```
 ## Parameters
-+ `grid`  vector or cell array of grid vectors or matching grid arrays
++ `grid`  vector or cell array of grid vectors
 + `mask`  logical mask selecting constrained locations
 + `options.D`  derivative orders as a scalar, row vector, or N-by-D matrix
 + `options.value`  scalar or one bound value per selected point
