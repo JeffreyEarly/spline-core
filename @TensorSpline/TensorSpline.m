@@ -235,8 +235,7 @@ classdef TensorSpline < handle
             % - Returns values: spline values reshaped to match the query input
 
             if isempty(varargin)
-                error('TensorSpline:NotEnoughInputs', ...
-                    'Specify one query input per spline dimension.');
+                error('TensorSpline:NotEnoughInputs', 'Specify one query input per spline dimension.');
             end
 
             if numel(varargin) == self.numDimensions
@@ -246,8 +245,7 @@ classdef TensorSpline < handle
                 queryInputs = varargin(1:end-1);
                 derivativeOrders = TensorSpline.normalizeDerivativeOrders(varargin{end}, self.numDimensions);
             else
-                error('TensorSpline:InvalidEvaluationInput', ...
-                    'Use spline(X1,...,Xn) or spline(X1,...,Xn,D).');
+                error('TensorSpline:InvalidEvaluationInput', 'Use spline(X1,...,Xn) or spline(X1,...,Xn,D).');
             end
 
             [pointMatrix, outputSize] = TensorSpline.normalizeQueryInputs(queryInputs, self.numDimensions);
