@@ -12,7 +12,7 @@ classdef ConstrainedSpline < TensorSpline
     %
     % ```matlab
     % spline = ConstrainedSpline(points, values);
-    % valuesFit = spline(points);
+    % valuesFit = spline(Xq, Yq);
     % ```
     %
     % - Topic: Create a constrained tensor spline
@@ -89,21 +89,20 @@ classdef ConstrainedSpline < TensorSpline
         function self = ConstrainedSpline(points, values, options)
             % Create a tensor-product spline fit to noisy observations.
             %
-            % Use this constructor with an `N x D` point matrix or a cell
-            % array of matching grids when fitting noisy tensor-product
-            % data.
+            % Use this constructor with an `N x D` point matrix when
+            % fitting noisy tensor-product data.
             %
             % In one dimension, `K=N` together with `splineDOF=N` gives the
             % same least-squares polynomial fit as `polyfit(t,x,N-1)`.
             %
             % ```matlab
             % spline = ConstrainedSpline(points, values, K=[4 4]);
-            % valuesFit = spline(points);
+            % valuesFit = spline(Xq, Yq);
             % ```
             %
             % - Topic: Create a constrained tensor spline
             % - Declaration: self = ConstrainedSpline(points,values,options)
-            % - Parameter points: observation locations as a point matrix or cell array of matching grids
+            % - Parameter points: observation locations as a point matrix
             % - Parameter values: observation values
             % - Parameter options.K: optional spline order scalar or vector with one entry per dimension
             % - Parameter options.S: optional spline degree scalar or vector with one entry per dimension
@@ -114,19 +113,35 @@ classdef ConstrainedSpline < TensorSpline
             % - Parameter options.constraints: optional mixed SplineConstraint array
             % - Returns self: ConstrainedSpline instance
             arguments
-                points
+                points {mustBeNumeric,mustBeReal,mustBeFinite}
                 values {mustBeNumeric,mustBeReal,mustBeFinite}
                 options.K {mustBeNumeric,mustBeReal,mustBeFinite,mustBeInteger,mustBePositive} = 4
-                options.S = NaN
+                options.S {mustBeNumeric,mustBeReal} = []
                 options.tKnot = []
                 options.dataDOF {mustBeNumeric,mustBeReal,mustBeFinite,mustBeInteger,mustBePositive} = 1
-                options.splineDOF = []
+                options.splineDOF {mustBeNumeric,mustBeReal,mustBeFinite,mustBeInteger,mustBeNonnegative} = []
                 options.distribution = []
                 options.constraints = []
             end
 
-            numDimensions = ConstrainedSpline.inferNumDimensions(points, options.tKnot);
-            pointMatrix = ConstrainedSpline.normalizeObservationPoints(points, numDimensions);
+            if ~isempty(options.tKnot)
+                if isnumeric(options.tKnot)
+                    validateattributes(options.tKnot, {'numeric'}, {'vector','real','finite'});
+                    numDimensions = 1;
+                else
+                    if ~iscell(options.tKnot)
+                        error('ConstrainedSpline:InvalidKnotCell', ...
+                            'tKnot must be a knot vector in 1-D or a cell array with one knot vector per dimension.');
+                    end
+                    numDimensions = numel(options.tKnot);
+                end
+            elseif isvector(points)
+                numDimensions = 1;
+            else
+                numDimensions = size(points, 2);
+            end
+
+            [pointMatrix, ~] = TensorSpline.normalizePointMatrixInput(points, numDimensions);
             observedValues = reshape(values, [], 1);
 
             if numel(observedValues) ~= size(pointMatrix,1)
@@ -135,15 +150,24 @@ classdef ConstrainedSpline < TensorSpline
             end
 
             K = ConstrainedSpline.splineOrderFromOptions(options, numDimensions);
-            dataDOF = ConstrainedSpline.normalizeDataDOFVector(options.dataDOF, numDimensions);
-            splineDOF = ConstrainedSpline.normalizeSplineDOFVector(options.splineDOF, numDimensions);
-            tKnot = ConstrainedSpline.defaultKnotCell(pointMatrix, K, options.tKnot, dataDOF, splineDOF);
+            dataDOF = TensorSpline.normalizeOrders(options.dataDOF, numDimensions);
+            splineDOF = ConstrainedSpline.normalizeOptionalOrders(options.splineDOF, numDimensions);
+            tKnot = options.tKnot;
+            if ~isempty(tKnot)
+                if numDimensions == 1 && isnumeric(tKnot)
+                    tKnot = {reshape(tKnot, [], 1)};
+                else
+                    tKnot = TensorSpline.normalizeKnotCell(tKnot, numDimensions);
+                end
+            end
+            if isempty(tKnot)
+                tKnot = ConstrainedSpline.defaultKnotCell(pointMatrix, K, dataDOF, splineDOF);
+            end
             distribution = options.distribution;
             if isempty(distribution)
                 distribution = NormalDistribution(1);
             end
 
-            tKnot = ConstrainedSpline.normalizeKnotCell(tKnot, numDimensions);
             for iDim = 1:numDimensions
                 tKnot{iDim} = ConstrainedSpline.terminatedKnotPoints(tKnot{iDim}, K(iDim));
             end
@@ -272,7 +296,7 @@ classdef ConstrainedSpline < TensorSpline
             % - Returns tKnot: terminated knot sequence
             if isnumeric(tKnot)
                 validateattributes(tKnot, {'numeric'}, {'vector','real','finite'});
-                validateattributes(K, {'numeric'}, {'scalar','real','finite','integer','positive'});
+                K = TensorSpline.normalizeOrders(K, 1);
                 tKnot = reshape(tKnot, [], 1);
 
                 nLeft = find(tKnot <= tKnot(1), 1, 'last');
@@ -287,7 +311,7 @@ classdef ConstrainedSpline < TensorSpline
             end
 
             numDimensions = numel(tKnot);
-            K = ConstrainedSpline.normalizeOrders(K, numDimensions);
+            K = TensorSpline.normalizeOrders(K, numDimensions);
             tKnot = reshape(tKnot, 1, []);
             for iDim = 1:numDimensions
                 tKnot{iDim} = ConstrainedSpline.terminatedKnotPoints(tKnot{iDim}, K(iDim));
@@ -372,12 +396,10 @@ classdef ConstrainedSpline < TensorSpline
     methods (Static, Access = private)
         function K = splineOrderFromOptions(options, numDimensions)
             % Resolve spline order from mutually exclusive K and S options.
-            validateattributes(options.S, {'numeric'}, {'vector','real'});
-            finiteEntries = options.S(~isnan(options.S));
-            validateattributes(finiteEntries, {'numeric'}, {'finite','nonnegative','integer'});
-            if all(isnan(options.S), 'all')
+            if isempty(options.S)
                 K = options.K;
             else
+                validateattributes(options.S, {'numeric'}, {'vector','real','finite','nonnegative','integer'});
                 if ~(isscalar(options.K) && options.K == 4)
                     error('ConstrainedSpline:ConflictingSplineOrder', ...
                         'Specify either K or S, but not both.');
@@ -385,113 +407,14 @@ classdef ConstrainedSpline < TensorSpline
                 K = options.S + 1;
             end
 
-            K = ConstrainedSpline.normalizeOrders(K, numDimensions);
+            K = TensorSpline.normalizeOrders(K, numDimensions);
         end
 
-        function K = normalizeOrders(K, numDimensions)
-            % Normalize spline-order input to one order per dimension.
-            validateattributes(K, {'numeric'}, {'vector','real','finite','positive','integer'});
-            if isscalar(K)
-                K = repmat(K, 1, numDimensions);
-            else
-                K = reshape(K, 1, []);
-                if numel(K) ~= numDimensions
-                    error('ConstrainedSpline:InvalidOrderVector', ...
-                        'K must be scalar or have one element per dimension.');
-                end
-            end
-        end
-
-        function tKnot = normalizeKnotCell(tKnot, numDimensions)
-            % Normalize and validate a cell array of knot vectors.
-            if numDimensions == 1 && isnumeric(tKnot)
-                validateattributes(tKnot, {'numeric'}, {'vector','real','finite'});
-                tKnot = {reshape(tKnot, [], 1)};
-            end
-
-            if ~iscell(tKnot) || numel(tKnot) ~= numDimensions
-                error('ConstrainedSpline:InvalidKnotCell', ...
-                    'tKnot must be a knot vector in 1-D or a cell array with one knot vector per dimension.');
-            end
-
-            tKnot = reshape(tKnot, 1, []);
-            for iDim = 1:numDimensions
-                validateattributes(tKnot{iDim}, {'numeric'}, {'column','real','finite'});
-                tKnot{iDim} = reshape(tKnot{iDim}, [], 1);
-            end
-        end
-
-        function pointMatrix = normalizeObservationPoints(X, numDimensions)
-            % Normalize observation locations to an N-by-D point matrix.
-            if iscell(X)
-                if numel(X) ~= numDimensions
-                    error('ConstrainedSpline:InvalidPointCell', ...
-                        'Cell input must have one array per dimension.');
-                end
-
-                outputSize = size(X{1});
-                pointMatrix = zeros(numel(X{1}), numDimensions);
-                for iDim = 1:numDimensions
-                    validateattributes(X{iDim}, {'numeric'}, {'real','finite'});
-                    if ~isequal(size(X{iDim}), outputSize)
-                        error('ConstrainedSpline:InvalidPointCell', ...
-                            'All observation arrays must have the same size.');
-                    end
-                    pointMatrix(:,iDim) = X{iDim}(:);
-                end
-                return;
-            end
-
-            validateattributes(X, {'numeric'}, {'real','finite'});
-            if numDimensions == 1
-                pointMatrix = reshape(X, [], 1);
-            else
-                if size(X,2) ~= numDimensions
-                    error('ConstrainedSpline:InvalidPointMatrix', ...
-                        'Point matrix must have one column per dimension.');
-                end
-                pointMatrix = X;
-            end
-        end
-
-        function numDimensions = inferNumDimensions(X, tKnot)
-            % Infer the tensor dimensionality from the inputs.
-            if ~isempty(tKnot)
-                if isnumeric(tKnot)
-                    validateattributes(tKnot, {'numeric'}, {'vector','real','finite'});
-                    numDimensions = 1;
-                    return;
-                end
-
-                if ~iscell(tKnot)
-                    error('ConstrainedSpline:InvalidKnotCell', ...
-                        'tKnot must be a knot vector in 1-D or a cell array with one knot vector per dimension.');
-                end
-                numDimensions = numel(tKnot);
-                return;
-            end
-
-            if iscell(X)
-                numDimensions = numel(X);
-                return;
-            end
-
-            validateattributes(X, {'numeric'}, {'real','finite'});
-            if isvector(X)
-                numDimensions = 1;
-            else
-                numDimensions = size(X, 2);
-            end
-        end
-
-        function tKnot = defaultKnotCell(X, K, tKnot, dataDOF, splineDOF)
-            % Create a minimal terminated knot cell when no knots are supplied.
-            if ~isempty(tKnot)
-                return;
-            end
-
+        function tKnot = defaultKnotCell(X, K, dataDOF, splineDOF)
+            % Create a knot cell when no knots are supplied.
             numDimensions = size(X, 2);
             tKnot = cell(1, numDimensions);
+            useSplineDOF = ~isempty(splineDOF);
             for iDim = 1:numDimensions
                 coordinateValues = unique(X(:,iDim), 'sorted');
                 if numel(coordinateValues) < K(iDim)
@@ -501,50 +424,30 @@ classdef ConstrainedSpline < TensorSpline
                     continue;
                 end
 
-                if isnan(splineDOF(iDim))
-                    tKnot{iDim} = BSpline.knotPointsForDataPoints(coordinateValues, ...
-                        K=K(iDim), dataDOF=dataDOF(iDim));
-                else
+                if useSplineDOF
                     tKnot{iDim} = BSpline.knotPointsForDataPoints(coordinateValues, ...
                         K=K(iDim), splineDOF=splineDOF(iDim));
+                else
+                    tKnot{iDim} = BSpline.knotPointsForDataPoints(coordinateValues, ...
+                        K=K(iDim), dataDOF=dataDOF(iDim));
                 end
             end
         end
 
-        function dof = normalizeDataDOFVector(dof, numDimensions)
-            % Normalize dataDOF to one positive integer per dimension.
-            validateattributes(dof, {'numeric'}, {'vector','real','finite','positive','integer'});
-            if isscalar(dof)
-                dof = repmat(dof, 1, numDimensions);
-            else
-                dof = reshape(dof, 1, []);
-                if numel(dof) ~= numDimensions
-                    error('ConstrainedSpline:InvalidDegreeOfFreedomOption', ...
-                        'dataDOF and splineDOF must be scalar or have one element per dimension.');
-                end
-            end
-        end
-
-        function dof = normalizeSplineDOFVector(dof, numDimensions)
-            % Normalize splineDOF to one optional target per dimension.
-            if isempty(dof)
-                dof = nan(1, numDimensions);
+        function values = normalizeOptionalOrders(values, numDimensions)
+            % Normalize an optional per-dimension nonnegative integer vector.
+            if isempty(values)
                 return;
             end
 
-            validateattributes(dof, {'numeric'}, {'vector','real'});
-            if isscalar(dof)
-                dof = repmat(dof, 1, numDimensions);
-            else
-                dof = reshape(dof, 1, []);
-                if numel(dof) ~= numDimensions
-                    error('ConstrainedSpline:InvalidDegreeOfFreedomOption', ...
-                        'dataDOF and splineDOF must be scalar or have one element per dimension.');
-                end
+            validateattributes(values, {'numeric'}, {'vector','real','finite','nonnegative','integer'});
+            values = reshape(values, 1, []);
+            if isscalar(values)
+                values = repmat(values, 1, numDimensions);
+            elseif numel(values) ~= numDimensions
+                error('ConstrainedSpline:InvalidDegreeOfFreedomOption', ...
+                    'dataDOF and splineDOF must be scalar or have one element per dimension.');
             end
-
-            finiteEntries = dof(~isnan(dof));
-            validateattributes(finiteEntries, {'numeric'}, {'finite','nonnegative','integer'});
         end
 
         function D = pairwiseDistanceMatrix(X)
@@ -619,8 +522,6 @@ classdef ConstrainedSpline < TensorSpline
             for iConstraint = 1:numel(globalConstraints)
                 constraint = globalConstraints(iConstraint);
                 switch constraint.shape
-                    case "none"
-                        continue;
                     case "positive"
                         constraintMatrix = -speye(numCoefficients);
                     case "monotonicIncreasing"
@@ -803,10 +704,6 @@ classdef ConstrainedSpline < TensorSpline
 
         function [pointConstraints, globalConstraints] = normalizeConstraintInputs(constraints, numDimensions)
             % Normalize mixed constraint inputs into separate arrays.
-            if nargin < 2
-                numDimensions = [];
-            end
-
             if isempty(constraints)
                 pointConstraints = PointConstraint.empty(0,1);
                 globalConstraints = GlobalConstraint.empty(0,1);
@@ -819,17 +716,17 @@ classdef ConstrainedSpline < TensorSpline
             end
 
             constraints = reshape(constraints, [], 1);
-            pointConstraints = PointConstraint.empty(0,1);
-            globalConstraints = GlobalConstraint.empty(0,1);
-            for iConstraint = 1:numel(constraints)
-                if isa(constraints(iConstraint), 'PointConstraint')
-                    pointConstraints(end+1,1) = constraints(iConstraint); %#ok<AGROW>
-                elseif isa(constraints(iConstraint), 'GlobalConstraint')
-                    globalConstraints(end+1,1) = constraints(iConstraint); %#ok<AGROW>
-                else
-                    error('ConstrainedSpline:InvalidConstraints', ...
-                        'constraints must contain only PointConstraint and GlobalConstraint objects.');
-                end
+            isPointConstraint = arrayfun(@(constraint) isa(constraint, 'PointConstraint'), constraints);
+            if any(isPointConstraint)
+                pointConstraints = reshape([constraints(isPointConstraint)], [], 1);
+            else
+                pointConstraints = PointConstraint.empty(0,1);
+            end
+
+            if any(~isPointConstraint)
+                globalConstraints = reshape([constraints(~isPointConstraint)], [], 1);
+            else
+                globalConstraints = GlobalConstraint.empty(0,1);
             end
 
             pointConstraints = ConstrainedSpline.normalizePointConstraints(pointConstraints, numDimensions);

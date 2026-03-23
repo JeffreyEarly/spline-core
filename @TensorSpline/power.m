@@ -25,7 +25,14 @@ if exponent == 1
 end
 
 [supportPoints, supportVectors] = TensorSpline.pointsOfSupport(self.tKnot_, self.K);
-values = self.valueAtPoints(supportPoints);
+basisMatrix = TensorSpline.matrix(supportPoints, self.tKnot_, self.K);
+values = basisMatrix * self.xi(:);
+if ~isempty(self.xStd)
+    values = self.xStd * values;
+end
+if ~isempty(self.xMean)
+    values = values + self.xMean;
+end
 values(abs(values) < 2*eps) = 0;
 
 poweredValues = values.^exponent;

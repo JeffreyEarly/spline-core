@@ -3,14 +3,14 @@ classdef TensorSpline < handle
     %
     % TensorSpline represents a tensor-product basis assembled from
     % one-dimensional B-spline bases in each coordinate direction. It
-    % supports direct evaluation on point clouds or query grids together
-    % with mixed partial derivatives.
+    % supports direct evaluation on one query array per coordinate
+    % together with mixed partial derivatives.
     %
     % ## Basic usage
     %
     % Use `TensorSpline` when you already have knot vectors and
     % tensor-product coefficients and want to evaluate the resulting
-    % spline on points or grids.
+    % spline on query arrays.
     %
     % ```matlab
     % tKnot = {[0;0;0;0;1;1;1;1], [0;0;0;0;1;1;1;1]};
@@ -90,7 +90,7 @@ classdef TensorSpline < handle
             %
             % ```matlab
             % spline = TensorSpline([4 4], tKnot, xi);
-            % values = spline(queryPoints);
+            % values = spline(xq, yq);
             % ```
             %
             % - Topic: Create a spline
@@ -192,11 +192,10 @@ classdef TensorSpline < handle
         function varargout = subsref(self, index)
             % Evaluate the tensor spline with function-call syntax or defer to built-in indexing.
             %
-            % Use `spline(X)` for values and `spline(X,D)` for mixed
-            % partial derivatives.
+            % Use `spline(X1,...,Xn)` for values and
+            % `spline(X1,...,Xn,D)` for mixed partial derivatives.
             %
             % ```matlab
-            % values = spline(queryPoints);
             % values = spline(xq, yq);
             % dFdx = spline(xq, yq, [1 0]);
             % ```
@@ -222,22 +221,36 @@ classdef TensorSpline < handle
         function values = valueAtPoints(self, varargin)
             % Evaluate the tensor spline or a mixed partial derivative.
             %
-            % Evaluate either on an `N x D` point matrix or with one query
-            % input per tensor dimension.
+            % Evaluate with one query input per tensor dimension.
             %
             % ```matlab
-            % values = spline(queryPoints);
             % values = spline(xq, yq);
             % ```
             %
             % - Topic: Evaluate the spline
             % - Declaration: values = valueAtPoints(self,X1,...,Xn,derivativeOrders)
             % - Parameter self: TensorSpline instance
-            % - Parameter X1,...,Xn: query locations as a point matrix or one array per dimension
+            % - Parameter X1,...,Xn: query locations as one array per dimension
             % - Parameter derivativeOrders: derivative order per dimension
             % - Returns values: spline values reshaped to match the query input
 
-            [pointMatrix, outputSize, derivativeOrders] = TensorSpline.parseValueAtPointsInputs(self.numDimensions, varargin{:});
+            if isempty(varargin)
+                error('TensorSpline:NotEnoughInputs', ...
+                    'Specify one query input per spline dimension.');
+            end
+
+            if numel(varargin) == self.numDimensions
+                queryInputs = varargin;
+                derivativeOrders = zeros(1, self.numDimensions);
+            elseif numel(varargin) == self.numDimensions + 1
+                queryInputs = varargin(1:end-1);
+                derivativeOrders = TensorSpline.normalizeDerivativeOrders(varargin{end}, self.numDimensions);
+            else
+                error('TensorSpline:InvalidEvaluationInput', ...
+                    'Use spline(X1,...,Xn) or spline(X1,...,Xn,D).');
+            end
+
+            [pointMatrix, outputSize] = TensorSpline.normalizeQueryInputs(queryInputs, self.numDimensions);
 
             if any(derivativeOrders > self.K - 1)
                 values = zeros(outputSize, 'like', pointMatrix);
@@ -268,7 +281,8 @@ classdef TensorSpline < handle
             % interpolation, regression, or basis inspection.
             %
             % ```matlab
-            % B = TensorSpline.matrix(queryPoints, tKnot, [4 4]);
+            % [Xq, Yq] = ndgrid(xq, yq);
+            % B = TensorSpline.matrix([Xq(:), Yq(:)], tKnot, [4 4]);
             % values = B * spline.xi(:);
             % ```
             %
@@ -359,7 +373,7 @@ classdef TensorSpline < handle
             %
             % ```matlab
             % [supportPoints, supportVectors] = TensorSpline.pointsOfSupport(tKnot, [4 4]);
-            % values = spline(supportPoints);
+            % values = spline(supportVectors{:});
             % ```
             %
             % - Topic: Build spline bases
@@ -389,42 +403,7 @@ classdef TensorSpline < handle
         end
     end
 
-    methods (Static, Access = private)
-        function [pointMatrix, outputSize, derivativeOrders] = parseValueAtPointsInputs(numDimensions, varargin)
-            % Parse tensor-spline query inputs and optional derivative orders.
-            if isempty(varargin)
-                error('TensorSpline:NotEnoughInputs', ...
-                    'Specify query points as a point matrix or one input per dimension.');
-            end
-
-            if numel(varargin) == 1
-                [pointMatrix, outputSize] = TensorSpline.normalizePointMatrixInput(varargin{1}, numDimensions);
-                derivativeOrders = zeros(1, numDimensions);
-                return;
-            end
-
-            if numel(varargin) == 2 ...
-                    && TensorSpline.isPointMatrixCandidate(varargin{1}, numDimensions) ...
-                    && TensorSpline.isDerivativeOrdersInput(varargin{2}, numDimensions)
-                [pointMatrix, outputSize] = TensorSpline.normalizePointMatrixInput(varargin{1}, numDimensions);
-                derivativeOrders = TensorSpline.normalizeDerivativeOrders(varargin{2}, numDimensions);
-                return;
-            end
-
-            if numel(varargin) == numDimensions
-                queryInputs = varargin;
-                derivativeOrders = zeros(1, numDimensions);
-            elseif numel(varargin) == numDimensions + 1
-                queryInputs = varargin(1:end-1);
-                derivativeOrders = TensorSpline.normalizeDerivativeOrders(varargin{end}, numDimensions);
-            else
-                error('TensorSpline:InvalidEvaluationInput', ...
-                    'Use spline(P), spline(P,D), spline(X1,...,Xn), or spline(X1,...,Xn,D).');
-            end
-
-            [pointMatrix, outputSize] = TensorSpline.normalizeQueryInputs(queryInputs, numDimensions);
-        end
-
+    methods (Static, Hidden)
         function K = normalizeOrders(K, numDimensions)
             % Normalize spline-order input to one order per dimension.
             validateattributes(K, {'numeric'}, {'vector','real','finite','positive','integer'});
@@ -444,6 +423,7 @@ classdef TensorSpline < handle
                 error('TensorSpline:InvalidKnotCell', 'tKnot must be a cell array with one knot vector per dimension.');
             end
 
+            tKnot = reshape(tKnot, 1, []);
             for iDim = 1:numDimensions
                 validateattributes(tKnot{iDim}, {'numeric'}, {'column','real','finite'});
                 tKnot{iDim} = reshape(tKnot{iDim}, [], 1);
@@ -492,18 +472,6 @@ classdef TensorSpline < handle
                 end
                 pointMatrix(:,iDim) = queryInputs{iDim}(:);
             end
-        end
-
-        function tf = isPointMatrixCandidate(X, numDimensions)
-            % True when the input could represent an N-by-D point matrix.
-            tf = isnumeric(X) && isreal(X) && ndims(X) == 2 && size(X,2) == numDimensions;
-        end
-
-        function tf = isDerivativeOrdersInput(value, numDimensions)
-            % True when the input can be interpreted as derivative orders.
-            tf = isnumeric(value) && isreal(value) && all(isfinite(value(:))) ...
-                && all(value(:) >= 0) && all(value(:) == round(value(:))) ...
-                && (isscalar(value) || numel(value) == numDimensions);
         end
 
         function derivativeOrders = normalizeDerivativeOrders(derivativeOrders, numDimensions)

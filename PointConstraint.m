@@ -68,7 +68,7 @@ classdef PointConstraint < SplineConstraint
             % - Returns self: PointConstraint instance
             arguments
                 points = []
-                relation {mustBeTextScalar} = "=="
+                relation {mustBeTextScalar,mustBeMember(relation,["==",">=","<="])} = "=="
                 value = []
                 options.D {mustBeNumeric,mustBeReal,mustBeFinite,mustBeNonnegative,mustBeInteger} = 0
             end
@@ -82,11 +82,9 @@ classdef PointConstraint < SplineConstraint
             numDimensions = size(pointMatrix,2);
             derivativeOrders = PointConstraint.normalizeDerivativeOrders(options.D, numPoints, numDimensions);
             targetValues = PointConstraint.normalizeValues(value, numPoints);
-            relation = PointConstraint.normalizeRelation(relation);
-
             self.points = pointMatrix;
             self.D = derivativeOrders;
-            self.relation = relation;
+            self.relation = string(relation);
             self.value = targetValues;
         end
 
@@ -202,8 +200,7 @@ classdef PointConstraint < SplineConstraint
                 options.value {mustBeNumeric,mustBeReal,mustBeFinite} = 0
             end
 
-            points = PointConstraint.pointsFromMask(grid, mask);
-            self = PointConstraint.equal(points, D=options.D, value=options.value);
+            self = PointConstraint(PointConstraint.pointsFromMask(grid, mask), "==", options.value, D=options.D);
         end
 
         function self = lowerBoundOnMask(grid, mask, options)
@@ -227,8 +224,7 @@ classdef PointConstraint < SplineConstraint
                 options.value {mustBeNumeric,mustBeReal,mustBeFinite} = 0
             end
 
-            points = PointConstraint.pointsFromMask(grid, mask);
-            self = PointConstraint.lowerBound(points, D=options.D, value=options.value);
+            self = PointConstraint(PointConstraint.pointsFromMask(grid, mask), ">=", options.value, D=options.D);
         end
 
         function self = upperBoundOnMask(grid, mask, options)
@@ -252,8 +248,7 @@ classdef PointConstraint < SplineConstraint
                 options.value {mustBeNumeric,mustBeReal,mustBeFinite} = 0
             end
 
-            points = PointConstraint.pointsFromMask(grid, mask);
-            self = PointConstraint.upperBound(points, D=options.D, value=options.value);
+            self = PointConstraint(PointConstraint.pointsFromMask(grid, mask), "<=", options.value, D=options.D);
         end
     end
 
@@ -323,16 +318,6 @@ classdef PointConstraint < SplineConstraint
             end
 
             values = reshape(double(value), [], 1);
-        end
-
-        function relation = normalizeRelation(relation)
-            % Normalize a relation token.
-            relation = string(relation);
-            validRelations = ["==", ">=", "<="];
-            if ~isscalar(relation) || ~ismember(relation, validRelations)
-                error('PointConstraint:InvalidRelation', ...
-                    'relation must be one of "==", ">=", or "<=".');
-            end
         end
 
         function pointMatrix = pointsFromMask(grid, mask)
