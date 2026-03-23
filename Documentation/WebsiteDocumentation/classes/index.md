@@ -11,6 +11,9 @@ permalink: /classes
 Method and property reference pages for the public spline classes are
 generated from the class annotations in the MATLAB source.
 
+If you are deciding where to start, read [Which Class Should I Use?](../which-class-should-i-use)
+before dropping into the method-level reference.
+
 ## Start with the highest-level class that matches your problem
 
 - [`InterpolatingSpline`](./interpolatingspline): exact interpolation in one dimension or on a rectilinear tensor grid

@@ -29,9 +29,9 @@ Evaluate a tensor spline at the supplied points.
 
   This is equivalent to `spline(...)` and is useful when you prefer an
   explicit function-call form.
- 
+
   ```matlab
   values = feval(spline, xq, yq);
   ```
- 
-          
+
+

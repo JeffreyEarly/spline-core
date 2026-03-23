@@ -31,9 +31,9 @@ Return a minimal set of one-dimensional locations for universal derivative const
   For a terminated spline of order K, this chooses the smallest
   set of 1-D points needed to constrain all segments at
   polynomial degree T.
- 
+
   ```matlab
   tc = ConstrainedSpline.minimumConstraintPoints(tKnot, 4, 0);
   ```
- 
-            
+
+

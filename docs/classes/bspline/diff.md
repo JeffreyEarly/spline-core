@@ -29,10 +29,10 @@ Differentiate a B-spline representation.
 
   Use this when you want a new spline object representing the derivative,
   rather than only evaluating derivatives at a set of points.
- 
+
   ```matlab
   dspline = diff(spline);
   curvatureSpline = diff(spline, 2);
   ```
- 
-          
+
+

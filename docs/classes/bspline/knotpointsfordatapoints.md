@@ -31,12 +31,12 @@ Construct a terminated knot sequence from sample locations.
 
   Use this helper to choose a knot sequence directly from sample
   locations before interpolation or least-squares fitting.
- 
+
   ```matlab
   tKnot = BSpline.knotPointsForDataPoints(t, K=4);
   X = BSpline.matrix(t, tKnot, 4);
   xi = X \ x;
   spline = BSpline(4, tKnot, xi);
   ```
- 
-              
+
+

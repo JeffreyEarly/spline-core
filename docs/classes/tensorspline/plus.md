@@ -30,5 +30,5 @@ Add a scalar offset to tensor-spline outputs.
   ```matlab
   shiftedSpline = spline + 3;
   ```
- 
-          
+
+

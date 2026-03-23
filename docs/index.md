@@ -15,6 +15,7 @@ constrained tensor-product fits for noisy data.
 
 - [Install](installation) the package
 - Read the [Getting Started](getting-started) guide
+- Use [Which Class Should I Use?](which-class-should-i-use) if you want the shortest path to the right API
 - Work through the runnable [Tutorials](tutorials)
 - Browse [Common Tasks](common-tasks)
 - See [Compared with MATLAB](compared-with-matlab)
@@ -35,6 +36,8 @@ If you are not sure where to begin, most users should start with:
 
 - `InterpolatingSpline` for exact interpolation
 - `ConstrainedSpline` for noisy or constrained fitting
+
+For a slightly more detailed guide, see [Which Class Should I Use?](which-class-should-i-use).
 
 ## Core Capabilities
 

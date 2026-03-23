@@ -27,9 +27,9 @@ Return real roots of a spline within its domain.
 ## Discussion
 
   Use this to locate zero crossings of the spline over its support.
- 
+
   ```matlab
   tZero = roots(spline);
   ```
- 
-        
+
+

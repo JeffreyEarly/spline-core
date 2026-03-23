@@ -16,4 +16,4 @@ Tensor dimension associated with the constraint, when applicable.
 
 ## Discussion
 
-  
+

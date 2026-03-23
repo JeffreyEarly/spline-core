@@ -16,4 +16,4 @@ Knot sequence used to define the spline basis.
 
 ## Discussion
 
-  
+

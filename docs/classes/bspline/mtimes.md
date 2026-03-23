@@ -29,9 +29,9 @@ Multiply a spline output by a scalar.
 
   This rescales the spline output without refitting the spline
   coefficients.
- 
+
   ```matlab
   scaledSpline = 2.5 * spline;
   ```
- 
-          
+
+

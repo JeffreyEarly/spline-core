@@ -9,7 +9,8 @@ permalink: /common-tasks
 # Common Tasks
 
 Use this page when you know what you want to do, but do not yet know which
-class or tutorial to open.
+class or tutorial to open. If you are still deciding between the main
+classes, start with [Which Class Should I Use?](which-class-should-i-use).
 
 ## Interpolate exact data in one dimension
 

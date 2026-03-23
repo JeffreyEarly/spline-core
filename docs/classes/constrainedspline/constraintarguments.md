@@ -31,4 +31,4 @@ Normalize mixed constraint inputs into constructor arguments.
 
 ## Discussion
 
-                
+

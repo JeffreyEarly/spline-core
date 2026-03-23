@@ -23,6 +23,9 @@ If you only remember one distinction, remember this:
 - use `InterpolatingSpline` for exact interpolation
 - use `ConstrainedSpline` for fitting noisy or constrained data
 
+For a slightly more detailed version of the same decision, see
+[Which Class Should I Use?](which-class-should-i-use).
+
 ## Initialization
 
 The `BSpline` class constructs and evaluates a spline basis once you specify
@@ -158,5 +161,6 @@ Use the `constraints` option to pass any mix of `PointConstraint` and
 
 - For guided workflows, go to [Tutorials](tutorials)
 - For task-oriented entry points, see [Common Tasks](common-tasks)
+- For a short class-selection guide, read [Which Class Should I Use?](which-class-should-i-use)
 - For built-in comparisons and package positioning, read [Compared with MATLAB](compared-with-matlab)
 - For method-level reference, browse [Class documentation](classes)

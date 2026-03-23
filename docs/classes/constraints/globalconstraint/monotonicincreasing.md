@@ -29,5 +29,5 @@ Create a monotone-increasing constraint along one dimension.
   ```matlab
   c = GlobalConstraint.monotonicIncreasing(dimension=1);
   ```
- 
-        
+
+

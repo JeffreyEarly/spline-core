@@ -20,22 +20,22 @@ Specify local equality or bound constraints at one or more points.
 <div class="language-matlab highlighter-rouge"><div class="highlight"><pre class="highlight"><code>classdef PointConstraint</code></pre></div></div>
 
 ## Overview
- 
+
 Use `PointConstraint` to declare values or derivative conditions at
 specific points in one or more dimensions. A single constraint object
 can represent many points at once, which makes it suitable for both
 simple one-dimensional constraints and large masked regions in tensor
 fits.
- 
+
 ## Basic usage
- 
+
 ```matlab
 c1 = PointConstraint.equal((0:10)', D=2, value=0);
 c2 = PointConstraint.lowerBound([X(mask), Y(mask)], D=[0 0], value=0);
 c3 = PointConstraint.equalOnMask({x,y}, islandMask, D=[0 0], value=0);
 ```
- 
-  
+
+
 
 
 ## Topics

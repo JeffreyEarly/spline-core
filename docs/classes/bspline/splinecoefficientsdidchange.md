@@ -25,4 +25,4 @@ Refresh cached polynomial coefficients after coefficient updates.
 
 ## Discussion
 
-        
+

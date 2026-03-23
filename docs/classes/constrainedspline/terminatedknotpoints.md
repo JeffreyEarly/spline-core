@@ -31,9 +31,9 @@ Ensure each knot vector has K repeated knots at its boundaries.
   knot sequence before fitting. In 1-D it accepts a numeric knot
   vector; in higher dimensions it accepts a cell array with one
   knot vector per dimension.
- 
+
   ```matlab
   tKnot = ConstrainedSpline.terminatedKnotPoints(tKnot, 4);
   ```
- 
-          
+
+

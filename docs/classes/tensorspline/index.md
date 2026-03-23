@@ -20,29 +20,29 @@ Tensor-product spline over multiple dimensions.
 <div class="language-matlab highlighter-rouge"><div class="highlight"><pre class="highlight"><code>classdef TensorSpline < handle</code></pre></div></div>
 
 ## Overview
- 
+
 TensorSpline represents a tensor-product basis assembled from
 one-dimensional B-spline bases in each coordinate direction. It
 supports direct evaluation on one query array per coordinate
 together with mixed partial derivatives.
- 
+
 ## Basic usage
- 
+
 Use `TensorSpline` when you already have knot vectors and
 tensor-product coefficients and want to evaluate the resulting
 spline on query arrays.
- 
+
 ```matlab
 tKnot = {[0;0;0;0;1;1;1;1], [0;0;0;0;1;1;1;1]};
 xi = randn(16,1);
 spline = TensorSpline([4 4], tKnot, xi);
- 
+
 xq = linspace(0,1,40)';
 yq = linspace(0,1,40)';
 F = spline(xq, yq);
 ```
- 
-          
+
+
 
 
 ## Topics

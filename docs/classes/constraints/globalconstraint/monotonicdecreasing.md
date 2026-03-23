@@ -29,5 +29,5 @@ Create a monotone-decreasing constraint along one dimension.
   ```matlab
   c = GlobalConstraint.monotonicDecreasing(dimension=2);
   ```
- 
-        
+
+

@@ -18,4 +18,4 @@ Linear inequality constraints applied to the coefficient solve.
 
 ## Discussion
 
-    
+
