@@ -124,24 +124,7 @@ classdef ConstrainedSpline < TensorSpline
                 options.constraints = []
             end
 
-            if ~isempty(options.tKnot)
-                if isnumeric(options.tKnot)
-                    validateattributes(options.tKnot, {'numeric'}, {'vector','real','finite'});
-                    numDimensions = 1;
-                else
-                    if ~iscell(options.tKnot)
-                        error('ConstrainedSpline:InvalidKnotCell', ...
-                            'tKnot must be a knot vector in 1-D or a cell array with one knot vector per dimension.');
-                    end
-                    numDimensions = numel(options.tKnot);
-                end
-            elseif isvector(points)
-                numDimensions = 1;
-            else
-                numDimensions = size(points, 2);
-            end
-
-            [pointMatrix, ~] = TensorSpline.normalizePointMatrixInput(points, numDimensions);
+            [pointMatrix, numDimensions, tKnot] = ConstrainedSpline.resolveGeometry(points, options.tKnot);
             observedValues = reshape(values, [], 1);
 
             if numel(observedValues) ~= size(pointMatrix,1)
@@ -152,14 +135,6 @@ classdef ConstrainedSpline < TensorSpline
             K = ConstrainedSpline.splineOrderFromOptions(options, numDimensions);
             dataDOF = TensorSpline.normalizeOrders(options.dataDOF, numDimensions);
             splineDOF = ConstrainedSpline.normalizeOptionalOrders(options.splineDOF, numDimensions);
-            tKnot = options.tKnot;
-            if ~isempty(tKnot)
-                if numDimensions == 1 && isnumeric(tKnot)
-                    tKnot = {reshape(tKnot, [], 1)};
-                else
-                    tKnot = TensorSpline.normalizeKnotCell(tKnot, numDimensions);
-                end
-            end
             if isempty(tKnot)
                 tKnot = ConstrainedSpline.defaultKnotCell(pointMatrix, K, dataDOF, splineDOF);
             end
@@ -394,6 +369,32 @@ classdef ConstrainedSpline < TensorSpline
     end
 
     methods (Static, Access = private)
+        function [pointMatrix, numDimensions, tKnot] = resolveGeometry(points, tKnot)
+            % Resolve constructor geometry inputs to canonical point and knot representations.
+            if isempty(tKnot)
+                if isvector(points)
+                    numDimensions = 1;
+                else
+                    numDimensions = size(points, 2);
+                end
+                [pointMatrix, ~] = TensorSpline.normalizePointMatrixInput(points, numDimensions);
+                return;
+            end
+
+            if isnumeric(tKnot)
+                validateattributes(tKnot, {'numeric'}, {'vector','real','finite'});
+                tKnot = {reshape(tKnot, [], 1)};
+            elseif iscell(tKnot)
+                tKnot = TensorSpline.normalizeKnotCell(tKnot, numel(tKnot));
+            else
+                error('ConstrainedSpline:InvalidKnotCell', ...
+                    'tKnot must be a knot vector in 1-D or a cell array with one knot vector per dimension.');
+            end
+
+            numDimensions = numel(tKnot);
+            [pointMatrix, ~] = TensorSpline.normalizePointMatrixInput(points, numDimensions);
+        end
+
         function K = splineOrderFromOptions(options, numDimensions)
             % Resolve spline order from mutually exclusive K and S options.
             if isempty(options.S)

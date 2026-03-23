@@ -29,14 +29,7 @@ classdef GlobalConstraint < SplineConstraint
     end
 
     methods (Access = private)
-        function self = GlobalConstraint(shape, dimension)
-            arguments
-                shape {mustBeTextScalar,mustBeMember(shape,["positive","monotonicIncreasing","monotonicDecreasing"])}
-                dimension = double.empty(1,0)
-            end
-
-            self.shape = string(shape);
-            self.dimension = dimension;
+        function self = GlobalConstraint
         end
     end
 
@@ -51,7 +44,8 @@ classdef GlobalConstraint < SplineConstraint
             % - Topic: Specify global constraints
             % - Declaration: self = positive()
             % - Returns self: positivity GlobalConstraint
-            self = GlobalConstraint("positive", double.empty(1,0));
+            self = GlobalConstraint;
+            self.shape = "positive";
         end
 
         function self = monotonicIncreasing(options)
@@ -69,7 +63,9 @@ classdef GlobalConstraint < SplineConstraint
                 options.dimension (1,1) double {mustBeInteger,mustBePositive} = 1
             end
 
-            self = GlobalConstraint("monotonicIncreasing", options.dimension);
+            self = GlobalConstraint;
+            self.shape = "monotonicIncreasing";
+            self.dimension = options.dimension;
         end
 
         function self = monotonicDecreasing(options)
@@ -87,7 +83,9 @@ classdef GlobalConstraint < SplineConstraint
                 options.dimension (1,1) double {mustBeInteger,mustBePositive} = 1
             end
 
-            self = GlobalConstraint("monotonicDecreasing", options.dimension);
+            self = GlobalConstraint;
+            self.shape = "monotonicDecreasing";
+            self.dimension = options.dimension;
         end
     end
 end
