@@ -28,10 +28,10 @@ Return the indefinite integral of a B-spline.
 
   Use this to construct an antiderivative spline that can be evaluated at
   arbitrary points after integration.
- 
+
   ```matlab
   F = cumsum(spline);
   values = F(tQuery);
   ```
- 
-        
+
+

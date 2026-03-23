@@ -8,9 +8,20 @@ permalink: /getting-started
 
 # Getting Started
 
-This tutorial demonstrates the basic usage of the spline classes, from
-explicit basis construction through noisy-data fitting in one and multiple
-dimensions.
+This guide gives the shortest path through the package, from low-level
+basis construction to exact interpolation and constrained fitting.
+
+## Choose the right class
+
+- `BSpline`: low-level one-dimensional basis construction and manipulation
+- `InterpolatingSpline`: exact interpolation in 1D and on rectilinear tensor grids
+- `ConstrainedSpline`: noisy-data fitting, robust fitting, and constraints
+- `TensorSpline`: lower-level tensor-product spline representation
+
+If you only remember one distinction, remember this:
+
+- use `InterpolatingSpline` for exact interpolation
+- use `ConstrainedSpline` for fitting noisy or constrained data
 
 ## Initialization
 
@@ -142,3 +153,10 @@ fit = ConstrainedSpline(P, Fobs(:), ...
 
 Use the `constraints` option to pass any mix of `PointConstraint` and
 `GlobalConstraint` objects.
+
+## Where to go next
+
+- For guided workflows, go to [Tutorials](tutorials)
+- For task-oriented entry points, see [Common Tasks](common-tasks)
+- For built-in comparisons and package positioning, read [Compared with MATLAB](compared-with-matlab)
+- For method-level reference, browse [Class documentation](classes)
