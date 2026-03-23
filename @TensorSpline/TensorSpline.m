@@ -34,26 +34,28 @@ classdef TensorSpline < handle
         %
         % - Topic: Inspect spline properties
         K
-        % Tensor-product spline coefficients reshaped to basisSize.
-        %
-        % - Topic: Inspect spline properties
-        xi
     end
 
     properties (Access = private)
+        % Internal tensor-product spline coefficients reshaped to basisSize.
+        xi_
         % Internal knot vectors for each tensor dimension.
         tKnot_
     end
 
-    properties
+    properties (Access = protected, Hidden)
+        coefficientsAreReadOnly (1,1) logical = false
+    end
+
+    properties (SetAccess = private)
         % Mean added back to zero-order evaluations.
         %
         % - Topic: Inspect spline properties
-        xMean = 0
+        xMean (1,1) double {mustBeReal,mustBeFinite} = 0
         % Multiplicative scale applied to evaluations.
         %
         % - Topic: Inspect spline properties
-        xStd = 1
+        xStd (1,1) double {mustBeReal,mustBeFinite} = 1
     end
 
     properties (Dependent)
@@ -69,6 +71,10 @@ classdef TensorSpline < handle
         %
         % - Topic: Inspect spline properties
         basisSize
+        % Tensor-product spline coefficients reshaped to basisSize.
+        %
+        % - Topic: Inspect spline properties
+        xi
         % Knot vectors defining the spline basis.
         %
         % Returns a numeric vector in 1-D and a cell array in higher dimensions.
@@ -105,8 +111,8 @@ classdef TensorSpline < handle
                 K {mustBeNumeric,mustBeReal,mustBeFinite}
                 tKnot cell
                 xi = []
-                options.xMean = 0
-                options.xStd = 1
+                options.xMean (1,1) double {mustBeReal,mustBeFinite} = 0
+                options.xStd (1,1) double {mustBeReal,mustBeFinite} = 1
             end
 
             numDimensions = numel(tKnot);
@@ -118,18 +124,9 @@ classdef TensorSpline < handle
                 xi = zeros(prod(basisSize),1);
             end
 
-            validateattributes(xi, {'numeric'}, {'real','finite'});
-            if numel(xi) ~= prod(basisSize)
-                error('TensorSpline:InvalidCoefficientCount',  'xi must contain exactly prod(basisSize) coefficients.');
-            end
-
             self.K = K;
             self.tKnot_ = tKnot;
-            if isscalar(basisSize)
-                self.xi = reshape(xi, basisSize, 1);
-            else
-                self.xi = reshape(xi, basisSize);
-            end
+            self.xi = xi;
             self.xMean = options.xMean;
             self.xStd = options.xStd;
         end
@@ -162,6 +159,44 @@ classdef TensorSpline < handle
             % - Parameter self: TensorSpline instance
             % - Returns value: row vector of basis sizes
             value = TensorSpline.basisSizeFromKnotCell(self.tKnot_, self.K);
+        end
+
+        function value = get.xi(self)
+            % Return the tensor-product spline coefficients.
+            %
+            % - Topic: Inspect spline properties
+            % - Declaration: value = get.xi(self)
+            % - Parameter self: TensorSpline instance
+            % - Returns value: coefficient array reshaped to basisSize
+            value = self.xi_;
+        end
+
+        function set.xi(self, value)
+            % Update the tensor-product coefficients with canonical reshaping.
+            %
+            % - Topic: Inspect spline properties
+            % - Declaration: set.xi(self,value)
+            % - Parameter self: TensorSpline instance
+            % - Parameter value: coefficient vector or array with prod(basisSize) entries
+            arguments
+                self (1,1) TensorSpline
+                value {mustBeNumeric,mustBeReal,mustBeFinite}
+            end
+
+            if self.coefficientsAreReadOnly
+                error('ConstrainedSpline:ReadOnlyCoefficients',  'Constrained spline coefficients are read-only after fitting.');
+            end
+
+            basisSize = self.basisSize;
+            if numel(value) ~= prod(basisSize)
+                error('TensorSpline:InvalidCoefficientCount',  'xi must contain exactly prod(basisSize) coefficients.');
+            end
+
+            if isscalar(basisSize)
+                self.xi_ = reshape(value, basisSize, 1);
+            else
+                self.xi_ = reshape(value, basisSize);
+            end
         end
 
         function value = get.tKnot(self)

@@ -16,6 +16,12 @@ classdef GlobalConstraint < SplineConstraint
     % - Topic: Specify global constraints
     % - Declaration: classdef GlobalConstraint
 
+    properties (Constant, Hidden)
+        positiveShape = "positive"
+        monotonicIncreasingShape = "monotonicIncreasing"
+        monotonicDecreasingShape = "monotonicDecreasing"
+    end
+
     properties (SetAccess = private)
         % Shape-constraint kind.
         %
@@ -45,7 +51,7 @@ classdef GlobalConstraint < SplineConstraint
             % - Declaration: self = positive()
             % - Returns self: positivity GlobalConstraint
             self = GlobalConstraint;
-            self.shape = "positive";
+            self.shape = GlobalConstraint.positiveShape;
         end
 
         function self = monotonicIncreasing(options)
@@ -64,7 +70,7 @@ classdef GlobalConstraint < SplineConstraint
             end
 
             self = GlobalConstraint;
-            self.shape = "monotonicIncreasing";
+            self.shape = GlobalConstraint.monotonicIncreasingShape;
             self.dimension = options.dimension;
         end
 
@@ -84,7 +90,7 @@ classdef GlobalConstraint < SplineConstraint
             end
 
             self = GlobalConstraint;
-            self.shape = "monotonicDecreasing";
+            self.shape = GlobalConstraint.monotonicDecreasingShape;
             self.dimension = options.dimension;
         end
     end

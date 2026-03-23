@@ -18,6 +18,13 @@ classdef PointConstraint < SplineConstraint
     % - Topic: Specify point constraints
     % - Declaration: classdef PointConstraint
 
+    properties (Constant, Hidden)
+        allowedRelations = ["==", ">=", "<="]
+        equalRelation = "=="
+        lowerBoundRelation = ">="
+        upperBoundRelation = "<="
+    end
+
     properties (SetAccess = private)
         % Constraint locations as an N-by-D point matrix.
         %
@@ -32,7 +39,7 @@ classdef PointConstraint < SplineConstraint
         % Constraint relation: "==", ">=", or "<=".
         %
         % - Topic: Inspect point constraint properties
-        relation string = "=="
+        relation string = PointConstraint.equalRelation
 
         % Target values as an N-by-1 vector.
         %
@@ -68,7 +75,7 @@ classdef PointConstraint < SplineConstraint
             % - Returns self: PointConstraint instance
             arguments
                 points = []
-                relation {mustBeTextScalar,mustBeMember(relation,["==",">=","<="])} = "=="
+                relation {mustBeTextScalar,mustBeMember(relation,["==",">=","<="])} = PointConstraint.equalRelation
                 value = []
                 options.D {mustBeNumeric,mustBeReal,mustBeFinite,mustBeNonnegative,mustBeInteger} = 0
             end
@@ -129,7 +136,7 @@ classdef PointConstraint < SplineConstraint
                 options.value {mustBeNumeric,mustBeReal,mustBeFinite} = 0
             end
 
-            self = PointConstraint(points, "==", options.value, D=options.D);
+            self = PointConstraint(points, PointConstraint.equalRelation, options.value, D=options.D);
         end
 
         function self = lowerBound(points, options)
@@ -151,7 +158,7 @@ classdef PointConstraint < SplineConstraint
                 options.value {mustBeNumeric,mustBeReal,mustBeFinite} = 0
             end
 
-            self = PointConstraint(points, ">=", options.value, D=options.D);
+            self = PointConstraint(points, PointConstraint.lowerBoundRelation, options.value, D=options.D);
         end
 
         function self = upperBound(points, options)
@@ -173,7 +180,7 @@ classdef PointConstraint < SplineConstraint
                 options.value {mustBeNumeric,mustBeReal,mustBeFinite} = 0
             end
 
-            self = PointConstraint(points, "<=", options.value, D=options.D);
+            self = PointConstraint(points, PointConstraint.upperBoundRelation, options.value, D=options.D);
         end
 
         function self = equalOnMask(grid, mask, options)
@@ -200,7 +207,7 @@ classdef PointConstraint < SplineConstraint
                 options.value {mustBeNumeric,mustBeReal,mustBeFinite} = 0
             end
 
-            self = PointConstraint(PointConstraint.pointsFromMask(grid, mask), "==", options.value, D=options.D);
+            self = PointConstraint(PointConstraint.pointsFromMask(grid, mask), PointConstraint.equalRelation, options.value, D=options.D);
         end
 
         function self = lowerBoundOnMask(grid, mask, options)
@@ -224,7 +231,7 @@ classdef PointConstraint < SplineConstraint
                 options.value {mustBeNumeric,mustBeReal,mustBeFinite} = 0
             end
 
-            self = PointConstraint(PointConstraint.pointsFromMask(grid, mask), ">=", options.value, D=options.D);
+            self = PointConstraint(PointConstraint.pointsFromMask(grid, mask), PointConstraint.lowerBoundRelation, options.value, D=options.D);
         end
 
         function self = upperBoundOnMask(grid, mask, options)
@@ -248,7 +255,7 @@ classdef PointConstraint < SplineConstraint
                 options.value {mustBeNumeric,mustBeReal,mustBeFinite} = 0
             end
 
-            self = PointConstraint(PointConstraint.pointsFromMask(grid, mask), "<=", options.value, D=options.D);
+            self = PointConstraint(PointConstraint.pointsFromMask(grid, mask), PointConstraint.upperBoundRelation, options.value, D=options.D);
         end
     end
 

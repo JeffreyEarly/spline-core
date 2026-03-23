@@ -81,18 +81,45 @@ classdef BSplineUnitTests < matlab.unittest.TestCase
             testCase.verifyNotEmpty(spline.Xtpp)
         end
 
-        function changingKnotsInvalidatesCoefficientsAndCaches(testCase)
+        function knotSequenceIsReadOnly(testCase)
             K = 3;
             t = linspace(0,1,5)';
             tKnot = [t(1)*ones(K,1); t(2:end-1); t(end)*ones(K,1)];
             spline = BSpline(K,tKnot,ones(length(tKnot)-K,1));
 
-            spline.tKnot = [0; 0; 0; 0.5; 1; 1; 1];
+            caught = [];
+            try
+                spline.tKnot = [0; 0; 0; 0.5; 1; 1; 1];
+            catch exception
+                caught = exception;
+            end
 
-            testCase.verifyEmpty(spline.xi)
-            testCase.verifyEmpty(spline.C)
-            testCase.verifyEmpty(spline.t_pp)
-            testCase.verifyEmpty(spline.Xtpp)
+            testCase.verifyNotEmpty(caught)
+            testCase.verifyEqual(spline.tKnot, tKnot)
+            testCase.verifyEqual(spline.xi, ones(length(tKnot)-K,1))
+        end
+
+        function outputAffineTermsAreReadOnly(testCase)
+            spline = BSpline(3, [0; 0; 0; 1; 1; 1], [1; 2; 3], xMean=4, xStd=5);
+
+            xMeanException = [];
+            try
+                spline.xMean = 7;
+            catch exception
+                xMeanException = exception;
+            end
+
+            xStdException = [];
+            try
+                spline.xStd = 8;
+            catch exception
+                xStdException = exception;
+            end
+
+            testCase.verifyNotEmpty(xMeanException)
+            testCase.verifyNotEmpty(xStdException)
+            testCase.verifyEqual(spline.xMean, 4)
+            testCase.verifyEqual(spline.xStd, 5)
         end
     end
 

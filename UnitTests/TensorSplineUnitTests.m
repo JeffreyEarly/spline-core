@@ -209,6 +209,59 @@ classdef TensorSplineUnitTests < matlab.unittest.TestCase
             testCase.verifyEqual(cellfun(@numel, supportVectors), spline.basisSize)
         end
 
+        function tensorSplineCoefficientsCanBeReassigned(testCase)
+            tKnot = {
+                [0; 0; 1; 1]
+                [0; 0; 1; 1]
+            };
+            spline = TensorSpline([2 2], tKnot, 1:4);
+
+            spline.xi = 11:14;
+
+            testCase.verifyEqual(spline.xi, reshape(11:14, [2 2]))
+        end
+
+        function tensorSplineRejectsInvalidCoefficientCountAssignment(testCase)
+            tKnot = {
+                [0; 0; 1; 1]
+                [0; 0; 1; 1]
+            };
+            spline = TensorSpline([2 2], tKnot, 1:4);
+
+            caught = [];
+            try
+                spline.xi = 1:3;
+            catch exception
+                caught = exception;
+            end
+
+            testCase.verifyNotEmpty(caught)
+            testCase.verifyEqual(caught.identifier, 'TensorSpline:InvalidCoefficientCount')
+        end
+
+        function tensorSplineOutputAffineTermsAreReadOnly(testCase)
+            spline = TensorSpline(2, {[0; 0; 1; 1]}, [1; 2], xMean=3, xStd=4);
+
+            xMeanException = [];
+            try
+                spline.xMean = 7;
+            catch exception
+                xMeanException = exception;
+            end
+
+            xStdException = [];
+            try
+                spline.xStd = 8;
+            catch exception
+                xStdException = exception;
+            end
+
+            testCase.verifyNotEmpty(xMeanException)
+            testCase.verifyNotEmpty(xStdException)
+            testCase.verifyEqual(spline.xMean, 3)
+            testCase.verifyEqual(spline.xStd, 4)
+        end
+
         function tensorSplinePowerMatchesSquaredValuesOnSupport(testCase)
             import matlab.unittest.constraints.IsEqualTo
             import matlab.unittest.constraints.AbsoluteTolerance

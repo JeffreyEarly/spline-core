@@ -22,7 +22,7 @@ classdef ConstrainedSpline < TensorSpline
     % - Topic: Prepare knot sequences
     % - Declaration: classdef ConstrainedSpline < TensorSpline
 
-    properties (Access = public)
+    properties (SetAccess = private)
         % Error model used while fitting the tensor spline.
         %
         % - Topic: Inspect fit results
@@ -180,6 +180,7 @@ classdef ConstrainedSpline < TensorSpline
             [coefficients,CmInv,W] = ConstrainedSpline.tensorModelSolution(  observedValues, Xbasis, distribution, rho_X, Aeq, beq, Aineq, bineq);
 
             self@TensorSpline(K, tKnot, coefficients(:));
+            self.coefficientsAreReadOnly = true;
             self.distribution = distribution;
             self.points = pointMatrix;
             self.values = observedValues;
@@ -449,13 +450,13 @@ classdef ConstrainedSpline < TensorSpline
                     values = constraint.value(isGroup);
 
                     switch constraint.relation
-                        case "=="
+                        case PointConstraint.equalRelation
                             Aeq = [Aeq; B];
                             beq = [beq; values];
-                        case ">="
+                        case PointConstraint.lowerBoundRelation
                             Aineq = [Aineq; -B];
                             bineq = [bineq; -values];
-                        case "<="
+                        case PointConstraint.upperBoundRelation
                             Aineq = [Aineq; B];
                             bineq = [bineq; values];
                         otherwise
@@ -475,11 +476,11 @@ classdef ConstrainedSpline < TensorSpline
             for iConstraint = 1:numel(globalConstraints)
                 constraint = globalConstraints(iConstraint);
                 switch constraint.shape
-                    case "positive"
+                    case GlobalConstraint.positiveShape
                         constraintMatrix = -speye(numCoefficients);
-                    case "monotonicIncreasing"
+                    case GlobalConstraint.monotonicIncreasingShape
                         constraintMatrix = ConstrainedSpline.monotonicDifferenceMatrix(  basisSize, constraint.dimension, "increasing");
-                    case "monotonicDecreasing"
+                    case GlobalConstraint.monotonicDecreasingShape
                         constraintMatrix = ConstrainedSpline.monotonicDifferenceMatrix(  basisSize, constraint.dimension, "decreasing");
                     otherwise
                         error('ConstrainedSpline:UnsupportedGlobalConstraint',  'Unsupported global constraint shape.');

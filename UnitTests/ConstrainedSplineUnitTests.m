@@ -291,5 +291,36 @@ classdef ConstrainedSplineUnitTests < matlab.unittest.TestCase
 
             testCase.verifyError(@() spline.smoothingMatrix(),  'ConstrainedSpline:UnavailableSmoothingMatrix')
         end
+
+        function constrainedSplineCoefficientsRemainReadOnly(testCase)
+            t = linspace(-1,1,9)';
+            x = sin(t);
+            spline = ConstrainedSpline(t, x);
+
+            testCase.verifyError(@() assignCoefficients(spline, zeros(size(spline.xi))), 'ConstrainedSpline:ReadOnlyCoefficients')
+        end
+
+        function constrainedSplineFitDiagnosticsAreReadOnly(testCase)
+            t = linspace(-1,1,9)';
+            x = sin(t);
+            spline = ConstrainedSpline(t, x);
+            propertyNames = ["distribution", "points", "values", "pointConstraints", "globalConstraints", "CmInv", "X", "W", "Aeq", "beq", "Aineq", "bineq"];
+
+            for iProperty = 1:numel(propertyNames)
+                propertyName = propertyNames(iProperty);
+                caught = [];
+                value = spline.(propertyName);
+                try
+                    spline.(propertyName) = value;
+                catch exception
+                    caught = exception;
+                end
+                testCase.verifyNotEmpty(caught, "Expected " + propertyName + " to be read-only.")
+            end
+        end
     end
+end
+
+function assignCoefficients(spline, value)
+spline.xi = value;
 end

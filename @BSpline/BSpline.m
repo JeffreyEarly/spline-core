@@ -71,15 +71,15 @@ classdef BSpline < handle
         C       
     end
     
-    properties (Access=public)
+    properties (SetAccess = private)
         % Mean added back to zero-order spline evaluations.
         %
         % - Topic: Inspect spline properties
-        xMean = 0 % if set, these will be used to scale the output
+        xMean (1,1) double {mustBeReal,mustBeFinite} = 0
         % Multiplicative scale applied to spline evaluations.
         %
         % - Topic: Inspect spline properties
-        xStd = 1 % xOut = xStd*(X*xi)+xMean;
+        xStd (1,1) double {mustBeReal,mustBeFinite} = 1
     end
 
     properties (Dependent)
@@ -98,6 +98,9 @@ classdef BSpline < handle
         %
         % - Topic: Inspect spline properties
         xi
+    end
+
+    properties (Dependent, SetAccess = private)
 
         % Knot sequence used to define the spline basis.
         %
@@ -192,8 +195,8 @@ classdef BSpline < handle
                 tKnot (:,1) double {mustBeNumeric,mustBeReal}
                 xi (:,1) double = zeros(length(tKnot)-K,1)
                 options.Xtpp (:,:,:) double
-                options.xMean = 0
-                options.xStd = 1
+                options.xMean (1,1) double {mustBeReal,mustBeFinite} = 0
+                options.xStd (1,1) double {mustBeReal,mustBeFinite} = 1
             end
             self.K = K;   
             self.tKnot_ = tKnot;
@@ -259,21 +262,6 @@ classdef BSpline < handle
             % - Parameter self: BSpline instance
             % - Returns tKnot: knot vector
             tKnot = self.tKnot_;
-        end
-
-        function set.tKnot(self, tKnot)
-            % Update the knot sequence and clear cached spline state.
-            %
-            % - Topic: Inspect spline properties
-            % - Declaration: set.tKnot(self,tKnot)
-            % - Parameter self: BSpline instance
-            % - Parameter tKnot: knot vector
-            arguments
-                self (1,1) BSpline
-                tKnot (:,1) double {mustBeNumeric,mustBeReal}
-            end
-            self.tKnot_ = tKnot;
-            self.tKnotDidChange();
         end
         
         function x_out = valueAtPoints( self, t, NumDerivatives)
