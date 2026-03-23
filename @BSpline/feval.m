@@ -1,20 +1,22 @@
-function values = feval(spline,x)
+function values = feval(spline,t,options)
 % Evaluate a B-spline at the supplied points.
 %
-% This is equivalent to `spline(x)` and is useful when you prefer an
-% explicit function-call form.
+% This is a thin wrapper around `valueAtPoints(...)`.
 %
 % ```matlab
 % values = feval(spline, tQuery);
 % ```
 %
 % - Topic: Evaluate the spline
-% - Declaration: values = feval(spline,x)
+% - Declaration: values = feval(spline,t,options)
 % - Parameter spline: BSpline instance
-% - Parameter x: evaluation points
-% - Returns values: spline values with the same shape as x
+% - Parameter t: evaluation points
+% - Parameter options.D: derivative order to evaluate
+% - Returns values: spline values with the same shape as the query input
 arguments
     spline (1,1) BSpline
-    x {mustBeNumeric,mustBeReal}
+    t {mustBeNumeric,mustBeReal}
+    options.D (1,1) double {mustBeInteger,mustBeNonnegative} = 0
 end
-values = spline.valueAtPoints(x);
+
+values = spline.valueAtPoints(t, D=options.D);

@@ -21,16 +21,15 @@ classdef BSplineUnitTests < matlab.unittest.TestCase
             testCase.assertThat(valuesFromPP, IsEqualTo(valuesFromMatrix, 'Within', AbsoluteTolerance(1e-10)))
         end
 
-        function splineDOFMatchesDerivedDataDOF(testCase)
+        function splineDOFMatchesDocumentedDataDOFMapping(testCase)
             t = linspace(0,3,13)';
             K = 4;
-            splineDOF = 5;
-            derivedDataDOF = ceil(numel(t)/max(splineDOF,K));
+            oldDataDOF = 3;
+            splineDOF = max(K, ceil(numel(t)/oldDataDOF));
+            expected = legacyKnotPointsForDataPoints(t, K, oldDataDOF);
+            actual = BSpline.knotPointsForDataPoints(t,K=K,splineDOF=splineDOF);
 
-            fromSplineDOF = BSpline.knotPointsForDataPoints(t,K=K,splineDOF=splineDOF);
-            fromDataDOF = BSpline.knotPointsForDataPoints(t,K=K,dataDOF=derivedDataDOF);
-
-            testCase.verifyEqual(fromSplineDOF, fromDataDOF)
+            testCase.verifyEqual(actual, expected)
         end
 
         function ppEvaluationHandlesUnsortedInputs(testCase)
@@ -53,6 +52,17 @@ classdef BSplineUnitTests < matlab.unittest.TestCase
             actual = BSpline.evaluateFromPPCoefficients(tqUnsorted,C,tpp);
 
             testCase.assertThat(actual, IsEqualTo(expected, 'Within', AbsoluteTolerance(1e-10)))
+        end
+
+        function fevalDelegatesToValueAtPoints(testCase)
+            t = linspace(0,1,9)';
+            x = sin(2*pi*t);
+            tKnot = BSpline.knotPointsForDataPoints(t, K=4);
+            spline = BSpline(4, tKnot, BSpline.matrix(t, tKnot, 4)\x);
+            tq = linspace(0,1,21)';
+
+            testCase.verifyEqual(feval(spline, tq), spline.valueAtPoints(tq))
+            testCase.verifyEqual(feval(spline, tq, D=1), spline.valueAtPoints(tq, D=1))
         end
 
         function clearingCoefficientsClearsCachedState(testCase)
@@ -123,4 +133,28 @@ classdef BSplineUnitTests < matlab.unittest.TestCase
         end
     end
 
+end
+
+function tKnot = legacyKnotPointsForDataPoints(t, K, dataDOF)
+tData = sort(t);
+tData = [tData(1); tData(1+dataDOF:dataDOF:end-dataDOF); tData(end)];
+mustBeGreaterThanOrEqual(numel(tData), K);
+
+tPseudo = interp1((0:numel(tData)-1)', tData, linspace(0, numel(tData)-1, numel(tData)).');
+if mod(K, 2) == 1
+    dt = diff(tPseudo);
+    tKnot = [tPseudo(1); tPseudo(1:end-1) + dt/2; tPseudo(end)];
+    for i = 1:((K-1)/2)
+        tKnot(2) = [];
+        tKnot(end-1) = [];
+    end
+else
+    tKnot = tPseudo;
+    for i = 1:((K-2)/2)
+        tKnot(2) = [];
+        tKnot(end-1) = [];
+    end
+end
+
+tKnot = [repmat(tKnot(1), K-1, 1); tKnot; repmat(tKnot(end), K-1, 1)];
 end

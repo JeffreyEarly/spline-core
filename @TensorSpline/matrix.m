@@ -18,18 +18,26 @@ function B = matrix(X,tKnot,K,options)
 % - Parameter options.D: derivative order per dimension
 % - Returns B: basis matrix with one row per query point
 arguments
-    X
+    X {mustBeNumeric,mustBeReal}
     tKnot cell
     K {mustBeNumeric,mustBeReal,mustBeFinite}
     options.D = 0
 end
 
 numDimensions = numel(tKnot);
-[pointMatrix, ~] = TensorSpline.normalizePointMatrixInput(X, numDimensions);
 K = TensorSpline.normalizeOrders(K, numDimensions);
 tKnot = TensorSpline.normalizeKnotCell(tKnot, numDimensions);
 derivativeOrders = TensorSpline.normalizeDerivativeOrders(options.D, numDimensions);
 basisSize = TensorSpline.basisSizeFromKnotCell(tKnot, K);
+
+if numDimensions == 1
+    pointMatrix = reshape(X, [], 1);
+else
+    if size(X,2) ~= numDimensions
+        error('TensorSpline:InvalidPointMatrix', 'Point matrix must have one column per dimension.');
+    end
+    pointMatrix = X;
+end
 
 if any(derivativeOrders > K - 1)
     B = zeros(size(pointMatrix,1), prod(basisSize));

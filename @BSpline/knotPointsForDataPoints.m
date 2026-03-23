@@ -4,6 +4,16 @@ function tKnot = knotPointsForDataPoints( t, options)
 % Use this helper to choose a knot sequence directly from sample
 % locations before interpolation or least-squares fitting.
 %
+% To recover the old `dataDOF=d` behavior, convert it to
+% `splineDOF = max(K, ceil(numel(t)/d))`:
+%
+% ```matlab
+% oldDataDOF = 3;
+% K = 4;
+% splineDOF = max(K, ceil(numel(t)/oldDataDOF));
+% tKnot = BSpline.knotPointsForDataPoints(t, K=K, splineDOF=splineDOF);
+% ```
+%
 % ```matlab
 % tKnot = BSpline.knotPointsForDataPoints(t, K=4);
 % X = BSpline.matrix(t, tKnot, 4);
@@ -15,13 +25,11 @@ function tKnot = knotPointsForDataPoints( t, options)
 % - Declaration: tKnot = knotPointsForDataPoints( t, options)
 % - Parameter t: observation times (N)
 % - Parameter options.K: (optional) spline order
-% - Parameter options.dataDOF: (optional) stride used to subsample sorted data points before knot placement
-% - Parameter options.splineDOF: (optional) approximate target number of splines, converted to dataDOF internally
+% - Parameter options.splineDOF: (optional) approximate target number of splines
 % - Returns tKnot: vector of knot point locations
 arguments
     t (:,1) double
     options.K (1,1) double {mustBePositive,mustBeInteger,mustBeGreaterThanOrEqual(options.K,1)} = 4
-    options.dataDOF (1,1) double {mustBePositive,mustBeInteger} = 1
     options.splineDOF (1,1) double = NaN
 end
 
@@ -31,17 +39,14 @@ if ~isnan(options.splineDOF)
 end
 
 if ~isnan(options.splineDOF)
-    if options.dataDOF ~= 1
-        error('BSpline:knotPointsForDataPoints:ConflictingDegreeOfFreedomOptions',  'Specify either dataDOF or splineDOF, but not both.');
-    end
     targetSplines = max(options.splineDOF, options.K);
-    dataDOF = ceil(numel(t)/targetSplines);
+    sampleStride = ceil(numel(t)/targetSplines);
 else
-    dataDOF = options.dataDOF;
+    sampleStride = 1;
 end
 
 tData = sort(t);
-tData = [tData(1); tData(1+dataDOF:dataDOF:end-dataDOF); tData(end)];
+tData = [tData(1); tData(1+sampleStride:sampleStride:end-sampleStride); tData(end)];
 M = numel(tData);
 mustBeGreaterThanOrEqual(M, options.K);
 

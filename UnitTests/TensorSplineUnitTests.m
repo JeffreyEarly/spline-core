@@ -27,7 +27,7 @@ classdef TensorSplineUnitTests < matlab.unittest.TestCase
 
             spline = InterpolatingSpline({x, y}, F, K=[4 4]);
 
-            testCase.assertThat(spline(X, Y, [1 0]), IsEqualTo(dFdx, 'Within', AbsoluteTolerance(1e-9)))
+            testCase.assertThat(spline.valueAtPoints(X, Y, D=[1 0]), IsEqualTo(dFdx, 'Within', AbsoluteTolerance(1e-9)))
         end
 
         function tensorSplineMatchesGriddedInterpolantSpline(testCase)
@@ -97,7 +97,7 @@ classdef TensorSplineUnitTests < matlab.unittest.TestCase
             testCase.verifyNotEmpty(caught)
         end
 
-        function tensorSplineEvaluatePointsMatchesGridEvaluation(testCase)
+        function tensorSplineValueAtPointsTreatsMatchingColumnVectorsAsPointwiseQueries(testCase)
             import matlab.unittest.constraints.IsEqualTo
             import matlab.unittest.constraints.AbsoluteTolerance
 
@@ -107,12 +107,15 @@ classdef TensorSplineUnitTests < matlab.unittest.TestCase
             F = X.^2 .* Y.^3 + 2*X.*Y - 5;
 
             spline = InterpolatingSpline({x, y}, F, K=[4 4]);
-            queryPoints = [X(:), Y(:)];
+            xq = linspace(-1, 1, 11)';
+            yq = linspace(0, 2, 11)';
+            expected = xq.^2 .* yq.^3 + 2*xq.*yq - 5;
 
-            testCase.assertThat(spline.evaluatePoints(queryPoints), IsEqualTo(F(:), 'Within', AbsoluteTolerance(1e-10)))
+            testCase.assertThat(spline.valueAtPoints(xq, yq), IsEqualTo(expected, 'Within', AbsoluteTolerance(1e-10)))
+            testCase.assertThat(spline(xq, yq), IsEqualTo(expected, 'Within', AbsoluteTolerance(1e-10)))
         end
 
-        function tensorSplineEvaluatePointsSupportsDerivativeOrders(testCase)
+        function tensorSplineValueAtPointsSupportsDerivativeOrders(testCase)
             import matlab.unittest.constraints.IsEqualTo
             import matlab.unittest.constraints.AbsoluteTolerance
 
@@ -123,21 +126,43 @@ classdef TensorSplineUnitTests < matlab.unittest.TestCase
             dFdx = 2*X.*Y.^3 + 2*Y;
 
             spline = InterpolatingSpline({x, y}, F, K=[4 4]);
-            queryPoints = [X(:), Y(:)];
+            xq = linspace(-1, 1, 11)';
+            yq = linspace(0, 2, 11)';
+            expected = 2*xq.*yq.^3 + 2*yq;
 
-            testCase.assertThat(spline.evaluatePoints(queryPoints, D=[1 0]), IsEqualTo(dFdx(:), 'Within', AbsoluteTolerance(1e-9)))
+            testCase.assertThat(spline.valueAtPoints(xq, yq, D=[1 0]), IsEqualTo(expected, 'Within', AbsoluteTolerance(1e-9)))
         end
 
-        function tensorSplineEvaluatePointsPreservesOneDimensionalInputShape(testCase)
+        function tensorSplineValueAtPointsPreservesOneDimensionalInputShape(testCase)
             x = linspace(0, 1, 6)';
             f = (x + 1).^2;
             query = linspace(0, 1, 9);
             spline = InterpolatingSpline(x, f, K=4);
 
-            values = spline.evaluatePoints(query);
+            values = spline.valueAtPoints(query);
 
             testCase.verifySize(values, size(query))
             testCase.verifyEqual(values, spline(query))
+        end
+
+        function tensorSplineRejectsMismatchedQueryArraySizes(testCase)
+            x = linspace(-1,1,6)';
+            y = linspace(0,2,7)';
+            [X,Y] = ndgrid(x,y);
+            F = X.^2 + Y;
+            spline = InterpolatingSpline({x, y}, F, K=[4 4]);
+
+            testCase.verifyError(@() spline.valueAtPoints((0:4)', (0:5)'), 'TensorSpline:InvalidQueryArrays')
+        end
+
+        function tensorSplineRejectsDerivativeInFunctionCallSyntax(testCase)
+            x = linspace(-1,1,6)';
+            y = linspace(0,2,7)';
+            [X,Y] = ndgrid(x,y);
+            F = X.^2 + Y;
+            spline = InterpolatingSpline({x, y}, F, K=[4 4]);
+
+            testCase.verifyError(@() spline(X, Y, [1 0]), 'TensorSpline:InvalidEvaluationInput')
         end
 
         function tensorSplinePlusAddsScalarOffset(testCase)
@@ -220,7 +245,7 @@ classdef TensorSplineUnitTests < matlab.unittest.TestCase
             spline = InterpolatingSpline({x, y}, F, K=[4 4]);
 
             testCase.assertThat(feval(spline, X, Y), IsEqualTo(spline(X, Y), 'Within', AbsoluteTolerance(1e-10)))
-            testCase.assertThat(feval(spline, X, Y, [1 0]), IsEqualTo(spline(X, Y, [1 0]), 'Within', AbsoluteTolerance(1e-10)))
+            testCase.assertThat(feval(spline, X, Y, D=[1 0]), IsEqualTo(spline.valueAtPoints(X, Y, D=[1 0]), 'Within', AbsoluteTolerance(1e-10)))
         end
 
         function tensorSplineDomainReturnsNumericLimits(testCase)

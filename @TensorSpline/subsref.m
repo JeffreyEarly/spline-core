@@ -1,12 +1,13 @@
 function varargout = subsref(self, index)
 % Evaluate the tensor spline with function-call syntax or defer to built-in indexing.
 %
-% Use `spline(X1,...,Xn)` for values and
-% `spline(X1,...,Xn,D)` for mixed partial derivatives.
+% Function-call syntax is a thin wrapper around `valueAtPoints(...)`.
+% Use `spline(X1,...,Xn)` for values. For derivatives, use
+% `valueAtPoints(X1,...,Xn,D=...)`.
 %
 % ```matlab
 % values = spline(xq, yq);
-% dFdx = spline(xq, yq, [1 0]);
+% dFdx = spline.valueAtPoints(xq, yq, D=[1 0]);
 % ```
 %
 % - Topic: Evaluate the spline
@@ -17,6 +18,9 @@ function varargout = subsref(self, index)
 idx = index(1).subs;
 switch index(1).type
     case '()'
+        if numel(idx) ~= self.numDimensions
+            error('TensorSpline:InvalidEvaluationInput', 'Use spline(X1,...,Xn) for values and spline.valueAtPoints(X1,...,Xn,D=...) for derivatives.');
+        end
         varargout{1} = self.valueAtPoints(idx{:});
     case '.'
         [varargout{1:nargout}] = builtin('subsref',self,index);

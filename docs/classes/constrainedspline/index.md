@@ -41,8 +41,6 @@ valuesFit = spline(Xq, Yq);
 ## Topics
 + Create a constrained tensor spline
   + [`ConstrainedSpline`](/spline-core/classes/constrainedspline/constrainedspline.html) Create a tensor-product spline fit to noisy observations.
-+ Fit scattered data
-  + [`fromPoints`](/spline-core/classes/constrainedspline/frompoints.html) Create a tensor-product spline fit from scattered point observations.
 + Inspect fit results
   + [`distribution`](/spline-core/classes/constrainedspline/distribution.html) Error model used while fitting the tensor spline.
   + [`globalConstraints`](/spline-core/classes/constrainedspline/globalconstraints.html) Global shape constraints used during fitting.

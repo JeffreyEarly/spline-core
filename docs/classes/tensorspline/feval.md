@@ -16,22 +16,20 @@ Evaluate a tensor spline at the supplied points.
 
 ## Declaration
 ```matlab
- values = feval(spline,varargin)
+ values = feval(spline,X1,...,Xn,options)
 ```
 ## Parameters
 + `spline`  TensorSpline instance
-+ `varargin`  query locations and optional derivative orders
++ `X1,...,Xn`  matching-size query locations as one array per dimension
++ `options.D`  derivative order per dimension
 
 ## Returns
 + `values`  spline values with the same shape as the query input
 
 ## Discussion
 
-  This is equivalent to `spline(...)` and is useful when you prefer an
-  explicit function-call form.
+  This is a thin wrapper around `valueAtPoints(...)`.
 
   ```matlab
   values = feval(spline, xq, yq);
   ```
-
-

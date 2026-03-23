@@ -21,8 +21,7 @@ Construct a terminated knot sequence from sample locations.
 ## Parameters
 + `t`  observation times (N)
 + `options.K`  (optional) spline order
-+ `options.dataDOF`  (optional) stride used to subsample sorted data points before knot placement
-+ `options.splineDOF`  (optional) approximate target number of splines, converted to dataDOF internally
++ `options.splineDOF`  (optional) approximate target number of splines
 
 ## Returns
 + `tKnot`  vector of knot point locations
@@ -39,4 +38,13 @@ Construct a terminated knot sequence from sample locations.
   spline = BSpline(4, tKnot, xi);
   ```
 
+  To recover the old `dataDOF=d` behavior, convert it to
+  `splineDOF = max(K, ceil(numel(t)/d))`:
+
+  ```matlab
+  oldDataDOF = 3;
+  K = 4;
+  splineDOF = max(K, ceil(numel(t)/oldDataDOF));
+  tKnot = BSpline.knotPointsForDataPoints(t, K=K, splineDOF=splineDOF);
+  ```
 

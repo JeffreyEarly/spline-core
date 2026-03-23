@@ -223,8 +223,7 @@ classdef TensorSpline < handle
             value = cell2mat(cellfun(@(tk) [tk(1), tk(end)], self.tKnot_, 'UniformOutput', false)');
         end
         varargout = subsref(self, index)
-        values = valueAtPoints(self, varargin)
-        values = evaluatePoints(self, points, options)
+        values = valueAtPoints(self, X, options)
 
     end
 
@@ -235,14 +234,9 @@ classdef TensorSpline < handle
     end
 
     methods (Static, Hidden)
-        [gridVectors, numDimensions] = normalizeGridInput(grid, errorPrefix)
-        validateGridValues(values, gridVectors, errorPrefix)
-        K = resolveSplineOrders(K, S, numDimensions, errorPrefix)
         K = normalizeOrders(K, numDimensions)
         tKnot = normalizeKnotCell(tKnot, numDimensions)
         basisSize = basisSizeFromKnotCell(tKnot, K)
-        [pointMatrix, outputSize] = normalizePointMatrixInput(X, numDimensions)
-        [pointMatrix, outputSize] = normalizeQueryInputs(queryInputs, numDimensions)
         derivativeOrders = normalizeDerivativeOrders(derivativeOrders, numDimensions)
         [xi, tKnot, K] = differentiateAlongDimension(xi, tKnot, K, derivativeOrder, dim)
         [xi, tKnot, K] = integrateAlongDimension(xi, tKnot, K, dim, xMean, xStd)

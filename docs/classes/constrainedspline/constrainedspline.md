@@ -24,7 +24,6 @@ Create a tensor-product spline fit to noisy observations.
 + `options.K`  optional spline order scalar or vector with one entry per dimension
 + `options.S`  optional spline degree scalar or vector with one entry per dimension
 + `options.tKnot`  optional knot vector in 1-D or cell array of knot vectors
-+ `options.dataDOF`  optional stride used to subsample sorted coordinates before knot placement
 + `options.splineDOF`  optional target number of splines per dimension
 + `options.distribution`  optional error model object for the fit
 + `options.constraints`  optional mixed SplineConstraint array
@@ -45,5 +44,4 @@ Create a tensor-product spline fit to noisy observations.
   spline = ConstrainedSpline({x, y}, values, K=[4 4]);
   valuesFit = spline(Xq, Yq);
   ```
-
 

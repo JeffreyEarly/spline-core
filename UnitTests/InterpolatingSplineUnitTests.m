@@ -141,7 +141,7 @@ classdef InterpolatingSplineUnitTests < matlab.unittest.TestCase
 
             spline = InterpolatingSpline(t,f(t),K=4);
 
-            testCase.assertThat(spline(t,1), IsEqualTo(df(t), 'Within', RelativeTolerance(100*eps)))
+            testCase.assertThat(spline.valueAtPoints(t, D=1), IsEqualTo(df(t), 'Within', RelativeTolerance(100*eps)))
         end
 
         function interpolatingSplineMatchesGriddedInterpolantSpline(testCase)
@@ -228,7 +228,7 @@ classdef InterpolatingSplineUnitTests < matlab.unittest.TestCase
             spline = InterpolatingSpline((0:2)',(0:2)',K=2);
             caught = [];
             try
-                spline.valueAtPoints((0:2)',-1);
+                spline.valueAtPoints((0:2)', D=-1);
             catch exception
                 caught = exception;
             end
@@ -239,7 +239,7 @@ classdef InterpolatingSplineUnitTests < matlab.unittest.TestCase
         function valueAtPointsReturnsZeroAboveSplineDegree(testCase)
             spline = InterpolatingSpline((0:2)',(0:2)',K=2);
 
-            values = spline.valueAtPoints((0:2)',2);
+            values = spline.valueAtPoints((0:2)', D=2);
 
             testCase.verifyEqual(values, zeros(3,1))
         end

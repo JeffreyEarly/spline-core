@@ -27,12 +27,11 @@ Evaluate the tensor spline with function-call syntax or defer to built-in indexi
 
 ## Discussion
 
-  Use `spline(X1,...,Xn)` for values and
-  `spline(X1,...,Xn,D)` for mixed partial derivatives.
+  Function-call syntax is a thin wrapper around `valueAtPoints(...)`.
+  Use `spline(X1,...,Xn)` for values. For derivatives, use
+  `valueAtPoints(X1,...,Xn,D=...)`.
 
   ```matlab
   values = spline(xq, yq);
-  dFdx = spline(xq, yq, [1 0]);
+  dFdx = spline.valueAtPoints(xq, yq, D=[1 0]);
   ```
-
-

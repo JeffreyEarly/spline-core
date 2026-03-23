@@ -16,7 +16,6 @@ classdef ConstrainedSpline < TensorSpline
     % ```
     %
     % - Topic: Create a constrained tensor spline
-    % - Topic: Fit scattered data
     % - Topic: Inspect fit results
     % - Topic: Analyze the fit
     % - Topic: Choose constraint locations
@@ -109,7 +108,6 @@ classdef ConstrainedSpline < TensorSpline
             % - Parameter options.K: optional spline order scalar or vector with one entry per dimension
             % - Parameter options.S: optional spline degree scalar or vector with one entry per dimension
             % - Parameter options.tKnot: optional knot vector in 1-D or cell array of knot vectors
-            % - Parameter options.dataDOF: optional stride used to subsample sorted coordinates before knot placement
             % - Parameter options.splineDOF: optional target number of splines per dimension
             % - Parameter options.distribution: optional error model object for the fit
             % - Parameter options.constraints: optional mixed SplineConstraint array
@@ -120,49 +118,97 @@ classdef ConstrainedSpline < TensorSpline
                 options.K {mustBeNumeric,mustBeReal,mustBeFinite,mustBeInteger,mustBePositive} = 4
                 options.S {mustBeNumeric,mustBeReal} = []
                 options.tKnot = []
-                options.dataDOF {mustBeNumeric,mustBeReal,mustBeFinite,mustBeInteger,mustBePositive} = 1
                 options.splineDOF {mustBeNumeric,mustBeReal,mustBeFinite,mustBeInteger,mustBeNonnegative} = []
                 options.distribution = []
                 options.constraints = []
-                options.inputMode (1,1) string {mustBeMember(options.inputMode, ["grid", "points"])} = "grid"
             end
 
-            if options.inputMode == "grid"
-                if ~iscell(grid) && ~isvector(grid)
-                    error('ConstrainedSpline:UseFromPoints',  'Use ConstrainedSpline.fromPoints(points, values, ...) for scattered multi-dimensional data.');
+            if iscell(grid)
+                if isempty(grid)
+                    error('ConstrainedSpline:InvalidGrid', 'grid must not be empty.');
                 end
 
-                [gridVectors, numDimensions] = TensorSpline.normalizeGridInput(grid, "ConstrainedSpline");
-                TensorSpline.validateGridValues(values, gridVectors, "ConstrainedSpline");
-                pointMatrix = TensorSpline.pointsFromGridVectors(gridVectors);
-                observedValues = values(:);
+                gridVectors = reshape(grid, 1, []);
+                for iDim = 1:numel(gridVectors)
+                    validateattributes(gridVectors{iDim}, {'numeric'}, {'vector','real','finite','nonempty'});
+                    gridVectors{iDim} = reshape(gridVectors{iDim}, [], 1);
+                end
             else
-                if iscell(grid)
-                    error('ConstrainedSpline:UseGridConstructor',  'Use ConstrainedSpline(grid, values, ...) for gridded data.');
+                validateattributes(grid, {'numeric'}, {'vector','real','finite','nonempty'});
+                gridVectors = {reshape(grid, [], 1)};
+            end
+
+            numDimensions = numel(gridVectors);
+            expectedSize = cellfun(@numel, gridVectors);
+            if numDimensions == 1
+                if ~(isvector(values) && numel(values) == expectedSize(1))
+                    error('ConstrainedSpline:SizeMismatch', 'values must have size matching the lengths of the supplied grid inputs.');
+                end
+            else
+                actualSize = size(values);
+                if numel(actualSize) < numDimensions
+                    actualSize = [actualSize, ones(1, numDimensions - numel(actualSize))];
                 end
 
-                [pointMatrix, numDimensions] = ConstrainedSpline.normalizePointInput(grid, options.tKnot);
-                observedValues = reshape(values, [], 1);
-                if numel(observedValues) ~= size(pointMatrix,1)
-                    error('ConstrainedSpline:SizeMismatch',  'values must have one value for each observation point.');
+                if ~isequal(actualSize(1:numDimensions), expectedSize)
+                    error('ConstrainedSpline:SizeMismatch', 'values must have size matching the lengths of the supplied grid inputs.');
                 end
             end
 
-            K = TensorSpline.resolveSplineOrders(options.K, options.S, numDimensions, "ConstrainedSpline");
-            tKnot = ConstrainedSpline.normalizeConstructorKnotCell(options.tKnot, numDimensions);
-            splineDOF = ConstrainedSpline.normalizeSplineDOF(options.splineDOF, numDimensions);
+            if isempty(options.S)
+                K = options.K;
+            else
+                validateattributes(options.S, {'numeric'}, {'vector','real','finite','nonnegative','integer'});
+                if ~(isscalar(options.K) && options.K == 4)
+                    error('ConstrainedSpline:ConflictingSplineOrder', 'Specify either K or S, but not both.');
+                end
+                K = options.S + 1;
+            end
+            K = TensorSpline.normalizeOrders(K, numDimensions);
+
+            if isempty(options.tKnot)
+                tKnot = [];
+            elseif isnumeric(options.tKnot)
+                validateattributes(options.tKnot, {'numeric'}, {'vector','real','finite'});
+                if numDimensions ~= 1
+                    error('ConstrainedSpline:InvalidKnotCell', 'tKnot must be a knot vector in 1-D or a cell array with one knot vector per dimension.');
+                end
+                tKnot = {reshape(options.tKnot, [], 1)};
+            else
+                tKnot = TensorSpline.normalizeKnotCell(options.tKnot, numDimensions);
+            end
+
+            if isempty(options.splineDOF)
+                splineDOF = [];
+            elseif isscalar(options.splineDOF)
+                splineDOF = repmat(options.splineDOF, 1, numDimensions);
+            else
+                splineDOF = reshape(options.splineDOF, 1, []);
+                if numel(splineDOF) ~= numDimensions
+                    error('ConstrainedSpline:InvalidDegreeOfFreedomOption', 'splineDOF must be scalar or have one element per dimension.');
+                end
+            end
+
             if isempty(tKnot)
-                if options.inputMode == "grid"
-                    dataDOF = TensorSpline.normalizeOrders(options.dataDOF, numDimensions);
-                    tKnot = ConstrainedSpline.defaultGridKnotCell(gridVectors, K, dataDOF, splineDOF);
-                else
-                    tKnot = ConstrainedSpline.defaultPointKnotCell(pointMatrix, K, splineDOF);
+                tKnot = cell(1, numDimensions);
+                for iDim = 1:numDimensions
+                    uniqueValues = unique(gridVectors{iDim}, 'sorted');
+                    if numel(uniqueValues) < K(iDim)
+                        tKnot{iDim} = [repmat(uniqueValues(1), K(iDim), 1); repmat(uniqueValues(end), K(iDim), 1)];
+                    elseif isempty(splineDOF)
+                        tKnot{iDim} = BSpline.knotPointsForDataPoints(gridVectors{iDim}, K=K(iDim));
+                    else
+                        tKnot{iDim} = BSpline.knotPointsForDataPoints(gridVectors{iDim}, K=K(iDim), splineDOF=splineDOF(iDim));
+                    end
                 end
             end
             distribution = options.distribution;
             if isempty(distribution)
                 distribution = NormalDistribution(1);
             end
+
+            pointMatrix = TensorSpline.pointsFromGridVectors(gridVectors);
+            observedValues = values(:);
 
             for iDim = 1:numDimensions
                 tKnot{iDim} = ConstrainedSpline.terminatedKnotPoints(tKnot{iDim}, K(iDim));
@@ -213,7 +259,6 @@ classdef ConstrainedSpline < TensorSpline
     end
 
     methods (Static)
-        self = fromPoints(points, values, options)
         [xi,CmInv,W] = tensorModelSolution(values, designMatrix, distribution, rho_X, Aeq, beq, Aineq, bineq)
         tKnot = terminatedKnotPoints(tKnot, K)
         tc = minimumConstraintPoints(tKnot, K, T)
@@ -221,16 +266,6 @@ classdef ConstrainedSpline < TensorSpline
     end
 
     methods (Static, Access = private)
-        tKnot = normalizeConstructorKnotCell(tKnot, numDimensions)
-        splineDOF = normalizeSplineDOF(splineDOF, numDimensions)
-        tKnot = defaultGridKnotCell(gridVectors, K, dataDOF, splineDOF)
-
-        % Scattered-data fitting helpers.
-        [pointMatrix, numDimensions] = normalizePointInput(points, tKnot)
-        tKnot = defaultPointKnotCell(pointMatrix, K, splineDOF)
-        tKnot = automaticKnotPoints(coordinateValues, K, options)
-        [isSafe, basisSize] = pointBasisIsSafe(pointMatrix, tKnot, K)
-
         % Constraint compilation.
         [Aeq, beq, Aineq, bineq] = compilePointConstraints(pointConstraints, tKnot, K)
         [Aineq, bineq] = compileGlobalConstraints(globalConstraints, tKnot, K)

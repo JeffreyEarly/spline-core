@@ -1,23 +1,26 @@
-function values = feval(spline, varargin)
+function values = feval(spline, X, options)
 % Evaluate a tensor spline at the supplied points.
 %
-% This is equivalent to `spline(...)` and is useful when you prefer an
-% explicit function-call form.
+% This is a thin wrapper around `valueAtPoints(...)`.
 %
 % ```matlab
 % values = feval(spline, xq, yq);
 % ```
 %
 % - Topic: Evaluate the spline
-% - Declaration: values = feval(spline,varargin)
+% - Declaration: values = feval(spline,X1,...,Xn,options)
 % - Parameter spline: TensorSpline instance
-% - Parameter varargin: query locations and optional derivative orders
+% - Parameter X1,...,Xn: matching-size query locations as one array per dimension
+% - Parameter options.D: derivative order per dimension
 % - Returns values: spline values with the same shape as the query input
 arguments
     spline (1,1) TensorSpline
 end
 arguments (Repeating)
-    varargin
+    X {mustBeNumeric,mustBeReal}
+end
+arguments
+    options.D {mustBeNumeric,mustBeReal,mustBeFinite,mustBeInteger,mustBeNonnegative} = 0
 end
 
-values = spline.valueAtPoints(varargin{:});
+values = spline.valueAtPoints(X{:}, D=options.D);

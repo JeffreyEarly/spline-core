@@ -59,7 +59,6 @@ F = spline(xq, yq);
   + [`xStd`](/spline-core/classes/tensorspline/xstd.html) Multiplicative scale applied to evaluations.
   + [`xi`](/spline-core/classes/tensorspline/xi.html) Tensor-product spline coefficients reshaped to basisSize.
 + Evaluate the spline
-  + [`evaluatePoints`](/spline-core/classes/tensorspline/evaluatepoints.html) Evaluate the tensor spline at explicit point locations.
   + [`feval`](/spline-core/classes/tensorspline/feval.html) Evaluate a tensor spline at the supplied points.
   + [`subsref`](/spline-core/classes/tensorspline/subsref.html) Evaluate the tensor spline with function-call syntax or defer to built-in indexing.
   + [`valueAtPoints`](/spline-core/classes/tensorspline/valueatpoints.html) Evaluate the tensor spline or a mixed partial derivative.

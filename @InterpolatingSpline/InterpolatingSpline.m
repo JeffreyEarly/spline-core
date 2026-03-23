@@ -59,9 +59,48 @@ classdef InterpolatingSpline < TensorSpline
                 options.S {mustBeNumeric,mustBeReal} = []
             end
 
-            [gridVectors, numDimensions] = TensorSpline.normalizeGridInput(grid, "InterpolatingSpline");
-            TensorSpline.validateGridValues(values, gridVectors, "InterpolatingSpline");
-            K = TensorSpline.resolveSplineOrders(options.K, options.S, numDimensions, "InterpolatingSpline");
+            if iscell(grid)
+                if isempty(grid)
+                    error('InterpolatingSpline:InvalidGrid', 'grid must not be empty.');
+                end
+
+                gridVectors = reshape(grid, 1, []);
+                for iDim = 1:numel(gridVectors)
+                    validateattributes(gridVectors{iDim}, {'numeric'}, {'vector','real','finite','nonempty'});
+                    gridVectors{iDim} = reshape(gridVectors{iDim}, [], 1);
+                end
+            else
+                validateattributes(grid, {'numeric'}, {'vector','real','finite','nonempty'});
+                gridVectors = {reshape(grid, [], 1)};
+            end
+
+            numDimensions = numel(gridVectors);
+            expectedSize = cellfun(@numel, gridVectors);
+            if numDimensions == 1
+                if ~(isvector(values) && numel(values) == expectedSize(1))
+                    error('InterpolatingSpline:SizeMismatch', 'values must have size matching the lengths of the supplied grid inputs.');
+                end
+            else
+                actualSize = size(values);
+                if numel(actualSize) < numDimensions
+                    actualSize = [actualSize, ones(1, numDimensions - numel(actualSize))];
+                end
+
+                if ~isequal(actualSize(1:numDimensions), expectedSize)
+                    error('InterpolatingSpline:SizeMismatch', 'values must have size matching the lengths of the supplied grid inputs.');
+                end
+            end
+
+            if isempty(options.S)
+                K = options.K;
+            else
+                validateattributes(options.S, {'numeric'}, {'vector','real','finite','nonnegative','integer'});
+                if ~(isscalar(options.K) && options.K == 4)
+                    error('InterpolatingSpline:ConflictingSplineOrder', 'Specify either K or S, but not both.');
+                end
+                K = options.S + 1;
+            end
+            K = TensorSpline.normalizeOrders(K, numDimensions);
 
             tKnot = cell(1, numDimensions);
             for iDim = 1:numDimensions

@@ -16,22 +16,22 @@ Evaluate the tensor spline or a mixed partial derivative.
 
 ## Declaration
 ```matlab
- values = valueAtPoints(self,X1,...,Xn,derivativeOrders)
+ values = valueAtPoints(self,X1,...,Xn,options)
 ```
 ## Parameters
 + `self`  TensorSpline instance
-+ `X1,...,Xn`  query locations as one array per dimension
-+ `derivativeOrders`  derivative order per dimension
++ `X1,...,Xn`  matching-size query locations as one array per dimension
++ `options.D`  derivative order per dimension
 
 ## Returns
 + `values`  spline values reshaped to match the query input
 
 ## Discussion
 
-  Evaluate with one query input per tensor dimension.
+  This is the primary explicit evaluation method. Supply one
+  matching-size query array per tensor dimension.
 
   ```matlab
   values = spline(xq, yq);
+  dFdx = spline.valueAtPoints(xq, yq, D=[1 0]);
   ```
-
-

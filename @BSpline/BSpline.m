@@ -218,7 +218,7 @@ classdef BSpline < handle
             tKnot = self.tKnot_;
         end
         
-        x_out = valueAtPoints(self, t, NumDerivatives)
+        x_out = valueAtPoints(self, t, options)
         tKnotDidChange(self)
         splineCoefficientsDidChange(self)
     end
