@@ -52,7 +52,7 @@ if any(derivativeOrders > self.K - 1)
     return;
 end
 
-basisMatrix = TensorSpline.matrix(pointMatrix, self.tKnot_, self.K, D=derivativeOrders);
+basisMatrix = TensorSpline.matrix(pointMatrix, self.tKnot_, self.S, D=derivativeOrders);
 values = basisMatrix * self.xi(:);
 
 if ~isempty(self.xStd)

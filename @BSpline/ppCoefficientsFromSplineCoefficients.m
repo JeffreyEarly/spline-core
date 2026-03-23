@@ -1,27 +1,28 @@
-function [C,tpp,Xtpp] = ppCoefficientsFromSplineCoefficients( xi, tKnot, K, options )
+function [C,tpp,Xtpp] = ppCoefficientsFromSplineCoefficients(xi, knotPoints, S, options)
 % Returns the piecewise polynomial coefficients in matrix C from spline coefficients in vector xi.
 %
 % - Topic: Represent piecewise polynomials
 % - Developer: true
-% - Declaration: ppCoefficientsFromSplineCoefficients( xi, tKnot, K, Xtpp )
+% - Declaration: ppCoefficientsFromSplineCoefficients(xi, knotPoints, S, Xtpp)
 % - Parameter xi: spline coefficients
-% - Parameter tKnot: spline knot points
-% - Parameter K: spline order (degree S=K-1)
+% - Parameter knotPoints: spline knot points
+% - Parameter S: spline degree
 % - Parameter options.Xtpp: (optional) splines at the points tpp
 % - Returns C: polynomial coefficients to be used in polyval, size(C) = [length(tpp)-1, K]
-% - Returns tpp: piece-wise polynomial intervals, size(tpp) = numel(tKnot) - 2*K + 1
+% - Returns tpp: piece-wise polynomial intervals, size(tpp) = numel(knotPoints) - 2*S - 1
 % - Returns Xtpp: splines at the points tpp
 arguments
     xi (:,1) double
-    tKnot (:,1) double {mustBeNumeric,mustBeReal}
-    K (1,1) double {mustBePositive,mustBeInteger,mustBeGreaterThanOrEqual(K,1)}
+    knotPoints (:,1) double {mustBeNumeric,mustBeReal}
+    S (1,1) double {mustBeNonnegative,mustBeInteger}
     options.Xtpp (:,:,:) double
 end
+K = S + 1;
 
-Nk = length(tKnot);
-tpp = tKnot(K:(Nk-K+1));
+Nk = length(knotPoints);
+tpp = knotPoints(K:(Nk-K+1));
 if ~isfield(options,'Xtpp') || isempty(options.Xtpp)
-    Xtpp = BSpline.matrix( tpp, tKnot, K, D=K-1 );
+    Xtpp = BSpline.matrix(tpp, knotPoints, S, D=S);
 else
     Xtpp = options.Xtpp;
 end

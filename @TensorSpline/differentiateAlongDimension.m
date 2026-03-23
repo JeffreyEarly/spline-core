@@ -10,14 +10,14 @@ xiMatrix = reshape(xiPermuted, size(xiPermuted, 1), []);
 
 originalK = K;
 originalTKnot = tKnot;
-transformedSlice = diff(BSpline(originalK, originalTKnot, xiMatrix(:,1)), derivativeOrder);
-tKnot = transformedSlice.tKnot;
+transformedSlice = diff(BSpline(S=originalK-1, knotPoints=originalTKnot, xi=xiMatrix(:,1)), derivativeOrder);
+tKnot = transformedSlice.knotPoints;
 K = transformedSlice.K;
 
 transformedMatrix = zeros(numel(transformedSlice.xi), size(xiMatrix, 2), 'like', xiMatrix);
 transformedMatrix(:,1) = transformedSlice.xi;
 for iSlice = 2:size(xiMatrix, 2)
-    transformedSlice = diff(BSpline(originalK, originalTKnot, xiMatrix(:,iSlice)), derivativeOrder);
+    transformedSlice = diff(BSpline(S=originalK-1, knotPoints=originalTKnot, xi=xiMatrix(:,iSlice)), derivativeOrder);
     transformedMatrix(:,iSlice) = transformedSlice.xi;
 end
 

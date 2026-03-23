@@ -1,7 +1,7 @@
 function tKnot = normalizeKnotCell(tKnot, numDimensions)
 % Normalize and validate a cell array of knot vectors.
 if ~iscell(tKnot) || numel(tKnot) ~= numDimensions
-    error('TensorSpline:InvalidKnotCell', 'tKnot must be a cell array with one knot vector per dimension.');
+    error('TensorSpline:InvalidKnotCell', 'knotPoints must be a cell array with one knot vector per dimension.');
 end
 
 tKnot = reshape(tKnot, 1, []);

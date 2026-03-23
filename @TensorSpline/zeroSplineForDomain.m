@@ -14,4 +14,4 @@ tKnot = cell(1, numDimensions);
 for iDim = 1:numDimensions
     tKnot{iDim} = reshape(domain(iDim,:), [], 1);
 end
-spline = TensorSpline(ones(1, numDimensions), tKnot, 0, xMean=0, xStd=options.xStd);
+spline = TensorSpline(S=zeros(1, numDimensions), knotPoints=tKnot, xi=0, xMean=0, xStd=options.xStd);

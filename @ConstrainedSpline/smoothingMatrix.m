@@ -6,7 +6,7 @@ function S = smoothingMatrix(self)
 %
 % ```matlab
 % S = spline.smoothingMatrix();
-% valuesFit = S * spline.values;
+% valuesFit = S * spline.dataValues;
 % ```
 %
 % - Topic: Analyze the fit
@@ -17,7 +17,7 @@ if ~isempty(self.Aeq) || ~isempty(self.Aineq)
     error('ConstrainedSpline:UnavailableSmoothingMatrix',  'smoothingMatrix is only available for unconstrained tensor fits.');
 end
 
-if size(self.W,1) == length(self.values) && size(self.W,2) == 1
+if size(self.W,1) == length(self.dataValues) && size(self.W,2) == 1
     S = (self.X*ConstrainedSpline.leftSolve(self.CmInv, self.X.')).*(self.W.');
 elseif isa(self.W, 'decomposition')
     S = self.X*ConstrainedSpline.leftSolve(self.CmInv, self.X.');

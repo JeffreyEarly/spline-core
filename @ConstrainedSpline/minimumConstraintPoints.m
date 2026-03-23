@@ -1,4 +1,4 @@
-function tc = minimumConstraintPoints(tKnot, K, T)
+function tc = minimumConstraintPoints(knotPoints, S, T)
 % Return a minimal set of one-dimensional locations for universal derivative constraints.
 %
 % For a terminated spline of order K, this chooses the smallest
@@ -6,22 +6,23 @@ function tc = minimumConstraintPoints(tKnot, K, T)
 % polynomial degree T.
 %
 % ```matlab
-% tc = ConstrainedSpline.minimumConstraintPoints(tKnot, 4, 0);
+% tc = ConstrainedSpline.minimumConstraintPoints(knotPoints, 3, 0);
 % ```
 %
 % - Topic: Choose constraint locations
-% - Declaration: tc = minimumConstraintPoints(tKnot,K,T)
-% - Parameter tKnot: one-dimensional knot sequence
-% - Parameter K: spline order
+% - Declaration: tc = minimumConstraintPoints(knotPoints, S, T)
+% - Parameter knotPoints: one-dimensional knot sequence
+% - Parameter S: spline degree
 % - Parameter T: constrained polynomial degree
 % - Returns tc: one-dimensional constraint locations
 arguments
-    tKnot (:,1) double {mustBeNumeric,mustBeReal,mustBeFinite}
-    K (1,1) double {mustBePositive,mustBeInteger,mustBeGreaterThanOrEqual(K,1)}
+    knotPoints (:,1) double {mustBeNumeric,mustBeReal,mustBeFinite}
+    S (1,1) double {mustBeNonnegative,mustBeInteger}
     T (1,1) double {mustBeNumeric,mustBeReal,mustBeFinite,mustBeInteger}
 end
 
-t = unique(tKnot);
+K = S + 1;
+t = unique(knotPoints);
 D = K - 1 - T;
 if mod(D, 2) == 0
     ts = t(1) + (t(2)-t(1))/(D/2 + 2) * (1:(D/2 + 1)).';

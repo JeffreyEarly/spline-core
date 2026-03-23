@@ -13,6 +13,6 @@ arguments
     offset (1,1) double
 end
 
-transformedSpline = BSpline(self.K,self.tKnot,self.xi);
+transformedSpline = BSpline(S=self.S, knotPoints=self.knotPoints, xi=self.xi);
 transformedSpline.xStd = scale*self.xStd;
 transformedSpline.xMean = scale*self.xMean + offset;

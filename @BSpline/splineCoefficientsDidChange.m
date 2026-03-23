@@ -11,4 +11,4 @@ if isempty(self.xi_)
     self.Xtpp = [];
     return;
 end
-[self.C,self.t_pp,self.Xtpp] = BSpline.ppCoefficientsFromSplineCoefficients(self.xi_, self.tKnot_, self.K, Xtpp=self.Xtpp);
+[self.C,self.t_pp,self.Xtpp] = BSpline.ppCoefficientsFromSplineCoefficients(self.xi_, self.tKnot_, self.S, Xtpp=self.Xtpp);

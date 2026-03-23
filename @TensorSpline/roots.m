@@ -20,5 +20,5 @@ if self.numDimensions ~= 1
     error('TensorSpline:roots:UnsupportedDimension',  'roots is only defined for one-dimensional TensorSpline objects.');
 end
 
-spline1D = BSpline(self.K, self.tKnot_{1}, self.xi(:),  xMean=self.xMean, xStd=self.xStd);
+spline1D = BSpline(S=self.S, knotPoints=self.knotPoints, xi=self.xi(:), xMean=self.xMean, xStd=self.xStd);
 values = roots(spline1D);

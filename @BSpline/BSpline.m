@@ -1,7 +1,7 @@
 classdef BSpline < handle
     % Create, evaluate, and manipulate terminated B-spline representations.
     %
-    % BSpline stores a spline basis order, knot sequence, and spline
+    % BSpline stores a spline basis degree, knot sequence, and spline
     % coefficients together with cached piecewise-polynomial coefficients for
     % efficient evaluation, differentiation, and algebraic transforms.
     %
@@ -14,9 +14,9 @@ classdef BSpline < handle
     % ```matlab
     % t = linspace(0,1,20)';
     % x = sin(2*pi*t);
-    % tKnot = BSpline.knotPointsForDataPoints(t, K=4);
-    % X = BSpline.matrix(t, tKnot, 4);
-    % spline = BSpline(4, tKnot, X\x);
+    % knotPoints = BSpline.knotPointsForDataPoints(t, S=3);
+    % X = BSpline.matrix(t, knotPoints, 3);
+    % spline = BSpline(S=3, knotPoints=knotPoints, xi=X\x);
     %
     % xq = spline(linspace(0,1,100)');
     % ```
@@ -30,7 +30,7 @@ classdef BSpline < handle
     % - Topic: Maintain cached state
     %
     % - Declaration: classdef BSpline < handle
-    properties (Access = public)
+    properties (SetAccess = private)
         % Spline order K, where polynomial degree is S = K - 1.
         %
         % - Topic: Inspect spline properties
@@ -60,7 +60,7 @@ classdef BSpline < handle
         %
         % - Topic: Represent piecewise polynomials
         % - Developer: true
-        % size(t_pp) = length(tKnot) - 2*K + 1
+        % size(t_pp) = length(knotPoints) - 2*K + 1
         t_pp
 
         % Piecewise-polynomial coefficients for interval evaluation.
@@ -105,7 +105,7 @@ classdef BSpline < handle
         % Knot sequence used to define the spline basis.
         %
         % - Topic: Inspect spline properties
-        tKnot
+        knotPoints
     end
     
     methods
@@ -118,8 +118,8 @@ classdef BSpline < handle
         % Initialization
         %
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-        function self = BSpline(K,tKnot,xi,options)
-            % Create a new B-spline representation from order, knots, and coefficients.
+        function self = BSpline(options)
+            % Create a new B-spline representation from degree, knots, and coefficients.
             %
             % Optionally accepts cached breakpoint evaluations and affine
             % output normalization parameters used by derived spline classes.
@@ -129,38 +129,44 @@ classdef BSpline < handle
             % algebraic manipulation.
             %
             % ```matlab
-            % tKnot = [0; 0; 0; 0; 1; 1; 1; 1];
+            % knotPoints = [0; 0; 0; 0; 1; 1; 1; 1];
             % xi = [1; -0.5; 0.25; 0];
-            % spline = BSpline(4, tKnot, xi);
+            % spline = BSpline(S=3, knotPoints=knotPoints, xi=xi);
             % x = spline(linspace(0,1,50)');
             % ```
             %
             % - Topic: Create a spline
-            % - Declaration: spline = BSpline(K,tKnot,xi)
-            % - Parameter K: spline order (degree S=K-1)
-            % - Parameter tKnot: knot points
-            % - Parameter xi: (optional) spline coefficients
+            % - Declaration: spline = BSpline(options)
+            % - Parameter options.S: spline degree
+            % - Parameter options.knotPoints: knot points
+            % - Parameter options.xi: (optional) spline coefficients
             % - Parameter options.Xtpp: optional cached basis values at piecewise breakpoints
             % - Parameter options.xMean: optional additive output offset
             % - Parameter options.xStd: optional multiplicative output scale
             % - Returns spline: BSpline instance
             arguments
-                K (1,1) double {mustBeInteger,mustBeGreaterThanOrEqual(K,1)}
-                tKnot (:,1) double {mustBeNumeric,mustBeReal}
-                xi (:,1) double = zeros(length(tKnot)-K,1)
-                options.Xtpp (:,:,:) double
+                options.S (1,1) double {mustBeInteger,mustBeNonnegative}
+                options.knotPoints (:,1) double {mustBeNumeric,mustBeReal}
+                options.xi {mustBeNumeric,mustBeReal,mustBeFinite} = []
+                options.Xtpp (:,:,:) double = []
                 options.xMean (1,1) double {mustBeReal,mustBeFinite} = 0
                 options.xStd (1,1) double {mustBeReal,mustBeFinite} = 1
             end
-            self.K = K;   
-            self.tKnot_ = tKnot;
-            self.xi_ = xi;
+
+            K = options.S + 1;
+            knotPoints = options.knotPoints;
+            if isempty(options.xi)
+                xi = zeros(length(knotPoints) - K, 1);
+            else
+                xi = reshape(options.xi, [], 1);
+            end
+
+            self.K = K;
+            self.tKnot_ = knotPoints;
+            self.Xtpp = options.Xtpp;
             self.xMean = options.xMean;
             self.xStd = options.xStd;
-            if isfield(options,'Xtpp')
-                self.Xtpp = options.Xtpp;
-            end
-            self.splineCoefficientsDidChange();
+            self.xi = xi;
         end
         
         function S = get.S(self)
@@ -180,7 +186,7 @@ classdef BSpline < handle
             % - Declaration: domain = get.domain(self)
             % - Parameter self: BSpline instance
             % - Returns domain: 1x2 vector [tMin tMax]
-            domain = [self.tKnot(1) self.tKnot(end)];
+            domain = [self.knotPoints(1) self.knotPoints(end)];
         end
 
         function xi = get.xi(self)
@@ -202,20 +208,24 @@ classdef BSpline < handle
             % - Parameter xi: spline coefficient column vector
             arguments
                 self (1,1) BSpline
-                xi (:,1) double
+                xi {mustBeNumeric,mustBeReal,mustBeFinite}
+            end
+            xi = reshape(xi, [], 1);
+            if ~isempty(xi) && numel(xi) ~= numel(self.tKnot_) - self.K
+                error('BSpline:InvalidCoefficientCount', 'xi must contain exactly numel(knotPoints) - K coefficients.');
             end
             self.xi_ = xi;
             self.splineCoefficientsDidChange();
         end
 
-        function tKnot = get.tKnot(self)
+        function knotPoints = get.knotPoints(self)
             % Return the current knot sequence.
             %
             % - Topic: Inspect spline properties
-            % - Declaration: tKnot = get.tKnot(self)
+            % - Declaration: knotPoints = get.knotPoints(self)
             % - Parameter self: BSpline instance
-            % - Returns tKnot: knot vector
-            tKnot = self.tKnot_;
+            % - Returns knotPoints: knot vector
+            knotPoints = self.tKnot_;
         end
         
         x_out = valueAtPoints(self, t, options)
@@ -228,10 +238,10 @@ classdef BSpline < handle
     end
     
     methods (Static)
-        tKnot = knotPointsForDataPoints( t, options)
-        t = pointsOfSupport(tKnot,K,D)
-        [C,tpp,Xtpp] = ppCoefficientsFromSplineCoefficients( xi, tKnot, K, options )
+        knotPoints = knotPointsForDataPoints(t, options)
+        t = pointsOfSupport(knotPoints, S)
+        [C,tpp,Xtpp] = ppCoefficientsFromSplineCoefficients(xi, knotPoints, S, options)
         f = evaluateFromPPCoefficients(t,C,tpp, D)
-        B = matrix( t, tKnot, K, options )
+        B = matrix(t, knotPoints, S, options)
     end
 end

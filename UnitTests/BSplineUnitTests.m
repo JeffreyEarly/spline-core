@@ -6,16 +6,16 @@ classdef BSplineUnitTests < matlab.unittest.TestCase
             import matlab.unittest.constraints.AbsoluteTolerance
 
             f = @(x) cos(2*pi*x/3);
-            K = 4;
+            S = 3;
             t = linspace(0,3,13)';
-            tKnot = BSpline.knotPointsForDataPoints(t,K=K);
+            knotPoints = BSpline.knotPointsForDataPoints(t, S=S);
 
-            X = BSpline.matrix(t,tKnot,K);
+            X = BSpline.matrix(t, knotPoints, S);
             xi = X\f(t);
-            [C,tpp] = BSpline.ppCoefficientsFromSplineCoefficients(xi,tKnot,K);
+            [C,tpp] = BSpline.ppCoefficientsFromSplineCoefficients(xi, knotPoints, S);
 
             tq = linspace(t(1),t(end),301)';
-            valuesFromMatrix = BSpline.matrix(tq,tKnot,K)*xi;
+            valuesFromMatrix = BSpline.matrix(tq, knotPoints, S) * xi;
             valuesFromPP = BSpline.evaluateFromPPCoefficients(tq,C,tpp);
 
             testCase.assertThat(valuesFromPP, IsEqualTo(valuesFromMatrix, 'Within', AbsoluteTolerance(1e-10)))
@@ -23,11 +23,11 @@ classdef BSplineUnitTests < matlab.unittest.TestCase
 
         function splineDOFMatchesDocumentedDataDOFMapping(testCase)
             t = linspace(0,3,13)';
-            K = 4;
+            S = 3;
             oldDataDOF = 3;
-            splineDOF = max(K, ceil(numel(t)/oldDataDOF));
-            expected = legacyKnotPointsForDataPoints(t, K, oldDataDOF);
-            actual = BSpline.knotPointsForDataPoints(t,K=K,splineDOF=splineDOF);
+            splineDOF = max(S + 1, ceil(numel(t)/oldDataDOF));
+            expected = legacyKnotPointsForDataPoints(t, S + 1, oldDataDOF);
+            actual = BSpline.knotPointsForDataPoints(t, S=S, splineDOF=splineDOF);
 
             testCase.verifyEqual(actual, expected)
         end
@@ -37,18 +37,18 @@ classdef BSplineUnitTests < matlab.unittest.TestCase
             import matlab.unittest.constraints.AbsoluteTolerance
 
             f = @(x) sin(2*pi*x/3);
-            K = 4;
+            S = 3;
             t = linspace(0,3,13)';
-            tKnot = BSpline.knotPointsForDataPoints(t,K=K);
+            knotPoints = BSpline.knotPointsForDataPoints(t, S=S);
 
-            X = BSpline.matrix(t,tKnot,K);
+            X = BSpline.matrix(t, knotPoints, S);
             xi = X\f(t);
-            [C,tpp] = BSpline.ppCoefficientsFromSplineCoefficients(xi,tKnot,K);
+            [C,tpp] = BSpline.ppCoefficientsFromSplineCoefficients(xi, knotPoints, S);
 
             tqSorted = linspace(t(1),t(end),31)';
             tqUnsorted = tqSorted([7 1 19 4 31 12 2 25 16 9 22 5 29 14 3 18 27 11 6 24 15 8 30 13 10 21 17 20 23 26 28]);
 
-            expected = BSpline.matrix(tqUnsorted,tKnot,K)*xi;
+            expected = BSpline.matrix(tqUnsorted, knotPoints, S) * xi;
             actual = BSpline.evaluateFromPPCoefficients(tqUnsorted,C,tpp);
 
             testCase.assertThat(actual, IsEqualTo(expected, 'Within', AbsoluteTolerance(1e-10)))
@@ -57,8 +57,8 @@ classdef BSplineUnitTests < matlab.unittest.TestCase
         function fevalDelegatesToValueAtPoints(testCase)
             t = linspace(0,1,9)';
             x = sin(2*pi*t);
-            tKnot = BSpline.knotPointsForDataPoints(t, K=4);
-            spline = BSpline(4, tKnot, BSpline.matrix(t, tKnot, 4)\x);
+            knotPoints = BSpline.knotPointsForDataPoints(t, S=3);
+            spline = BSpline(S=3, knotPoints=knotPoints, xi=BSpline.matrix(t, knotPoints, 3)\x);
             tq = linspace(0,1,21)';
 
             testCase.verifyEqual(feval(spline, tq), spline.valueAtPoints(tq))
@@ -67,9 +67,10 @@ classdef BSplineUnitTests < matlab.unittest.TestCase
 
         function clearingCoefficientsClearsCachedState(testCase)
             K = 3;
+            S = K - 1;
             t = linspace(0,1,5)';
-            tKnot = [t(1)*ones(K,1); t(2:end-1); t(end)*ones(K,1)];
-            spline = BSpline(K,tKnot,ones(length(tKnot)-K,1));
+            knotPoints = [t(1)*ones(K,1); t(2:end-1); t(end)*ones(K,1)];
+            spline = BSpline(S=S, knotPoints=knotPoints, xi=ones(length(knotPoints)-K,1));
 
             spline.xi = [];
 
@@ -80,11 +81,12 @@ classdef BSplineUnitTests < matlab.unittest.TestCase
 
         function settingCoefficientsRebuildsCachedState(testCase)
             K = 3;
+            S = K - 1;
             t = linspace(0,1,5)';
-            tKnot = [t(1)*ones(K,1); t(2:end-1); t(end)*ones(K,1)];
-            spline = BSpline(K,tKnot,[]);
+            knotPoints = [t(1)*ones(K,1); t(2:end-1); t(end)*ones(K,1)];
+            spline = BSpline(S=S, knotPoints=knotPoints, xi=[]);
 
-            spline.xi = ones(length(tKnot)-K,1);
+            spline.xi = ones(length(knotPoints)-K,1);
 
             testCase.verifyNotEmpty(spline.C)
             testCase.verifyNotEmpty(spline.t_pp)
@@ -93,24 +95,40 @@ classdef BSplineUnitTests < matlab.unittest.TestCase
 
         function knotSequenceIsReadOnly(testCase)
             K = 3;
+            S = K - 1;
             t = linspace(0,1,5)';
-            tKnot = [t(1)*ones(K,1); t(2:end-1); t(end)*ones(K,1)];
-            spline = BSpline(K,tKnot,ones(length(tKnot)-K,1));
+            knotPoints = [t(1)*ones(K,1); t(2:end-1); t(end)*ones(K,1)];
+            spline = BSpline(S=S, knotPoints=knotPoints, xi=ones(length(knotPoints)-K,1));
 
             caught = [];
             try
-                spline.tKnot = [0; 0; 0; 0.5; 1; 1; 1];
+                spline.knotPoints = [0; 0; 0; 0.5; 1; 1; 1];
             catch exception
                 caught = exception;
             end
 
             testCase.verifyNotEmpty(caught)
-            testCase.verifyEqual(spline.tKnot, tKnot)
-            testCase.verifyEqual(spline.xi, ones(length(tKnot)-K,1))
+            testCase.verifyEqual(spline.knotPoints, knotPoints)
+            testCase.verifyEqual(spline.xi, ones(length(knotPoints)-K,1))
+        end
+
+        function orderIsReadOnly(testCase)
+            spline = BSpline(S=2, knotPoints=[0; 0; 0; 1; 1; 1], xi=[1; 2; 3]);
+
+            caught = [];
+            try
+                spline.K = 4;
+            catch exception
+                caught = exception;
+            end
+
+            testCase.verifyNotEmpty(caught)
+            testCase.verifyEqual(spline.S, 2)
+            testCase.verifyEqual(spline.K, 3)
         end
 
         function outputAffineTermsAreReadOnly(testCase)
-            spline = BSpline(3, [0; 0; 0; 1; 1; 1], [1; 2; 3], xMean=4, xStd=5);
+            spline = BSpline(S=2, knotPoints=[0; 0; 0; 1; 1; 1], xi=[1; 2; 3], xMean=4, xStd=5);
 
             xMeanException = [];
             try

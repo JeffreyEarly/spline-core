@@ -24,7 +24,7 @@ if ~isa(f, 'TensorSpline')
 elseif isempty(g)
     f = [];
 elseif isnumeric(g) && isscalar(g)
-    f = TensorSpline(f.K, f.tKnot_, f.xi, xMean=f.xMean + g, xStd=f.xStd);
+    f = TensorSpline(S=f.S, knotPoints=f.knotPoints, xi=f.xi, xMean=f.xMean + g, xStd=f.xStd);
 else
     error('TensorSpline:plus:UnsupportedOperand',  'Only scalar numeric offsets are supported.');
 end

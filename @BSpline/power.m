@@ -23,19 +23,19 @@ if exponent == 1
     return;
 end
 
-supportPoints = BSpline.pointsOfSupport(spline.tKnot,spline.K,0);
+supportPoints = BSpline.pointsOfSupport(spline.knotPoints, spline.S);
 values = spline.valueAtPoints(supportPoints);
 values(abs(values) < 2*eps) = 0;
 
-poweredOrder = ceil(exponent*spline.K);
-tKnot = BSpline.knotPointsForDataPoints(supportPoints,K=poweredOrder);
+poweredK = ceil(exponent*spline.K);
+knotPoints = BSpline.knotPointsForDataPoints(supportPoints, S=poweredK-1);
 poweredValues = values.^exponent;
 [constraintArguments, poweredValues] = ConstrainedSpline.constraintArguments(  [], poweredValues, enforcePositiveIfPossible=true, numDimensions=1);
 if ~isempty(constraintArguments)
-    fittedSpline = ConstrainedSpline(supportPoints, poweredValues,  K=poweredOrder,  tKnot=tKnot,  constraintArguments{:});
-    poweredSpline = BSpline(poweredOrder, fittedSpline.tKnot, fittedSpline.xi(:));
+    fittedSpline = ConstrainedSpline(supportPoints, poweredValues, S=poweredK-1, knotPoints=knotPoints, constraintArguments{:});
+    poweredSpline = BSpline(S=poweredK-1, knotPoints=fittedSpline.knotPoints, xi=fittedSpline.xi(:));
 else
-    X = BSpline.matrix(supportPoints,tKnot,poweredOrder);
+    X = BSpline.matrix(supportPoints, knotPoints, poweredK-1);
     xi = X\poweredValues;
-    poweredSpline = BSpline(poweredOrder,tKnot,xi);
+    poweredSpline = BSpline(S=poweredK-1, knotPoints=knotPoints, xi=xi);
 end

@@ -1,4 +1,4 @@
-function B = matrix(X,tKnot,K,options)
+function B = matrix(X, knotPoints, S, options)
 % Evaluate the tensor-product basis matrix and optional derivatives.
 %
 % Use this to assemble a tensor-product design matrix for
@@ -6,27 +6,33 @@ function B = matrix(X,tKnot,K,options)
 %
 % ```matlab
 % [Xq, Yq] = ndgrid(xq, yq);
-% B = TensorSpline.matrix([Xq(:), Yq(:)], tKnot, [4 4]);
+% B = TensorSpline.matrix([Xq(:), Yq(:)], knotPoints, [3 3]);
 % values = B * spline.xi(:);
 % ```
 %
 % - Topic: Build spline bases
-% - Declaration: B = matrix(X,tKnot,K,options)
+% - Declaration: B = matrix(X, knotPoints, S, options)
 % - Parameter X: query locations as a point matrix
-% - Parameter tKnot: cell array of knot vectors
-% - Parameter K: spline order scalar or vector with one entry per dimension
+% - Parameter knotPoints: knot vector in 1-D or cell array of knot vectors
+% - Parameter S: spline degree scalar or vector with one entry per dimension
 % - Parameter options.D: derivative order per dimension
 % - Returns B: basis matrix with one row per query point
 arguments
     X {mustBeNumeric,mustBeReal}
-    tKnot cell
-    K {mustBeNumeric,mustBeReal,mustBeFinite}
+    knotPoints
+    S {mustBeNumeric,mustBeReal,mustBeFinite,mustBeInteger,mustBeNonnegative}
     options.D = 0
 end
 
-numDimensions = numel(tKnot);
-K = TensorSpline.normalizeOrders(K, numDimensions);
-tKnot = TensorSpline.normalizeKnotCell(tKnot, numDimensions);
+if isnumeric(knotPoints)
+    validateattributes(knotPoints, {'numeric'}, {'vector','real','finite','nonempty'});
+    numDimensions = 1;
+    tKnot = {reshape(knotPoints, [], 1)};
+else
+    numDimensions = numel(knotPoints);
+    tKnot = TensorSpline.normalizeKnotCell(knotPoints, numDimensions);
+end
+K = TensorSpline.normalizeOrders(S + 1, numDimensions);
 derivativeOrders = TensorSpline.normalizeDerivativeOrders(options.D, numDimensions);
 basisSize = TensorSpline.basisSizeFromKnotCell(tKnot, K);
 
@@ -47,7 +53,7 @@ end
 numPoints = size(pointMatrix,1);
 dimensionMatrices = cell(1, numDimensions);
 for iDim = 1:numDimensions
-    Bi = BSpline.matrix(pointMatrix(:,iDim), tKnot{iDim}, K(iDim), D=derivativeOrders(iDim));
+    Bi = BSpline.matrix(pointMatrix(:,iDim), tKnot{iDim}, K(iDim) - 1, D=derivativeOrders(iDim));
     dimensionMatrices{iDim} = reshape(Bi(:,:,derivativeOrders(iDim)+1), numPoints, []);
 end
 

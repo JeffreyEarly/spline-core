@@ -24,8 +24,8 @@ if exponent == 1
     return;
 end
 
-[supportPoints, supportVectors] = TensorSpline.pointsOfSupport(self.tKnot_, self.K);
-basisMatrix = TensorSpline.matrix(supportPoints, self.tKnot_, self.K);
+[supportPoints, supportVectors] = TensorSpline.pointsOfSupport(self.knotPoints, self.S);
+basisMatrix = TensorSpline.matrix(supportPoints, self.knotPoints, self.S);
 values = basisMatrix * self.xi(:);
 if ~isempty(self.xStd)
     values = self.xStd * values;
@@ -40,9 +40,9 @@ maxSupportedOrder = cellfun(@numel, supportVectors);
 poweredK = min(maxSupportedOrder, max(1, ceil(exponent * self.K)));
 poweredTKnot = cell(1, self.numDimensions);
 for iDim = 1:self.numDimensions
-    poweredTKnot{iDim} = BSpline.knotPointsForDataPoints(supportVectors{iDim}, K=poweredK(iDim));
+    poweredTKnot{iDim} = BSpline.knotPointsForDataPoints(supportVectors{iDim}, S=poweredK(iDim)-1);
 end
 
-X = TensorSpline.matrix(supportPoints, poweredTKnot, poweredK);
+X = TensorSpline.matrix(supportPoints, poweredTKnot, poweredK - 1);
 xi = X \ poweredValues(:);
-poweredSpline = TensorSpline(poweredK, poweredTKnot, xi);
+poweredSpline = TensorSpline(S=poweredK-1, knotPoints=poweredTKnot, xi=xi);

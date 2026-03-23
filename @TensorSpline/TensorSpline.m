@@ -13,9 +13,9 @@ classdef TensorSpline < handle
     % spline on query arrays.
     %
     % ```matlab
-    % tKnot = {[0;0;0;0;1;1;1;1], [0;0;0;0;1;1;1;1]};
+    % knotPoints = {[0;0;0;0;1;1;1;1], [0;0;0;0;1;1;1;1]};
     % xi = randn(16,1);
-    % spline = TensorSpline([4 4], tKnot, xi);
+    % spline = TensorSpline(S=[3 3], knotPoints=knotPoints, xi=xi);
     %
     % xq = linspace(0,1,40)';
     % yq = linspace(0,1,40)';
@@ -80,7 +80,7 @@ classdef TensorSpline < handle
         % Returns a numeric vector in 1-D and a cell array in higher dimensions.
         %
         % - Topic: Inspect spline properties
-        tKnot
+        knotPoints
         % Minimum and maximum values of the spline domain in each dimension.
         %
         % - Topic: Inspect spline properties
@@ -88,40 +88,50 @@ classdef TensorSpline < handle
     end
 
     methods
-        function self = TensorSpline(K,tKnot,xi,options)
-            % Create a tensor-product spline from per-dimension orders, knots, and coefficients.
+        function self = TensorSpline(options)
+            % Create a tensor-product spline from per-dimension degrees, knots, and coefficients.
             %
             % Use this constructor when you already know the per-dimension
             % knot vectors and tensor-product coefficients.
             %
             % ```matlab
-            % spline = TensorSpline([4 4], tKnot, xi);
+            % spline = TensorSpline(S=[3 3], knotPoints=knotPoints, xi=xi);
             % values = spline(xq, yq);
             % ```
             %
             % - Topic: Create a spline
-            % - Declaration: self = TensorSpline(K,tKnot,xi,options)
-            % - Parameter K: spline order scalar or vector with one entry per dimension
-            % - Parameter tKnot: cell array of knot vectors
+            % - Declaration: self = TensorSpline(options)
+            % - Parameter options.S: spline degree scalar or vector with one entry per dimension
+            % - Parameter options.knotPoints: knot vector in 1-D or cell array of knot vectors
             % - Parameter xi: optional tensor-product coefficient array or vector
             % - Parameter options.xMean: optional additive output offset
             % - Parameter options.xStd: optional multiplicative output scale
             % - Returns self: TensorSpline instance
             arguments
-                K {mustBeNumeric,mustBeReal,mustBeFinite}
-                tKnot cell
-                xi = []
+                options.S {mustBeNumeric,mustBeReal,mustBeFinite,mustBeInteger,mustBeNonnegative}
+                options.knotPoints
+                options.xi {mustBeNumeric,mustBeReal,mustBeFinite} = []
                 options.xMean (1,1) double {mustBeReal,mustBeFinite} = 0
                 options.xStd (1,1) double {mustBeReal,mustBeFinite} = 1
             end
 
-            numDimensions = numel(tKnot);
-            K = TensorSpline.normalizeOrders(K, numDimensions);
-            tKnot = TensorSpline.normalizeKnotCell(tKnot, numDimensions);
+            if isnumeric(options.knotPoints)
+                validateattributes(options.knotPoints, {'numeric'}, {'vector','real','finite','nonempty'});
+                numDimensions = 1;
+                tKnot = {reshape(options.knotPoints, [], 1)};
+            else
+                tKnot = options.knotPoints;
+                numDimensions = numel(tKnot);
+                tKnot = TensorSpline.normalizeKnotCell(tKnot, numDimensions);
+            end
+
+            K = TensorSpline.normalizeOrders(options.S + 1, numDimensions);
             basisSize = TensorSpline.basisSizeFromKnotCell(tKnot, K);
 
-            if isempty(xi)
+            if isempty(options.xi)
                 xi = zeros(prod(basisSize),1);
+            else
+                xi = options.xi;
             end
 
             self.K = K;
@@ -199,11 +209,11 @@ classdef TensorSpline < handle
             end
         end
 
-        function value = get.tKnot(self)
+        function value = get.knotPoints(self)
             % Return the knot vectors defining the tensor-product basis.
             %
             % - Topic: Inspect spline properties
-            % - Declaration: value = get.tKnot(self)
+            % - Declaration: value = get.knotPoints(self)
             % - Parameter self: TensorSpline instance
             % - Returns value: knot vector in 1-D, cell array otherwise
             if self.numDimensions == 1
@@ -228,9 +238,9 @@ classdef TensorSpline < handle
     end
 
     methods (Static)
-        B = matrix(X,tKnot,K,options)
+        B = matrix(X, knotPoints, S, options)
         [pointMatrix, gridSize] = pointsFromGridVectors(gridVectors)
-        [pointMatrix, supportVectors] = pointsOfSupport(tKnot, K, D)
+        [pointMatrix, supportVectors] = pointsOfSupport(knotPoints, S)
     end
 
     methods (Static, Hidden)

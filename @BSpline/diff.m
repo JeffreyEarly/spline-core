@@ -22,12 +22,12 @@ end
 if n == 0
     dspline = spline;
 elseif n >= spline.K
-    dspline = BSpline(1,reshape(spline.domain,[],1),0);
+    dspline = BSpline(S=0, knotPoints=reshape(spline.domain,[],1), xi=0);
 else
     D = n;
     xi = spline.xi;
     K = spline.K;
-    tKnot = spline.tKnot;
+    knotPoints = spline.knotPoints;
     M = length(xi);
     
     alpha = zeros(length(xi),D+1);
@@ -35,10 +35,10 @@ else
     
     for d=1:D
         dm = diff(alpha(:,d));
-        dt = (tKnot(1+K-d:M+K-d)-tKnot(1:M))/(K-d);
+        dt = (knotPoints(1+K-d:M+K-d)-knotPoints(1:M))/(K-d);
         alpha(1:end-d,d+1) = dm./dt(d+1:end);
     end
     
-    dspline = BSpline(K-D,tKnot((1+D):(end-D)),alpha(1:end-D,D+1));
+    dspline = BSpline(S=K-D-1, knotPoints=knotPoints((1+D):(end-D)), xi=alpha(1:end-D,D+1));
     dspline.xStd = spline.xStd;
 end

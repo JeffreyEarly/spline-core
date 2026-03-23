@@ -1,49 +1,50 @@
-function B = matrix( t, tKnot, K, options )
+function B = matrix(t, knotPoints, S, options)
 % Evaluate terminated B-spline basis functions and optional derivatives.
 %
-% Returns the basis splines of order K evaluated at point t,
-% given knot points tKnot. If you optionally provide D,
+% Returns the basis splines of degree S evaluated at points t,
+% given knot points knotPoints. If you optionally provide D,
 % then D derivatives will be returned.
 %
 % Use this to assemble a design matrix for interpolation, regression, or
 % direct inspection of the basis functions.
 %
 % ```matlab
-% B = BSpline.matrix(t, tKnot, 4);
+% B = BSpline.matrix(t, knotPoints, 3);
 % xi = B \ x;
-% spline = BSpline(4, tKnot, xi);
+% spline = BSpline(S=3, knotPoints=knotPoints, xi=xi);
 % ```
 %
 % - Topic: Build spline bases
-% - Declaration: B = matrix( t, tKnot, K, options )
+% - Declaration: B = matrix(t, knotPoints, S, options)
 % - Parameter t: points at which to evaluate the splines
-% - Parameter tKnot: spline knot points
-% - Parameter K: spline order (degree S=K-1)
-% - Parameter options.D: (optional) number of spline derivatives to return, max(D)=K-1
-% - Returns B: [numel(t) M D] where M = numel(tKnot)-K
+% - Parameter knotPoints: spline knot points
+% - Parameter S: spline degree
+% - Parameter options.D: (optional) number of spline derivatives to return, max(D)=S
+% - Returns B: [numel(t) M D] where M = numel(knotPoints)-S-1
 arguments
     t (:,1) double {mustBeNumeric,mustBeReal}
-    tKnot (:,1) double {mustBeNumeric,mustBeReal}
-    K (1,1) double {mustBeInteger,mustBeGreaterThanOrEqual(K,1)}
-    options.D (1,1) double {mustBeInteger,mustBeNonnegative} = 0 %,mustBeLessThanOrEqual(options.D,K-1)
+    knotPoints (:,1) double {mustBeNumeric,mustBeReal}
+    S (1,1) double {mustBeInteger,mustBeNonnegative}
+    options.D (1,1) double {mustBeInteger,mustBeNonnegative} = 0
 end
+K = S + 1;
 
-if any(diff(tKnot)<0)
-    error('tKnot must be non-decreasing.');
+if any(diff(knotPoints) < 0)
+    error('BSpline:InvalidKnotPoints', 'knotPoints must be non-decreasing.');
 end
 
 D = options.D;
 
 % number of knots
-M = length(tKnot);
+M = length(knotPoints);
 
-nl = find(tKnot <= tKnot(1),1,'last');
-nr = M - find(tKnot == tKnot(end),1,'first')+1;
+nl = find(knotPoints <= knotPoints(1),1,'last');
+nr = M - find(knotPoints == knotPoints(end),1,'first')+1;
 if (nl < K || nr < K)
     error('Your splines are not terminated. You need to have K repeat knot points at the beginning and end.');
 end
 
-% This is true assuming the original tKnot was strictly monotonically
+% This is true assuming the original knotPoints were strictly monotonically
 % increasing (no repeat knots) and we added repeat knots at the beginning
 % and end of the sequences.
 N_splines = M - K;
@@ -56,7 +57,7 @@ N = length(t);
 B = zeros(N,N_splines,D+1); % This will contain all splines and their derivatives
 delta_r = zeros(N,K);
 delta_l = zeros(N,K);
-knot_indices = discretize(t,tKnot(1:(M-K+1)));
+knot_indices = discretize(t,knotPoints(1:(M-K+1)));
 
 % XB will contain all splines from (K-D) through order (K-1).
 % These are needed to compute the derivatives of the spline, if
@@ -75,8 +76,8 @@ end
 b = zeros(N,K);
 b(:,1) = 1;
 for j=1:(K-1) % loop through splines of increasing order: j+1
-    delta_r(:,j) = tKnot(knot_indices+j) - t;
-    delta_l(:,j) = t - tKnot(knot_indices+1-j);
+    delta_r(:,j) = knotPoints(knot_indices+j) - t;
+    delta_l(:,j) = t - knotPoints(knot_indices+1-j);
 
     saved = zeros(N,1);
     for r=1:j % loop through the nonzero splines
@@ -104,7 +105,7 @@ for r = 1:K
     B(to_indices) = b(from_indices);
 end
 
-diff_coeff = @(a,r,m) (K-m)*(a(2)-a(1))/(tKnot(r+K-m) - tKnot(r));
+diff_coeff = @(a,r,m) (K-m)*(a(2)-a(1))/(knotPoints(r+K-m) - knotPoints(r));
 
 if D > 0
     for r=1:N_splines

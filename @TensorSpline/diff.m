@@ -41,4 +41,4 @@ for iDim = 1:self.numDimensions
     [xi, tKnot{iDim}, K(iDim)] = TensorSpline.differentiateAlongDimension(  xi, tKnot{iDim}, K(iDim), derivativeOrders(iDim), iDim);
 end
 
-dspline = TensorSpline(K, tKnot, xi, xMean=0, xStd=self.xStd);
+dspline = TensorSpline(S=K-1, knotPoints=tKnot, xi=xi, xMean=0, xStd=self.xStd);

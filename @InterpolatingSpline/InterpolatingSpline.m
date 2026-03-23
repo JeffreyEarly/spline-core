@@ -4,7 +4,6 @@ classdef InterpolatingSpline < TensorSpline
     % Supported construction forms:
     %   spline = InterpolatingSpline(x,V)
     %   spline = InterpolatingSpline({x,y,...},V)
-    %   spline = InterpolatingSpline(grid,V,K=K)
     %   spline = InterpolatingSpline(grid,V,S=S)
     %
     % ## Basic usage
@@ -41,7 +40,7 @@ classdef InterpolatingSpline < TensorSpline
             % in higher dimensions together with the sampled value array.
             %
             % ```matlab
-            % spline = InterpolatingSpline({x, y}, F, K=[4 4]);
+            % spline = InterpolatingSpline({x, y}, F, S=[3 3]);
             % Fq = spline(Xq, Yq);
             % ```
             %
@@ -49,14 +48,12 @@ classdef InterpolatingSpline < TensorSpline
             % - Declaration: self = InterpolatingSpline(grid,values,options)
             % - Parameter grid: numeric vector in 1-D or cell array of grid vectors in higher dimensions
             % - Parameter values: array of sampled values on the grid
-            % - Parameter options.K: spline order scalar or vector with one entry per dimension
             % - Parameter options.S: spline degree scalar or vector with one entry per dimension
             % - Returns self: InterpolatingSpline instance
             arguments
                 grid
                 values {mustBeNumeric,mustBeReal,mustBeFinite}
-                options.K {mustBeNumeric,mustBeReal,mustBeFinite,mustBeInteger,mustBePositive} = 4
-                options.S {mustBeNumeric,mustBeReal} = []
+                options.S {mustBeNumeric,mustBeReal,mustBeFinite,mustBeInteger,mustBeNonnegative} = 3
             end
 
             if iscell(grid)
@@ -91,20 +88,13 @@ classdef InterpolatingSpline < TensorSpline
                 end
             end
 
-            if isempty(options.S)
-                K = options.K;
-            else
-                validateattributes(options.S, {'numeric'}, {'vector','real','finite','nonnegative','integer'});
-                if ~(isscalar(options.K) && options.K == 4)
-                    error('InterpolatingSpline:ConflictingSplineOrder', 'Specify either K or S, but not both.');
-                end
-                K = options.S + 1;
-            end
+            K = options.S + 1;
             K = TensorSpline.normalizeOrders(K, numDimensions);
+            S = K - 1;
 
             tKnot = cell(1, numDimensions);
             for iDim = 1:numDimensions
-                tKnot{iDim} = BSpline.knotPointsForDataPoints(gridVectors{iDim}, K=K(iDim));
+                tKnot{iDim} = BSpline.knotPointsForDataPoints(gridVectors{iDim}, S=S(iDim));
             end
 
             xMean = mean(values(:));
@@ -118,10 +108,10 @@ classdef InterpolatingSpline < TensorSpline
             end
 
             [gridPoints, ~] = TensorSpline.pointsFromGridVectors(gridVectors);
-            basisMatrix = TensorSpline.matrix(gridPoints, tKnot, K);
+            basisMatrix = TensorSpline.matrix(gridPoints, tKnot, S);
             xi = basisMatrix \ values(:);
 
-            self@TensorSpline(K, tKnot, xi, xMean=xMean, xStd=xStd);
+            self@TensorSpline(S=S, knotPoints=tKnot, xi=xi, xMean=xMean, xStd=xStd);
             self.gridVectors = gridVectors;
         end
     end
