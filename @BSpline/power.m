@@ -1,4 +1,4 @@
-function poweredSpline = power(spline,exponent,constraints)
+function poweredSpline = power(spline,exponent)
 % Raise spline values to a real scalar power by refitting support values.
 %
 % This is useful for simple nonlinear transforms of a spline when an exact
@@ -10,15 +10,13 @@ function poweredSpline = power(spline,exponent,constraints)
 % ```
 %
 % - Topic: Transform the spline
-% - Declaration: poweredSpline = power(spline,exponent,constraints)
+% - Declaration: poweredSpline = power(spline,exponent)
 % - Parameter spline: BSpline instance
 % - Parameter exponent: scalar exponent
-% - Parameter constraints: optional SplineConstraint array for the refit
 % - Returns poweredSpline: BSpline approximating spline.^exponent
 arguments
     spline (1,1) BSpline
     exponent (1,1) double {mustBeReal,mustBeFinite}
-    constraints = []
 end
 if exponent == 1
     poweredSpline = spline;
@@ -33,7 +31,7 @@ poweredOrder = ceil(exponent*spline.K);
 tKnot = BSpline.knotPointsForDataPoints(supportPoints,K=poweredOrder);
 poweredValues = values.^exponent;
 [constraintArguments, poweredValues] = ConstrainedSpline.constraintArguments( ...
-    constraints, poweredValues, EnforcePositiveIfPossible=true, NumDimensions=1);
+    [], poweredValues, enforcePositiveIfPossible=true, numDimensions=1);
 if ~isempty(constraintArguments)
     fittedSpline = ConstrainedSpline(supportPoints, poweredValues, ...
         K=poweredOrder, ...

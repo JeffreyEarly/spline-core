@@ -10,7 +10,7 @@ classdef GlobalConstraint < SplineConstraint
     %
     % ```matlab
     % c1 = GlobalConstraint.positive();
-    % c2 = GlobalConstraint.monotonicIncreasing(Dimension=2);
+    % c2 = GlobalConstraint.monotonicIncreasing(dimension=2);
     % ```
     %
     % - Topic: Specify global constraints
@@ -20,12 +20,12 @@ classdef GlobalConstraint < SplineConstraint
         % Shape-constraint kind.
         %
         % - Topic: Inspect global constraint properties
-        Shape (1,1) string = "none"
+        shape (1,1) string = "none"
 
         % Tensor dimension associated with the constraint, when applicable.
         %
         % - Topic: Inspect global constraint properties
-        Dimension = double.empty(1,0)
+        dimension = double.empty(1,0)
     end
 
     methods
@@ -39,37 +39,37 @@ classdef GlobalConstraint < SplineConstraint
             % - Topic: Specify global constraints
             % - Declaration: self = GlobalConstraint(shape,options)
             % - Parameter shape: one of "none", "positive", "monotonicIncreasing", or "monotonicDecreasing"
-            % - Parameter options.Dimension: tensor dimension for directional constraints
+            % - Parameter options.dimension: tensor dimension for directional constraints
             % - Returns self: GlobalConstraint instance
             arguments
                 shape {mustBeTextScalar, mustBeMember(shape, ["none", "positive", "monotonicIncreasing", "monotonicDecreasing"])} = "none"
-                options.Dimension = double.empty(1,0)
+                options.dimension = double.empty(1,0)
             end
 
             shape = string(shape);
 
-            if ~isempty(options.Dimension)
-                validateattributes(options.Dimension, {'numeric'}, ...
+            if ~isempty(options.dimension)
+                validateattributes(options.dimension, {'numeric'}, ...
                     {'scalar','real','finite','integer','positive'});
             end
 
             switch shape
                 case {"none", "positive"}
-                    if ~isempty(options.Dimension)
+                    if ~isempty(options.dimension)
                         error('GlobalConstraint:UnexpectedDimension', ...
                             'Dimension is not used for this global constraint.');
                     end
                     dimension = double.empty(1,0);
                 case {"monotonicIncreasing", "monotonicDecreasing"}
-                    if isempty(options.Dimension)
+                    if isempty(options.dimension)
                         error('GlobalConstraint:MissingDimension', ...
                             'Dimension must be specified for directional global constraints.');
                     end
-                    dimension = options.Dimension;
+                    dimension = options.dimension;
             end
 
-            self.Shape = shape;
-            self.Dimension = dimension;
+            self.shape = shape;
+            self.dimension = dimension;
         end
     end
 
@@ -91,36 +91,36 @@ classdef GlobalConstraint < SplineConstraint
             % Create a monotone-increasing constraint along one dimension.
             %
             % ```matlab
-            % c = GlobalConstraint.monotonicIncreasing(Dimension=1);
+            % c = GlobalConstraint.monotonicIncreasing(dimension=1);
             % ```
             %
             % - Topic: Specify global constraints
             % - Declaration: self = monotonicIncreasing(options)
-            % - Parameter options.Dimension: tensor dimension, default 1
+            % - Parameter options.dimension: tensor dimension, default 1
             % - Returns self: monotone-increasing GlobalConstraint
             arguments
-                options.Dimension (1,1) double {mustBeInteger,mustBePositive} = 1
+                options.dimension (1,1) double {mustBeInteger,mustBePositive} = 1
             end
 
-            self = GlobalConstraint("monotonicIncreasing", Dimension=options.Dimension);
+            self = GlobalConstraint("monotonicIncreasing", dimension=options.dimension);
         end
 
         function self = monotonicDecreasing(options)
             % Create a monotone-decreasing constraint along one dimension.
             %
             % ```matlab
-            % c = GlobalConstraint.monotonicDecreasing(Dimension=2);
+            % c = GlobalConstraint.monotonicDecreasing(dimension=2);
             % ```
             %
             % - Topic: Specify global constraints
             % - Declaration: self = monotonicDecreasing(options)
-            % - Parameter options.Dimension: tensor dimension, default 1
+            % - Parameter options.dimension: tensor dimension, default 1
             % - Returns self: monotone-decreasing GlobalConstraint
             arguments
-                options.Dimension (1,1) double {mustBeInteger,mustBePositive} = 1
+                options.dimension (1,1) double {mustBeInteger,mustBePositive} = 1
             end
 
-            self = GlobalConstraint("monotonicDecreasing", Dimension=options.Dimension);
+            self = GlobalConstraint("monotonicDecreasing", dimension=options.dimension);
         end
 
         function self = none()

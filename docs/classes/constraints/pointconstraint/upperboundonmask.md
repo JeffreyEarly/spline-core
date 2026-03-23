@@ -3,7 +3,7 @@ layout: default
 title: upperBoundOnMask
 parent: PointConstraint
 grand_parent: Classes
-nav_order: 13
+nav_order: 12
 mathjax: true
 ---
 
@@ -22,7 +22,7 @@ Create a pointwise upper-bound constraint from a logical mask.
 + `grid`  vector or cell array of grid vectors or matching grid arrays
 + `mask`  logical mask selecting constrained locations
 + `options.D`  derivative orders as a scalar, row vector, or N-by-D matrix
-+ `options.Value`  scalar or one bound value per selected point
++ `options.value`  scalar or one bound value per selected point
 
 ## Returns
 + `self`  upper-bound PointConstraint
@@ -30,7 +30,7 @@ Create a pointwise upper-bound constraint from a logical mask.
 ## Discussion
 
   ```matlab
-  c = PointConstraint.upperBoundOnMask({x,y}, mask, D=[0 0], Value=1);
+  c = PointConstraint.upperBoundOnMask({x,y}, mask, D=[0 0], value=1);
   ```
 
 

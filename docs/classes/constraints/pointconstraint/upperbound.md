@@ -3,7 +3,7 @@ layout: default
 title: upperBound
 parent: PointConstraint
 grand_parent: Classes
-nav_order: 12
+nav_order: 11
 mathjax: true
 ---
 
@@ -21,7 +21,7 @@ Create a pointwise upper-bound constraint.
 ## Parameters
 + `points`  point locations as a vector or N-by-D matrix
 + `options.D`  derivative orders as a scalar, row vector, or N-by-D matrix
-+ `options.Value`  scalar or one bound value per point
++ `options.value`  scalar or one bound value per point
 
 ## Returns
 + `self`  upper-bound PointConstraint
@@ -29,7 +29,7 @@ Create a pointwise upper-bound constraint.
 ## Discussion
 
   ```matlab
-  c = PointConstraint.upperBound(P, D=[0 0], Value=1);
+  c = PointConstraint.upperBound(P, D=[0 0], value=1);
   ```
 
 

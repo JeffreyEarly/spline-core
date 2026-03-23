@@ -16,11 +16,10 @@ Return a spline approximation to the square root of the spline output.
 
 ## Declaration
 ```matlab
- splinesqrt = sqrt(spline,constraints)
+ splinesqrt = sqrt(spline)
 ```
 ## Parameters
 + `spline`  BSpline instance
-+ `constraints`  optional constraint specification for the refit
 
 ## Returns
 + `splinesqrt`  BSpline approximating sqrt(spline)

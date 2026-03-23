@@ -3,7 +3,7 @@ layout: default
 title: equal
 parent: PointConstraint
 grand_parent: Classes
-nav_order: 6
+nav_order: 3
 mathjax: true
 ---
 
@@ -21,7 +21,7 @@ Create a pointwise equality constraint.
 ## Parameters
 + `points`  point locations as a vector or N-by-D matrix
 + `options.D`  derivative orders as a scalar, row vector, or N-by-D matrix
-+ `options.Value`  scalar or one target value per point
++ `options.value`  scalar or one target value per point
 
 ## Returns
 + `self`  equality PointConstraint
@@ -29,7 +29,7 @@ Create a pointwise equality constraint.
 ## Discussion
 
   ```matlab
-  c = PointConstraint.equal(tc, D=2, Value=0);
+  c = PointConstraint.equal(tc, D=2, value=0);
   ```
 
 

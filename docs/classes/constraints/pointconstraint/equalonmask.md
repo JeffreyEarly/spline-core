@@ -3,7 +3,7 @@ layout: default
 title: equalOnMask
 parent: PointConstraint
 grand_parent: Classes
-nav_order: 7
+nav_order: 4
 mathjax: true
 ---
 
@@ -22,7 +22,7 @@ Create a pointwise equality constraint from a logical mask.
 + `grid`  vector or cell array of grid vectors or matching grid arrays
 + `mask`  logical mask selecting constrained locations
 + `options.D`  derivative orders as a scalar, row vector, or N-by-D matrix
-+ `options.Value`  scalar or one target value per selected point
++ `options.value`  scalar or one target value per selected point
 
 ## Returns
 + `self`  equality PointConstraint
@@ -33,7 +33,7 @@ Create a pointwise equality constraint from a logical mask.
   a logical mask on a rectilinear grid.
 
   ```matlab
-  c = PointConstraint.equalOnMask({x,y}, mask, D=[0 0], Value=0);
+  c = PointConstraint.equalOnMask({x,y}, mask, D=[0 0], value=0);
   ```
 
 

@@ -4,26 +4,26 @@ classdef GlobalConstraintUnitTests < matlab.unittest.TestCase
         function positiveConstraintHasNoAssociatedDimension(testCase)
             constraint = GlobalConstraint.positive();
 
-            testCase.verifyEqual(constraint.Shape, "positive")
-            testCase.verifyEmpty(constraint.Dimension)
+            testCase.verifyEqual(constraint.shape, "positive")
+            testCase.verifyEmpty(constraint.dimension)
         end
 
         function monotonicIncreasingDefaultsToFirstDimension(testCase)
             constraint = GlobalConstraint.monotonicIncreasing();
 
-            testCase.verifyEqual(constraint.Shape, "monotonicIncreasing")
-            testCase.verifyEqual(constraint.Dimension, 1)
+            testCase.verifyEqual(constraint.shape, "monotonicIncreasing")
+            testCase.verifyEqual(constraint.dimension, 1)
         end
 
         function monotonicDecreasingStoresRequestedDimension(testCase)
-            constraint = GlobalConstraint.monotonicDecreasing(Dimension=2);
+            constraint = GlobalConstraint.monotonicDecreasing(dimension=2);
 
-            testCase.verifyEqual(constraint.Shape, "monotonicDecreasing")
-            testCase.verifyEqual(constraint.Dimension, 2)
+            testCase.verifyEqual(constraint.shape, "monotonicDecreasing")
+            testCase.verifyEqual(constraint.dimension, 2)
         end
 
         function positiveConstraintRejectsUnexpectedDimension(testCase)
-            testCase.verifyError(@() GlobalConstraint("positive", Dimension=1), ...
+            testCase.verifyError(@() GlobalConstraint("positive", dimension=1), ...
                 'GlobalConstraint:UnexpectedDimension')
         end
     end

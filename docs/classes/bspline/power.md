@@ -16,12 +16,11 @@ Raise spline values to a real scalar power by refitting support values.
 
 ## Declaration
 ```matlab
- poweredSpline = power(spline,exponent,constraints)
+ poweredSpline = power(spline,exponent)
 ```
 ## Parameters
 + `spline`  BSpline instance
 + `exponent`  scalar exponent
-+ `constraints`  optional SplineConstraint array for the refit
 
 ## Returns
 + `poweredSpline`  BSpline approximating spline.^exponent

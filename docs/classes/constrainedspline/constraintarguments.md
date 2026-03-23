@@ -23,7 +23,7 @@ Normalize mixed constraint inputs into constructor arguments.
 ## Parameters
 + `constraints`  optional mixed SplineConstraint array
 + `sampleValues`  optional vector used for positivity heuristics
-+ `options.EnforcePositiveIfPossible`  add positivity when sampleValues are nonnegative
++ `options.enforcePositiveIfPossible`  add positivity when sampleValues are nonnegative
 
 ## Returns
 + `constraintArguments`  name-value arguments for constructor constraints

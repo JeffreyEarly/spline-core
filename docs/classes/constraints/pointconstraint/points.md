@@ -1,13 +1,13 @@
 ---
 layout: default
-title: Points
+title: points
 parent: PointConstraint
 grand_parent: Classes
-nav_order: 3
+nav_order: 9
 mathjax: true
 ---
 
-#  Points
+#  points
 
 Constraint locations as an N-by-D point matrix.
 

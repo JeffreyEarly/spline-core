@@ -30,9 +30,9 @@ fits.
 ## Basic usage
 
 ```matlab
-c1 = PointConstraint.equal((0:10)', D=2, Value=0);
-c2 = PointConstraint.lowerBound([X(mask), Y(mask)], D=[0 0], Value=0);
-c3 = PointConstraint.equalOnMask({x,y}, islandMask, D=[0 0], Value=0);
+c1 = PointConstraint.equal((0:10)', D=2, value=0);
+c2 = PointConstraint.lowerBound([X(mask), Y(mask)], D=[0 0], value=0);
+c3 = PointConstraint.equalOnMask({x,y}, islandMask, D=[0 0], value=0);
 ```
 
 
@@ -49,11 +49,11 @@ c3 = PointConstraint.equalOnMask({x,y}, islandMask, D=[0 0], Value=0);
   + [`upperBoundOnMask`](/spline-core/classes/constraints/pointconstraint/upperboundonmask.html) Create a pointwise upper-bound constraint from a logical mask.
 + Inspect point constraint properties
   + [`D`](/spline-core/classes/constraints/pointconstraint/d.html) Derivative orders as an N-by-D matrix.
-  + [`Points`](/spline-core/classes/constraints/pointconstraint/points.html) Constraint locations as an N-by-D point matrix.
-  + [`Relation`](/spline-core/classes/constraints/pointconstraint/relation.html) Constraint relation: "==", ">=", or "<=".
-  + [`Value`](/spline-core/classes/constraints/pointconstraint/value.html) Target values as an N-by-1 vector.
   + [`numConstraints`](/spline-core/classes/constraints/pointconstraint/numconstraints.html) Number of constrained points.
   + [`numDimensions`](/spline-core/classes/constraints/pointconstraint/numdimensions.html) Number of constrained dimensions.
+  + [`points`](/spline-core/classes/constraints/pointconstraint/points.html) Constraint locations as an N-by-D point matrix.
+  + [`relation`](/spline-core/classes/constraints/pointconstraint/relation.html) Constraint relation: "==", ">=", or "<=".
+  + [`value`](/spline-core/classes/constraints/pointconstraint/value.html) Target values as an N-by-1 vector.
 
 
 ---

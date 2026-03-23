@@ -1,13 +1,13 @@
 ---
 layout: default
-title: Shape
+title: shape
 parent: GlobalConstraint
 grand_parent: Classes
-nav_order: 3
+nav_order: 7
 mathjax: true
 ---
 
-#  Shape
+#  shape
 
 constraint kind.
 

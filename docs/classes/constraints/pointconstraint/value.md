@@ -1,13 +1,13 @@
 ---
 layout: default
-title: Value
+title: value
 parent: PointConstraint
 grand_parent: Classes
-nav_order: 5
+nav_order: 13
 mathjax: true
 ---
 
-#  Value
+#  value
 
 Target values as an N-by-1 vector.
 

@@ -113,7 +113,7 @@ end
 constraintPoints = [];
 for iConstraint = 1:numel(pointConstraints)
     if all(pointConstraints(iConstraint).D == derivativeOrder, 2)
-        constraintPoints = [constraintPoints; pointConstraints(iConstraint).Points]; %#ok<AGROW>
+        constraintPoints = [constraintPoints; pointConstraints(iConstraint).points]; %#ok<AGROW>
     end
 end
 
@@ -131,7 +131,7 @@ end
 function specification = caseSpecification(exampleCase)
 constraintTimes = [2.5; 2.5; 7.5];
 constraintOrders = [1; 2; 2];
-pointConstraints = PointConstraint.equal(constraintTimes, D=constraintOrders, Value=0);
+pointConstraints = PointConstraint.equal(constraintTimes, D=constraintOrders, value=0);
 
 switch exampleCase
     case 1

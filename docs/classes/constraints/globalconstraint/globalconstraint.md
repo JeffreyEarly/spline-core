@@ -3,7 +3,7 @@ layout: default
 title: GlobalConstraint
 parent: GlobalConstraint
 grand_parent: Classes
-nav_order: 2
+nav_order: 1
 mathjax: true
 ---
 
@@ -20,7 +20,7 @@ Create a global constraint specification.
 ```
 ## Parameters
 + `shape`  one of "none", "positive", "monotonicIncreasing", or "monotonicDecreasing"
-+ `options.Dimension`  tensor dimension for directional constraints
++ `options.dimension`  tensor dimension for directional constraints
 
 ## Returns
 + `self`  GlobalConstraint instance

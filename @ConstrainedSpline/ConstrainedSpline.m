@@ -340,20 +340,20 @@ classdef ConstrainedSpline < TensorSpline
             % - Declaration: [constraintArguments,constrainedValues] = constraintArguments(constraints,sampleValues,options)
             % - Parameter constraints: optional mixed SplineConstraint array
             % - Parameter sampleValues: optional vector used for positivity heuristics
-            % - Parameter options.EnforcePositiveIfPossible: add positivity when sampleValues are nonnegative
+            % - Parameter options.enforcePositiveIfPossible: add positivity when sampleValues are nonnegative
             % - Returns constraintArguments: name-value arguments for constructor constraints
             % - Returns constrainedValues: possibly clipped sample values
             arguments
                 constraints = []
                 sampleValues (:,1) double = zeros(0,1)
-                options.EnforcePositiveIfPossible (1,1) logical = false
-                options.NumDimensions = []
+                options.enforcePositiveIfPossible (1,1) logical = false
+                options.numDimensions = []
             end
 
-            [pointConstraints, globalConstraints] = ConstrainedSpline.normalizeConstraintInputs(constraints, options.NumDimensions);
+            [pointConstraints, globalConstraints] = ConstrainedSpline.normalizeConstraintInputs(constraints, options.numDimensions);
             constrainedValues = sampleValues;
 
-            if options.EnforcePositiveIfPossible && isempty(globalConstraints) ...
+            if options.enforcePositiveIfPossible && isempty(globalConstraints) ...
                     && all(isfinite(constrainedValues)) ...
                     && all(constrainedValues >= -10*eps(max(1, max(abs(constrainedValues)))))
                 globalConstraints = GlobalConstraint.positive();
@@ -588,10 +588,10 @@ classdef ConstrainedSpline < TensorSpline
                 for iGroup = 1:size(groupOrders, 1)
                     isGroup = groupIndex == iGroup;
                     B = sparse(TensorSpline.matrix( ...
-                        constraint.Points(isGroup,:), tKnot, K, D=groupOrders(iGroup,:)));
-                    values = constraint.Value(isGroup);
+                        constraint.points(isGroup,:), tKnot, K, D=groupOrders(iGroup,:)));
+                    values = constraint.value(isGroup);
 
-                    switch constraint.Relation
+                    switch constraint.relation
                         case "=="
                             Aeq = [Aeq; B];
                             beq = [beq; values];
@@ -618,17 +618,17 @@ classdef ConstrainedSpline < TensorSpline
 
             for iConstraint = 1:numel(globalConstraints)
                 constraint = globalConstraints(iConstraint);
-                switch constraint.Shape
+                switch constraint.shape
                     case "none"
                         continue;
                     case "positive"
                         constraintMatrix = -speye(numCoefficients);
                     case "monotonicIncreasing"
                         constraintMatrix = ConstrainedSpline.monotonicDifferenceMatrix( ...
-                            basisSize, constraint.Dimension, "increasing");
+                            basisSize, constraint.dimension, "increasing");
                     case "monotonicDecreasing"
                         constraintMatrix = ConstrainedSpline.monotonicDifferenceMatrix( ...
-                            basisSize, constraint.Dimension, "decreasing");
+                            basisSize, constraint.dimension, "decreasing");
                     otherwise
                         error('ConstrainedSpline:UnsupportedGlobalConstraint', ...
                             'Unsupported global constraint shape.');
@@ -793,8 +793,8 @@ classdef ConstrainedSpline < TensorSpline
 
             globalConstraints = reshape(globalConstraints, [], 1);
             for iConstraint = 1:numel(globalConstraints)
-                if ~isempty(numDimensions) && ~isempty(globalConstraints(iConstraint).Dimension) ...
-                        && globalConstraints(iConstraint).Dimension > numDimensions
+                if ~isempty(numDimensions) && ~isempty(globalConstraints(iConstraint).dimension) ...
+                        && globalConstraints(iConstraint).dimension > numDimensions
                     error('ConstrainedSpline:GlobalConstraintDimensionMismatch', ...
                         'Global constraint dimensions must not exceed the spline dimensionality.');
                 end

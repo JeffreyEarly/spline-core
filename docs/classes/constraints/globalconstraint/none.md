@@ -3,7 +3,7 @@ layout: default
 title: none
 parent: GlobalConstraint
 grand_parent: Classes
-nav_order: 6
+nav_order: 5
 mathjax: true
 ---
 

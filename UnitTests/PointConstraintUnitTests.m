@@ -2,45 +2,45 @@ classdef PointConstraintUnitTests < matlab.unittest.TestCase
 
     methods (Test)
         function equalityConstraintNormalizesOneDimensionalInputs(testCase)
-            constraint = PointConstraint.equal((0:2)', D=2, Value=0);
+            constraint = PointConstraint.equal((0:2)', D=2, value=0);
 
-            testCase.verifyEqual(constraint.Points, (0:2)')
+            testCase.verifyEqual(constraint.points, (0:2)')
             testCase.verifyEqual(constraint.D, 2*ones(3,1))
-            testCase.verifyEqual(constraint.Value, zeros(3,1))
-            testCase.verifyEqual(constraint.Relation, "==")
+            testCase.verifyEqual(constraint.value, zeros(3,1))
+            testCase.verifyEqual(constraint.relation, "==")
             testCase.verifyEqual(constraint.numDimensions, 1)
             testCase.verifyEqual(constraint.numConstraints, 3)
         end
 
         function equalityConstraintReplicatesDerivativeVectorAcrossPoints(testCase)
             points = [0 0; 1 1; 2 2];
-            constraint = PointConstraint.equal(points, D=[1 0], Value=5);
+            constraint = PointConstraint.equal(points, D=[1 0], value=5);
 
             testCase.verifyEqual(constraint.D, repmat([1 0], 3, 1))
-            testCase.verifyEqual(constraint.Value, 5*ones(3,1))
+            testCase.verifyEqual(constraint.value, 5*ones(3,1))
         end
 
         function lowerBoundConstraintAcceptsPerPointTargets(testCase)
             points = [0 0; 1 1; 2 2];
             values = [0; 1; 2];
-            constraint = PointConstraint.lowerBound(points, D=zeros(3,2), Value=values);
+            constraint = PointConstraint.lowerBound(points, D=zeros(3,2), value=values);
 
-            testCase.verifyEqual(constraint.Relation, ">=")
-            testCase.verifyEqual(constraint.Value, values)
+            testCase.verifyEqual(constraint.relation, ">=")
+            testCase.verifyEqual(constraint.value, values)
             testCase.verifyEqual(constraint.D, zeros(3,2))
         end
 
         function upperBoundConstraintStoresRelation(testCase)
-            constraint = PointConstraint.upperBound((0:2)', D=0, Value=1);
+            constraint = PointConstraint.upperBound((0:2)', D=0, value=1);
 
-            testCase.verifyEqual(constraint.Relation, "<=")
-            testCase.verifyEqual(constraint.Value, ones(3,1))
+            testCase.verifyEqual(constraint.relation, "<=")
+            testCase.verifyEqual(constraint.value, ones(3,1))
         end
 
         function multidimensionalScalarDerivativeOrderIsRejected(testCase)
             points = [0 0; 1 1];
 
-            testCase.verifyError(@() PointConstraint.equal(points, D=1, Value=0), ...
+            testCase.verifyError(@() PointConstraint.equal(points, D=1, value=0), ...
                 'PointConstraint:AmbiguousDerivativeOrders')
         end
 
@@ -48,12 +48,12 @@ classdef PointConstraintUnitTests < matlab.unittest.TestCase
             t = (0:4)';
             mask = [true; false; true; false; true];
 
-            constraint = PointConstraint.equalOnMask(t, mask, D=1, Value=0);
+            constraint = PointConstraint.equalOnMask(t, mask, D=1, value=0);
 
-            testCase.verifyEqual(constraint.Points, t(mask))
+            testCase.verifyEqual(constraint.points, t(mask))
             testCase.verifyEqual(constraint.D, ones(nnz(mask),1))
-            testCase.verifyEqual(constraint.Value, zeros(nnz(mask),1))
-            testCase.verifyEqual(constraint.Relation, "==")
+            testCase.verifyEqual(constraint.value, zeros(nnz(mask),1))
+            testCase.verifyEqual(constraint.relation, "==")
         end
 
         function equalityConstraintCanBeBuiltFromGridVectorMask(testCase)
@@ -62,9 +62,9 @@ classdef PointConstraintUnitTests < matlab.unittest.TestCase
             [X,Y] = ndgrid(x,y);
             mask = [true false true; false true false];
 
-            constraint = PointConstraint.equalOnMask({x,y}, mask, D=[0 1], Value=0);
+            constraint = PointConstraint.equalOnMask({x,y}, mask, D=[0 1], value=0);
 
-            testCase.verifyEqual(constraint.Points, [X(mask), Y(mask)])
+            testCase.verifyEqual(constraint.points, [X(mask), Y(mask)])
             testCase.verifyEqual(constraint.D, repmat([0 1], nnz(mask), 1))
         end
 
@@ -74,12 +74,12 @@ classdef PointConstraintUnitTests < matlab.unittest.TestCase
             [X,Y] = ndgrid(x,y);
             mask = [false true false; true false true];
 
-            constraint = PointConstraint.lowerBoundOnMask({X,Y}, mask, D=[1 0], Value=5);
+            constraint = PointConstraint.lowerBoundOnMask({X,Y}, mask, D=[1 0], value=5);
 
-            testCase.verifyEqual(constraint.Points, [X(mask), Y(mask)])
+            testCase.verifyEqual(constraint.points, [X(mask), Y(mask)])
             testCase.verifyEqual(constraint.D, repmat([1 0], nnz(mask), 1))
-            testCase.verifyEqual(constraint.Value, 5*ones(nnz(mask),1))
-            testCase.verifyEqual(constraint.Relation, ">=")
+            testCase.verifyEqual(constraint.value, 5*ones(nnz(mask),1))
+            testCase.verifyEqual(constraint.relation, ">=")
         end
 
         function maskSizeMustMatchGrid(testCase)
@@ -87,13 +87,13 @@ classdef PointConstraintUnitTests < matlab.unittest.TestCase
             y = [10; 20; 30];
             mask = true(3,3);
 
-            testCase.verifyError(@() PointConstraint.equalOnMask({x,y}, mask, D=[0 0], Value=0), ...
+            testCase.verifyError(@() PointConstraint.equalOnMask({x,y}, mask, D=[0 0], value=0), ...
                 'PointConstraint:InvalidMaskSize')
         end
 
         function pointAndGlobalConstraintsCanFormMixedArray(testCase)
             constraints = [
-                PointConstraint.equal((0:2)', D=1, Value=0)
+                PointConstraint.equal((0:2)', D=1, value=0)
                 GlobalConstraint.positive()
             ];
 

@@ -25,7 +25,7 @@ Common superclass for local and global spline constraint objects.
 
   ```matlab
   constraints = [
-      PointConstraint.equal(0, D=1, Value=0)
+      PointConstraint.equal(0, D=1, value=0)
       GlobalConstraint.positive()
   ];
   ```

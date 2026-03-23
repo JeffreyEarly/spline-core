@@ -10,9 +10,9 @@ classdef PointConstraint < SplineConstraint
     % ## Basic usage
     %
     % ```matlab
-    % c1 = PointConstraint.equal((0:10)', D=2, Value=0);
-    % c2 = PointConstraint.lowerBound([X(mask), Y(mask)], D=[0 0], Value=0);
-    % c3 = PointConstraint.equalOnMask({x,y}, islandMask, D=[0 0], Value=0);
+    % c1 = PointConstraint.equal((0:10)', D=2, value=0);
+    % c2 = PointConstraint.lowerBound([X(mask), Y(mask)], D=[0 0], value=0);
+    % c3 = PointConstraint.equalOnMask({x,y}, islandMask, D=[0 0], value=0);
     % ```
     %
     % - Topic: Specify point constraints
@@ -22,7 +22,7 @@ classdef PointConstraint < SplineConstraint
         % Constraint locations as an N-by-D point matrix.
         %
         % - Topic: Inspect point constraint properties
-        Points = zeros(0,0)
+        points = zeros(0,0)
 
         % Derivative orders as an N-by-D matrix.
         %
@@ -32,12 +32,12 @@ classdef PointConstraint < SplineConstraint
         % Constraint relation: "==", ">=", or "<=".
         %
         % - Topic: Inspect point constraint properties
-        Relation string = "=="
+        relation string = "=="
 
         % Target values as an N-by-1 vector.
         %
         % - Topic: Inspect point constraint properties
-        Value = zeros(0,1)
+        value = zeros(0,1)
     end
 
     properties (Dependent)
@@ -84,10 +84,10 @@ classdef PointConstraint < SplineConstraint
             targetValues = PointConstraint.normalizeValues(value, numPoints);
             relation = PointConstraint.normalizeRelation(relation);
 
-            self.Points = pointMatrix;
+            self.points = pointMatrix;
             self.D = derivativeOrders;
-            self.Relation = relation;
-            self.Value = targetValues;
+            self.relation = relation;
+            self.value = targetValues;
         end
 
         function value = get.numDimensions(self)
@@ -96,8 +96,8 @@ classdef PointConstraint < SplineConstraint
             % - Topic: Inspect point constraint properties
             % - Declaration: value = get.numDimensions(self)
             % - Parameter self: PointConstraint instance
-            % - Returns value: number of dimensions in Points
-            value = size(self.Points, 2);
+            % - Returns value: number of dimensions in points
+            value = size(self.points, 2);
         end
 
         function value = get.numConstraints(self)
@@ -106,8 +106,8 @@ classdef PointConstraint < SplineConstraint
             % - Topic: Inspect point constraint properties
             % - Declaration: value = get.numConstraints(self)
             % - Parameter self: PointConstraint instance
-            % - Returns value: number of rows in Points
-            value = size(self.Points, 1);
+            % - Returns value: number of rows in points
+            value = size(self.points, 1);
         end
     end
 
@@ -116,66 +116,66 @@ classdef PointConstraint < SplineConstraint
             % Create a pointwise equality constraint.
             %
             % ```matlab
-            % c = PointConstraint.equal(tc, D=2, Value=0);
+            % c = PointConstraint.equal(tc, D=2, value=0);
             % ```
             %
             % - Topic: Specify point constraints
             % - Declaration: self = equal(points,options)
             % - Parameter points: point locations as a vector or N-by-D matrix
             % - Parameter options.D: derivative orders as a scalar, row vector, or N-by-D matrix
-            % - Parameter options.Value: scalar or one target value per point
+            % - Parameter options.value: scalar or one target value per point
             % - Returns self: equality PointConstraint
             arguments
                 points {mustBeNumeric,mustBeReal,mustBeFinite}
                 options.D {mustBeNumeric,mustBeReal,mustBeFinite,mustBeNonnegative,mustBeInteger} = 0
-                options.Value {mustBeNumeric,mustBeReal,mustBeFinite} = 0
+                options.value {mustBeNumeric,mustBeReal,mustBeFinite} = 0
             end
 
-            self = PointConstraint(points, "==", options.Value, D=options.D);
+            self = PointConstraint(points, "==", options.value, D=options.D);
         end
 
         function self = lowerBound(points, options)
             % Create a pointwise lower-bound constraint.
             %
             % ```matlab
-            % c = PointConstraint.lowerBound(P, D=[0 1], Value=0);
+            % c = PointConstraint.lowerBound(P, D=[0 1], value=0);
             % ```
             %
             % - Topic: Specify point constraints
             % - Declaration: self = lowerBound(points,options)
             % - Parameter points: point locations as a vector or N-by-D matrix
             % - Parameter options.D: derivative orders as a scalar, row vector, or N-by-D matrix
-            % - Parameter options.Value: scalar or one bound value per point
+            % - Parameter options.value: scalar or one bound value per point
             % - Returns self: lower-bound PointConstraint
             arguments
                 points {mustBeNumeric,mustBeReal,mustBeFinite}
                 options.D {mustBeNumeric,mustBeReal,mustBeFinite,mustBeNonnegative,mustBeInteger} = 0
-                options.Value {mustBeNumeric,mustBeReal,mustBeFinite} = 0
+                options.value {mustBeNumeric,mustBeReal,mustBeFinite} = 0
             end
 
-            self = PointConstraint(points, ">=", options.Value, D=options.D);
+            self = PointConstraint(points, ">=", options.value, D=options.D);
         end
 
         function self = upperBound(points, options)
             % Create a pointwise upper-bound constraint.
             %
             % ```matlab
-            % c = PointConstraint.upperBound(P, D=[0 0], Value=1);
+            % c = PointConstraint.upperBound(P, D=[0 0], value=1);
             % ```
             %
             % - Topic: Specify point constraints
             % - Declaration: self = upperBound(points,options)
             % - Parameter points: point locations as a vector or N-by-D matrix
             % - Parameter options.D: derivative orders as a scalar, row vector, or N-by-D matrix
-            % - Parameter options.Value: scalar or one bound value per point
+            % - Parameter options.value: scalar or one bound value per point
             % - Returns self: upper-bound PointConstraint
             arguments
                 points {mustBeNumeric,mustBeReal,mustBeFinite}
                 options.D {mustBeNumeric,mustBeReal,mustBeFinite,mustBeNonnegative,mustBeInteger} = 0
-                options.Value {mustBeNumeric,mustBeReal,mustBeFinite} = 0
+                options.value {mustBeNumeric,mustBeReal,mustBeFinite} = 0
             end
 
-            self = PointConstraint(points, "<=", options.Value, D=options.D);
+            self = PointConstraint(points, "<=", options.value, D=options.D);
         end
 
         function self = equalOnMask(grid, mask, options)
@@ -185,7 +185,7 @@ classdef PointConstraint < SplineConstraint
             % a logical mask on a rectilinear grid.
             %
             % ```matlab
-            % c = PointConstraint.equalOnMask({x,y}, mask, D=[0 0], Value=0);
+            % c = PointConstraint.equalOnMask({x,y}, mask, D=[0 0], value=0);
             % ```
             %
             % - Topic: Specify point constraints
@@ -193,24 +193,24 @@ classdef PointConstraint < SplineConstraint
             % - Parameter grid: vector or cell array of grid vectors or matching grid arrays
             % - Parameter mask: logical mask selecting constrained locations
             % - Parameter options.D: derivative orders as a scalar, row vector, or N-by-D matrix
-            % - Parameter options.Value: scalar or one target value per selected point
+            % - Parameter options.value: scalar or one target value per selected point
             % - Returns self: equality PointConstraint
             arguments
                 grid
                 mask
                 options.D {mustBeNumeric,mustBeReal,mustBeFinite,mustBeNonnegative,mustBeInteger} = 0
-                options.Value {mustBeNumeric,mustBeReal,mustBeFinite} = 0
+                options.value {mustBeNumeric,mustBeReal,mustBeFinite} = 0
             end
 
             points = PointConstraint.pointsFromMask(grid, mask);
-            self = PointConstraint.equal(points, D=options.D, Value=options.Value);
+            self = PointConstraint.equal(points, D=options.D, value=options.value);
         end
 
         function self = lowerBoundOnMask(grid, mask, options)
             % Create a pointwise lower-bound constraint from a logical mask.
             %
             % ```matlab
-            % c = PointConstraint.lowerBoundOnMask({x,y}, mask, D=[0 1], Value=0);
+            % c = PointConstraint.lowerBoundOnMask({x,y}, mask, D=[0 1], value=0);
             % ```
             %
             % - Topic: Specify point constraints
@@ -218,24 +218,24 @@ classdef PointConstraint < SplineConstraint
             % - Parameter grid: vector or cell array of grid vectors or matching grid arrays
             % - Parameter mask: logical mask selecting constrained locations
             % - Parameter options.D: derivative orders as a scalar, row vector, or N-by-D matrix
-            % - Parameter options.Value: scalar or one bound value per selected point
+            % - Parameter options.value: scalar or one bound value per selected point
             % - Returns self: lower-bound PointConstraint
             arguments
                 grid
                 mask
                 options.D {mustBeNumeric,mustBeReal,mustBeFinite,mustBeNonnegative,mustBeInteger} = 0
-                options.Value {mustBeNumeric,mustBeReal,mustBeFinite} = 0
+                options.value {mustBeNumeric,mustBeReal,mustBeFinite} = 0
             end
 
             points = PointConstraint.pointsFromMask(grid, mask);
-            self = PointConstraint.lowerBound(points, D=options.D, Value=options.Value);
+            self = PointConstraint.lowerBound(points, D=options.D, value=options.value);
         end
 
         function self = upperBoundOnMask(grid, mask, options)
             % Create a pointwise upper-bound constraint from a logical mask.
             %
             % ```matlab
-            % c = PointConstraint.upperBoundOnMask({x,y}, mask, D=[0 0], Value=1);
+            % c = PointConstraint.upperBoundOnMask({x,y}, mask, D=[0 0], value=1);
             % ```
             %
             % - Topic: Specify point constraints
@@ -243,17 +243,17 @@ classdef PointConstraint < SplineConstraint
             % - Parameter grid: vector or cell array of grid vectors or matching grid arrays
             % - Parameter mask: logical mask selecting constrained locations
             % - Parameter options.D: derivative orders as a scalar, row vector, or N-by-D matrix
-            % - Parameter options.Value: scalar or one bound value per selected point
+            % - Parameter options.value: scalar or one bound value per selected point
             % - Returns self: upper-bound PointConstraint
             arguments
                 grid
                 mask
                 options.D {mustBeNumeric,mustBeReal,mustBeFinite,mustBeNonnegative,mustBeInteger} = 0
-                options.Value {mustBeNumeric,mustBeReal,mustBeFinite} = 0
+                options.value {mustBeNumeric,mustBeReal,mustBeFinite} = 0
             end
 
             points = PointConstraint.pointsFromMask(grid, mask);
-            self = PointConstraint.upperBound(points, D=options.D, Value=options.Value);
+            self = PointConstraint.upperBound(points, D=options.D, value=options.value);
         end
     end
 
@@ -319,7 +319,7 @@ classdef PointConstraint < SplineConstraint
 
             if numel(value) ~= numPoints
                 error('PointConstraint:InvalidValueSize', ...
-                    'Value must be scalar or provide one entry per constrained point.');
+                    'value must be scalar or provide one entry per constrained point.');
             end
 
             values = reshape(double(value), [], 1);

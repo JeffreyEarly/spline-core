@@ -1,13 +1,13 @@
 ---
 layout: default
-title: Relation
+title: relation
 parent: PointConstraint
 grand_parent: Classes
-nav_order: 4
+nav_order: 10
 mathjax: true
 ---
 
-#  Relation
+#  relation
 
 Constraint relation: "==", ">=", or "<=".
 

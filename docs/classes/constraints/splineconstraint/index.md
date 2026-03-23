@@ -26,7 +26,7 @@ Use `SplineConstraint` when you want to pass a mixed array of
 
 ```matlab
 constraints = [
-    PointConstraint.equal(0, D=1, Value=0)
+    PointConstraint.equal(0, D=1, value=0)
     GlobalConstraint.positive()
 ];
 ```

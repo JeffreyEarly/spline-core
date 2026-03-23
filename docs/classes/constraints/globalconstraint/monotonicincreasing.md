@@ -3,7 +3,7 @@ layout: default
 title: monotonicIncreasing
 parent: GlobalConstraint
 grand_parent: Classes
-nav_order: 5
+nav_order: 4
 mathjax: true
 ---
 
@@ -19,7 +19,7 @@ Create a monotone-increasing constraint along one dimension.
  self = monotonicIncreasing(options)
 ```
 ## Parameters
-+ `options.Dimension`  tensor dimension, default 1
++ `options.dimension`  tensor dimension, default 1
 
 ## Returns
 + `self`  monotone-increasing GlobalConstraint
@@ -27,7 +27,7 @@ Create a monotone-increasing constraint along one dimension.
 ## Discussion
 
   ```matlab
-  c = GlobalConstraint.monotonicIncreasing(Dimension=1);
+  c = GlobalConstraint.monotonicIncreasing(dimension=1);
   ```
 
 

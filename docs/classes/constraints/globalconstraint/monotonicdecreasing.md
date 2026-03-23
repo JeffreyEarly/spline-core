@@ -3,7 +3,7 @@ layout: default
 title: monotonicDecreasing
 parent: GlobalConstraint
 grand_parent: Classes
-nav_order: 4
+nav_order: 3
 mathjax: true
 ---
 
@@ -19,7 +19,7 @@ Create a monotone-decreasing constraint along one dimension.
  self = monotonicDecreasing(options)
 ```
 ## Parameters
-+ `options.Dimension`  tensor dimension, default 1
++ `options.dimension`  tensor dimension, default 1
 
 ## Returns
 + `self`  monotone-decreasing GlobalConstraint
@@ -27,7 +27,7 @@ Create a monotone-decreasing constraint along one dimension.
 ## Discussion
 
   ```matlab
-  c = GlobalConstraint.monotonicDecreasing(Dimension=2);
+  c = GlobalConstraint.monotonicDecreasing(dimension=2);
   ```
 
 

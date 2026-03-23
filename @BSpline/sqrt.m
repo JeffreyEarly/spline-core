@@ -1,4 +1,4 @@
-function splinesqrt = sqrt(spline,constraints)
+function splinesqrt = sqrt(spline)
 % Return a spline approximation to the square root of the spline output.
 %
 % This is a convenience wrapper around `spline.^(1/2)` and is most useful
@@ -9,16 +9,10 @@ function splinesqrt = sqrt(spline,constraints)
 % ```
 %
 % - Topic: Transform the spline
-% - Declaration: splinesqrt = sqrt(spline,constraints)
+% - Declaration: splinesqrt = sqrt(spline)
 % - Parameter spline: BSpline instance
-% - Parameter constraints: optional constraint specification for the refit
 % - Returns splinesqrt: BSpline approximating sqrt(spline)
 arguments
     spline (1,1) BSpline
-    constraints = []
 end
-if ~isempty(constraints)
-    splinesqrt = power(spline,1/2,constraints);
-else
-    splinesqrt = power(spline,1/2);
-end
+splinesqrt = power(spline,1/2);

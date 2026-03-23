@@ -168,7 +168,7 @@ classdef ConstrainedSplineUnitTests < matlab.unittest.TestCase
 
             spline = ConstrainedSpline(t, x, ...
                 distribution=NormalDistribution(1), ...
-                constraints=PointConstraint.equal(0, D=1, Value=0));
+                constraints=PointConstraint.equal(0, D=1, value=0));
 
             testCase.verifyLessThan(abs(spline(0, 1)), 1e-10)
         end
@@ -177,7 +177,7 @@ classdef ConstrainedSplineUnitTests < matlab.unittest.TestCase
             t = linspace(-1,1,21)';
             x = t.^2 - 0.2;
             constraints = [
-                PointConstraint.equal(0, D=1, Value=0)
+                PointConstraint.equal(0, D=1, value=0)
                 GlobalConstraint.positive()
             ];
 
@@ -200,7 +200,7 @@ classdef ConstrainedSplineUnitTests < matlab.unittest.TestCase
 
             mask = abs(X) <= 0.25 & abs(Y) <= 0.35;
             points = [X(mask), Y(mask)];
-            constraint = PointConstraint.equal(points, D=[0 0], Value=0);
+            constraint = PointConstraint.equal(points, D=[0 0], value=0);
 
             spline = ConstrainedSpline({X,Y}, F, ...
                 K=[4 4], ...
@@ -220,7 +220,7 @@ classdef ConstrainedSplineUnitTests < matlab.unittest.TestCase
 
             spline = ConstrainedSpline({X,Y}, F, ...
                 distribution=NormalDistribution(1), ...
-                constraints=PointConstraint.equalOnMask({x,y}, mask, D=[0 0], Value=0));
+                constraints=PointConstraint.equalOnMask({x,y}, mask, D=[0 0], value=0));
 
             maskedPoints = [X(mask), Y(mask)];
             testCase.verifyLessThan(max(abs(spline(maskedPoints(:,1), maskedPoints(:,2)))), 1e-8)
@@ -253,7 +253,7 @@ classdef ConstrainedSplineUnitTests < matlab.unittest.TestCase
                 K=[4 4], ...
                 tKnot=tKnot, ...
                 distribution=NormalDistribution(1), ...
-                constraints=GlobalConstraint.monotonicIncreasing(Dimension=2));
+                constraints=GlobalConstraint.monotonicIncreasing(dimension=2));
 
             xq = linspace(min(x), max(x), 13)';
             yq = linspace(min(y), max(y), 19)';

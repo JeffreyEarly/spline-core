@@ -30,7 +30,7 @@ classes.
 
 ```matlab
 c1 = GlobalConstraint.positive();
-c2 = GlobalConstraint.monotonicIncreasing(Dimension=2);
+c2 = GlobalConstraint.monotonicIncreasing(dimension=2);
 ```
 
 
@@ -44,8 +44,8 @@ c2 = GlobalConstraint.monotonicIncreasing(Dimension=2);
   + [`none`](/spline-core/classes/constraints/globalconstraint/none.html) Create an explicit no-op global constraint.
   + [`positive`](/spline-core/classes/constraints/globalconstraint/positive.html) Create a positivity constraint.
 + Inspect global constraint properties
-  + [`Dimension`](/spline-core/classes/constraints/globalconstraint/dimension.html) Tensor dimension associated with the constraint, when applicable.
-  + [`Shape`](/spline-core/classes/constraints/globalconstraint/shape.html) constraint kind.
+  + [`dimension`](/spline-core/classes/constraints/globalconstraint/dimension.html) Tensor dimension associated with the constraint, when applicable.
+  + [`shape`](/spline-core/classes/constraints/globalconstraint/shape.html) constraint kind.
 
 
 ---

@@ -1,13 +1,13 @@
 ---
 layout: default
-title: Dimension
+title: dimension
 parent: GlobalConstraint
 grand_parent: Classes
-nav_order: 1
+nav_order: 2
 mathjax: true
 ---
 
-#  Dimension
+#  dimension
 
 Tensor dimension associated with the constraint, when applicable.
 
