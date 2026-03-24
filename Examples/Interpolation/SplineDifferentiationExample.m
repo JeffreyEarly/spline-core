@@ -8,11 +8,11 @@ df = @(x) 4*pi*cos(4*pi*x);
 d3f = @(x) -(4*pi)^3*cos(4*pi*x);
 
 N = 11;
-K = 4;
+S = 3;
 x = linspace(-1, 1, N)';
 xDense = linspace(-1, 1, 400)';
 
-splineFit = InterpolatingSpline(x, f(x), S=K-1);
+splineFit = InterpolatingSpline(x, f(x), S=S);
 derivativeSpline = diff(splineFit, 1);
 
 figure(Position=[100 100 980 560])
@@ -46,4 +46,4 @@ plot(xDense, splineFit.valueAtPoints(xDense, D=3), LineWidth=2)
 plot(xDense, derivativeSpline.valueAtPoints(xDense, D=2), ":", LineWidth=2)
 grid on
 title("Higher derivatives remain consistent")
-legend("Truth", "spline.valueAtPoints(x, D=3)", "diff(spline).valueAtPoints(x, D=2)", Location="southoutside")
+legend("Truth", "Direct D = 3", "diff(spline), D = 2", Location="southoutside")

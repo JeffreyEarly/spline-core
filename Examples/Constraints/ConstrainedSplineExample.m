@@ -1,134 +1,109 @@
 % ConstrainedSplineExample
 %
-% Explore how knot placement and local derivative constraints change a
-% one-dimensional fit. Set `exampleCase` to one of:
+% Choose one knot pattern and see how knot placement changes a simple
+% one-dimensional constrained fit. Set `knotType` to one of:
 %
-% 1. default unconstrained fit
-% 2. transition knots with local plateau/acceleration constraints
-% 3. wider transition knots with the same constraints
-% 4. single midpoint break with the same constraints
-% 5. repeated midpoint knots with the same constraints
-% 6. repeated transition knots with the same constraints
+% 1. automatic knots
+% 2. transition knots
+% 3. wider transition knots
+% 4. single repeated midpoint knot
+% 5. repeated midpoint knots
+% 6. repeated transition knots
 
-exampleCase = 6;
+knotType = 6;
+
+switch knotType
+    case 1
+        knotPoints = [];
+        useTransitionConstraints = false;
+        summary = "Automatic unconstrained fit.";
+    case 2
+        knotPoints = [0; 4; 4.5; 5.5; 6; 10];
+        useTransitionConstraints = true;
+        summary = "Transition knots with local stationary and zero-acceleration constraints.";
+    case 3
+        knotPoints = [0; 3.5; 4.5; 5.5; 6.5; 10];
+        useTransitionConstraints = true;
+        summary = "Wider transition region with the same local constraints.";
+    case 4
+        knotPoints = [0; 5; 5; 10];
+        useTransitionConstraints = true;
+        summary = "Single repeated midpoint knot with the same local constraints.";
+    case 5
+        knotPoints = [0; 4; 4; 6; 6; 10];
+        useTransitionConstraints = true;
+        summary = "Repeated midpoint knots that allow sharper regime changes.";
+    case 6
+        knotPoints = [0; 4.5; 4.5; 5.5; 5.5; 10];
+        useTransitionConstraints = true;
+        summary = "Repeated transition knots centered on the observed jump.";
+    otherwise
+        error("ConstrainedSplineExample:UnknownCase", "knotType must be an integer from 1 to 6.");
+end
 
 t = (0:10)';
 x = [0; 0; 0; 0; 0; 0; 2; 4; 6; 8; 10];
-tq = linspace(min(t), max(t), 1000)';
+tq = linspace(t(1), t(end), 1000)';
 
-K = 3;
-distribution = NormalDistribution(1);
-
-selectedCase = caseSpecification(exampleCase);
-defaultSpline = ConstrainedSpline(t, x, S=K-1, distribution=distribution);
-
-selectedFreeSpline = [];
-selectedConstrainedSpline = [];
-if ~isempty(selectedCase.tKnot)
-    selectedFreeSpline = ConstrainedSpline(t, x,  S=K-1,  knotPoints=selectedCase.tKnot,  distribution=distribution);
-end
-if ~isempty(selectedCase.pointConstraints)
-    selectedConstrainedSpline = ConstrainedSpline(t, x,  S=K-1,  knotPoints=selectedCase.tKnot,  distribution=distribution,  constraints=selectedCase.pointConstraints);
+S = 2;
+if useTransitionConstraints
+    constraints = PointConstraint.equal([2.5; 2.5; 7.5], D=[1; 2; 2], value=0);
+else
+    constraints = PointConstraint.empty(0,1);
 end
 
-figure(Position=[100 100 980 760])
+fit = ConstrainedSpline(t, x, S=S, knotPoints=knotPoints, constraints=constraints);
+
+figure(Position=[100 100 900 700])
 tiledlayout(3, 1, TileSpacing="compact")
 
-plotPanel(tq, t, x, defaultSpline, selectedFreeSpline, selectedConstrainedSpline,  selectedCase, 0, "Position", "Constrained spline case exploration", "");
-plotPanel(tq, t, x, defaultSpline, selectedFreeSpline, selectedConstrainedSpline,  selectedCase, 1, "Velocity", "", "");
-plotPanel(tq, t, x, defaultSpline, selectedFreeSpline, selectedConstrainedSpline,  selectedCase, 2, "Acceleration", "", "Time");
+panelLabels = ["Position", "1st derivative", "2nd derivative"];
+for derivativeOrder = 0:S
+    nexttile
+    plot(tq, fit.valueAtPoints(tq, D=derivativeOrder), LineWidth=2), hold on
 
-annotation("textbox", [0.14 0.93 0.72 0.04],  String=sprintf("Case %d: %s", exampleCase, selectedCase.summary),  EdgeColor="none", HorizontalAlignment="center", FontWeight="bold");
+    if derivativeOrder == 0
+        scatter(t, x, 45, "filled")
+        ylim([-1 11])
+    else
+        addConstraintLines(constraints, derivativeOrder)
+    end
 
-function plotPanel(tq, t, x, defaultSpline, selectedFreeSpline, selectedConstrainedSpline,  selectedCase, derivativeOrder, yLabelText, panelTitle, xLabelText)
-nexttile
-hold on
+    addKnotLines(knotPoints)
+    xlim([t(1) t(end)])
+    grid on
+    ylabel(panelLabels(derivativeOrder + 1))
 
-plot(tq, defaultSpline.valueAtPoints(tq, D=derivativeOrder), "--", LineWidth=1.75,  DisplayName="Default fit")
-
-if ~isempty(selectedFreeSpline)
-    plot(tq, selectedFreeSpline.valueAtPoints(tq, D=derivativeOrder), "-.", LineWidth=1.75,  DisplayName="Selected knots, unconstrained")
+    if derivativeOrder < S
+        set(gca, XTickLabel=[])
+    else
+        xlabel("Time")
+    end
 end
 
-if ~isempty(selectedConstrainedSpline)
-    plot(tq, selectedConstrainedSpline.valueAtPoints(tq, D=derivativeOrder), LineWidth=2.25,  DisplayName="Selected knots with constraints")
-end
+sgtitle(sprintf("Case %d: %s", knotType, summary))
 
-if derivativeOrder == 0
-    scatter(t, x, 45, "filled", DisplayName="Samples")
-    ylim([-1, 11])
-end
-
-addKnotLines(selectedCase.tKnot)
-markConstraintLocations(selectedCase.pointConstraints, derivativeOrder)
-grid on
-ylabel(yLabelText)
-
-if ~isempty(panelTitle)
-    title(panelTitle)
-end
-
-if derivativeOrder == 0
-    legend(Location="southoutside")
-else
-    set(gca, XTickLabel=[])
-end
-
-if ~isempty(xLabelText)
-    xlabel(xLabelText)
-end
-end
-
-function addKnotLines(tKnot)
-if isempty(tKnot)
+function addKnotLines(knotPoints)
+if isempty(knotPoints)
     return
 end
 
-for knotValue = unique(tKnot(:)).'
+for knotValue = unique(knotPoints(:)).'
     xline(knotValue, ":", Color=[0.2 0.6 0.2], LineWidth=1);
 end
 end
 
-function markConstraintLocations(pointConstraints, derivativeOrder)
-if isempty(pointConstraints)
+function addConstraintLines(constraints, derivativeOrder)
+if isempty(constraints)
     return
 end
 
-constraintPoints = [];
-for iConstraint = 1:numel(pointConstraints)
-    if all(pointConstraints(iConstraint).D == derivativeOrder, 2)
-        constraintPoints = [constraintPoints; pointConstraints(iConstraint).points]; %#ok<AGROW>
-    end
-end
-
-if isempty(constraintPoints)
+matchingConstraints = constraints(arrayfun(@(c) isequal(c.D, derivativeOrder), constraints));
+if isempty(matchingConstraints)
     return
 end
 
-yLimits = ylim();
-markerY = yLimits(1) + 0.08*range(yLimits);
-scatter(constraintPoints, markerY*ones(size(constraintPoints)), 35, "filled",  MarkerFaceColor=[0.85 0.2 0.2], MarkerEdgeColor="none",  DisplayName="Constraint location");
-end
-
-function specification = caseSpecification(exampleCase)
-constraintTimes = [2.5; 2.5; 7.5];
-constraintOrders = [1; 2; 2];
-pointConstraints = PointConstraint.equal(constraintTimes, D=constraintOrders, value=0);
-
-switch exampleCase
-    case 1
-        specification = struct(  "tKnot", [],  "pointConstraints", [],  "summary", "Default unconstrained fit with automatically chosen knots.");
-    case 2
-        specification = struct(  "tKnot", [0; 4; 4.5; 5.5; 6; 10],  "pointConstraints", pointConstraints,  "summary", "Transition knots with local stationary and zero-acceleration constraints.");
-    case 3
-        specification = struct(  "tKnot", [0; 3.5; 4.5; 5.5; 6.5; 10],  "pointConstraints", pointConstraints,  "summary", "Wider transition region with the same local constraints.");
-    case 4
-        specification = struct(  "tKnot", [0; 5; 5; 10],  "pointConstraints", pointConstraints,  "summary", "Single repeated midpoint knot with the same local constraints.");
-    case 5
-        specification = struct(  "tKnot", [0; 4; 4; 6; 6; 10],  "pointConstraints", pointConstraints,  "summary", "Repeated midpoint knots that allow sharper regime changes.");
-    case 6
-        specification = struct(  "tKnot", [0; 4.5; 4.5; 5.5; 5.5; 10],  "pointConstraints", pointConstraints,  "summary", "Repeated transition knots centered on the observed jump.");
-    otherwise
-        error("ConstrainedSplineExample:UnknownCase",  "exampleCase must be an integer from 1 to 6.");
+for point = unique(vertcat(matchingConstraints.points)).'
+    xline(point, "--", Color=[0.85 0.2 0.2], LineWidth=1);
 end
 end

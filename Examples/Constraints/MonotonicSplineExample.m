@@ -9,13 +9,13 @@ t = linspace(0, 2, 11)';
 f = @(x) tanh(x - 1);
 x = f(t) + distribution.rand(size(t));
 
-K = 3;
-tKnot = [min(t); min(t); 0.5; 1; 1.5; max(t); max(t)];
+S = 2;
+knotPoints = [min(t); min(t); 0.5; 1; 1.5; max(t); max(t)];
 tq = linspace(min(t), max(t), 400)';
 
-unconstrainedSpline = ConstrainedSpline(t, x,  S=K-1,  knotPoints=tKnot,  distribution=distribution);
+unconstrainedSpline = ConstrainedSpline(t, x, S=S, knotPoints=knotPoints, distribution=distribution);
 
-monotoneSpline = ConstrainedSpline(t, x,  S=K-1,  knotPoints=tKnot,  distribution=distribution,  constraints=GlobalConstraint.monotonicIncreasing());
+monotoneSpline = ConstrainedSpline(t, x, S=S, knotPoints=knotPoints, distribution=distribution, constraints=GlobalConstraint.monotonicIncreasing());
 
 figure(Position=[100 100 860 560])
 tiledlayout(2, 1, TileSpacing="compact")

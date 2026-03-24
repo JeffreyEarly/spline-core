@@ -5,15 +5,15 @@
 
 f = @(x) 1./(25*x.^2 + 1);
 N = 11;
-K = 4;
+S = 3;
 xDense = linspace(-1, 1, 400)';
 
 xUniform = linspace(-1, 1, N)';
-uniformSpline = InterpolatingSpline(xUniform, f(xUniform), S=K-1);
+uniformSpline = InterpolatingSpline(xUniform, f(xUniform), S=S);
 uniformError = max(abs(f(xDense) - uniformSpline(xDense)));
 
 xChebyshev = cos((0:N-1)'*pi/(N-1));
-chebyshevSpline = InterpolatingSpline(xChebyshev, f(xChebyshev), S=K-1);
+chebyshevSpline = InterpolatingSpline(xChebyshev, f(xChebyshev), S=S);
 chebyshevError = max(abs(f(xDense) - chebyshevSpline(xDense)));
 
 xReference = [-1; -0.33; 0.33; 1];

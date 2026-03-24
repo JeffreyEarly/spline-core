@@ -10,12 +10,12 @@ f = @(x) x.^2 + 2*x + 1;
 x = f(t) + distribution.rand(size(t));
 x([4 9]) = x([4 9]) + [2.5; -2.0];
 
-K = 3;
-tKnot = [min(t); min(t); 0.75; 1.25; max(t); max(t)];
+S = 2;
+knotPoints = [min(t); min(t); 0.75; 1.25; max(t); max(t)];
 tq = linspace(min(t), max(t), 400)';
 
-leastSquaresSpline = ConstrainedSpline(t, x, S=K-1, knotPoints=tKnot);
-robustSpline = ConstrainedSpline(t, x,  S=K-1,  knotPoints=tKnot,  distribution=distribution);
+leastSquaresSpline = ConstrainedSpline(t, x, S=S, knotPoints=knotPoints);
+robustSpline = ConstrainedSpline(t, x, S=S, knotPoints=knotPoints, distribution=distribution);
 
 figure(Position=[100 100 860 520])
 tiledlayout(2, 1, TileSpacing="compact")
