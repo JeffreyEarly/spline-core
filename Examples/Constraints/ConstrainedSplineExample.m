@@ -20,15 +20,15 @@ K = 3;
 distribution = NormalDistribution(1);
 
 selectedCase = caseSpecification(exampleCase);
-defaultSpline = ConstrainedSpline(t, x, K=K, distribution=distribution);
+defaultSpline = ConstrainedSpline(t, x, S=K-1, distribution=distribution);
 
 selectedFreeSpline = [];
 selectedConstrainedSpline = [];
 if ~isempty(selectedCase.tKnot)
-    selectedFreeSpline = ConstrainedSpline(t, x,  K=K,  tKnot=selectedCase.tKnot,  distribution=distribution);
+    selectedFreeSpline = ConstrainedSpline(t, x,  S=K-1,  knotPoints=selectedCase.tKnot,  distribution=distribution);
 end
 if ~isempty(selectedCase.pointConstraints)
-    selectedConstrainedSpline = ConstrainedSpline(t, x,  K=K,  tKnot=selectedCase.tKnot,  distribution=distribution,  constraints=selectedCase.pointConstraints);
+    selectedConstrainedSpline = ConstrainedSpline(t, x,  S=K-1,  knotPoints=selectedCase.tKnot,  distribution=distribution,  constraints=selectedCase.pointConstraints);
 end
 
 figure(Position=[100 100 980 760])
@@ -44,14 +44,14 @@ function plotPanel(tq, t, x, defaultSpline, selectedFreeSpline, selectedConstrai
 nexttile
 hold on
 
-plot(tq, defaultSpline(tq, derivativeOrder), "--", LineWidth=1.75,  DisplayName="Default fit")
+plot(tq, defaultSpline.valueAtPoints(tq, D=derivativeOrder), "--", LineWidth=1.75,  DisplayName="Default fit")
 
 if ~isempty(selectedFreeSpline)
-    plot(tq, selectedFreeSpline(tq, derivativeOrder), "-.", LineWidth=1.75,  DisplayName="Selected knots, unconstrained")
+    plot(tq, selectedFreeSpline.valueAtPoints(tq, D=derivativeOrder), "-.", LineWidth=1.75,  DisplayName="Selected knots, unconstrained")
 end
 
 if ~isempty(selectedConstrainedSpline)
-    plot(tq, selectedConstrainedSpline(tq, derivativeOrder), LineWidth=2.25,  DisplayName="Selected knots with constraints")
+    plot(tq, selectedConstrainedSpline.valueAtPoints(tq, D=derivativeOrder), LineWidth=2.25,  DisplayName="Selected knots with constraints")
 end
 
 if derivativeOrder == 0

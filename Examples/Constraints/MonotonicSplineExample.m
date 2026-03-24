@@ -13,9 +13,9 @@ K = 3;
 tKnot = [min(t); min(t); 0.5; 1; 1.5; max(t); max(t)];
 tq = linspace(min(t), max(t), 400)';
 
-unconstrainedSpline = ConstrainedSpline(t, x,  K=K,  tKnot=tKnot,  distribution=distribution);
+unconstrainedSpline = ConstrainedSpline(t, x,  S=K-1,  knotPoints=tKnot,  distribution=distribution);
 
-monotoneSpline = ConstrainedSpline(t, x,  K=K,  tKnot=tKnot,  distribution=distribution,  constraints=GlobalConstraint.monotonicIncreasing());
+monotoneSpline = ConstrainedSpline(t, x,  S=K-1,  knotPoints=tKnot,  distribution=distribution,  constraints=GlobalConstraint.monotonicIncreasing());
 
 figure(Position=[100 100 860 560])
 tiledlayout(2, 1, TileSpacing="compact")
@@ -30,8 +30,8 @@ title("Monotonic spline fit")
 legend("Unconstrained", "Monotone increasing", "Samples",  Location="southoutside")
 
 nexttile
-plot(tq, unconstrainedSpline(tq, 1), LineWidth=2), hold on
-plot(tq, monotoneSpline(tq, 1), LineWidth=2)
+plot(tq, unconstrainedSpline.valueAtPoints(tq, D=1), LineWidth=2), hold on
+plot(tq, monotoneSpline.valueAtPoints(tq, D=1), LineWidth=2)
 yline(0, "k--")
 grid on
 xlabel("Time")

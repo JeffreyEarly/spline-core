@@ -48,7 +48,7 @@ for iColumn = 1:3
                 values = BSpline.evaluateFromPPCoefficients(queryPoints=tqPP, C=C, tpp=tPP, D=iDerivative);
             case 3
                 queryPoints = tqBasis;
-                values = splineFit(tqBasis, iDerivative);
+                values = splineFit.valueAtPoints(tqBasis, D=iDerivative);
         end
 
         plot(queryPoints, values, LineWidth=1.75)

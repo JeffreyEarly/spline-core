@@ -14,8 +14,8 @@ K = 3;
 tKnot = [min(t); min(t); 0.75; 1.25; max(t); max(t)];
 tq = linspace(min(t), max(t), 400)';
 
-leastSquaresSpline = ConstrainedSpline(t, x, K=K, tKnot=tKnot);
-robustSpline = ConstrainedSpline(t, x,  K=K,  tKnot=tKnot,  distribution=distribution);
+leastSquaresSpline = ConstrainedSpline(t, x, S=K-1, knotPoints=tKnot);
+robustSpline = ConstrainedSpline(t, x,  S=K-1,  knotPoints=tKnot,  distribution=distribution);
 
 figure(Position=[100 100 860 520])
 tiledlayout(2, 1, TileSpacing="compact")
