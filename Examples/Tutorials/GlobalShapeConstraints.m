@@ -5,8 +5,10 @@
 % NavOrder: 5
 
 %% Enforce positivity and monotonicity across the whole domain
-% Global constraints do not act at a few selected points. Instead they
-% describe the shape of the fit everywhere on the domain:
+% [`GlobalConstraint`](../classes/constraints/globalconstraint) objects do
+% not act at a few selected points. Instead they describe the shape of a
+% [`ConstrainedSpline`](../classes/constrainedspline) fit everywhere on
+% the domain:
 %
 % $$
 % f(t)\ge 0,\qquad f'(t)\ge 0 \quad \text{for all } t.

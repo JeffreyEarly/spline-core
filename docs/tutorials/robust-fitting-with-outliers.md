@@ -15,10 +15,13 @@ Source: `Examples/Tutorials/RobustFittingWithOutliers.m`
 
 ## Switch the noise model from normal to Student-t
 
-The workflow is the same as in the previous tutorial, but now a few
-observations are badly contaminated. The key change is the
-`distribution` object: use a `StudentTDistribution` when you want the fit
-to be less sensitive to outliers than a normal model.
+The workflow is the same as in the previous
+[`ConstrainedSpline`](../classes/constrainedspline) tutorial, but now a
+few observations are badly contaminated. The key change is the
+[`distribution`](../classes/constrainedspline/distribution) object: use
+a [`StudentTDistribution`](https://en.wikipedia.org/wiki/Student%27s_t-distribution)
+when you want the fit to be less sensitive to outliers than a
+[normal model](https://en.wikipedia.org/wiki/Normal_distribution).
 
 $$
 y_i = f(t_i) + \epsilon_i, \qquad \epsilon_i \sim t_{\nu}(0,\sigma).
@@ -65,9 +68,9 @@ Internally the robust fit is solved by an iteratively reweighted scheme,
 but the tutorial-level idea is simply that the Student-t model downweights
 observations that look much less plausible under a normal model. For the
 implementation details, see
-[`distribution`](/spline-core/classes/constrainedspline/distribution.html)
+[`distribution`](../classes/constrainedspline/distribution)
 and the developer topic
-[`tensorModelSolution`](/spline-core/classes/constrainedspline/tensormodelsolution.html).
+[`tensorModelSolution`](../classes/constrainedspline/tensormodelsolution).
 
 Plot the final weights assigned by the robust fit.
 

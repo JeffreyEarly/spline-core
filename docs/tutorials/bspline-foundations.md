@@ -15,7 +15,8 @@ Source: `Examples/Tutorials/BSplineFoundations.m`
 
 ## Connect spline degree, order, and the basis expansion
 
-The low-level one-dimensional spline model is
+The low-level one-dimensional
+[`BSpline`](../classes/bspline) model is
 
 $$
 f(t)=\sum_{j=1}^{M}\xi_j B_{j,S}(t;\tau),
@@ -63,10 +64,13 @@ end
 
 ## Assemble the basis matrix explicitly
 
-`InterpolatingSpline` hides the basis construction, but the public
-`BSpline` helpers expose the same steps directly: choose knot points,
-assemble the basis matrix, solve for the coefficients, and evaluate the
-resulting spline.
+[`InterpolatingSpline`](../classes/interpolatingspline) hides the basis
+construction, but the public [`BSpline`](../classes/bspline) helpers
+expose the same steps directly: choose knot points with
+[`knotPointsForDataPoints`](../classes/bspline/knotpointsfordatapoints),
+assemble the basis matrix with
+[`matrixForDataPoints`](../classes/bspline/matrixfordatapoints), solve
+for the coefficients, and evaluate the resulting spline.
 
 ```matlab
 S = 3;

@@ -6,8 +6,10 @@
 
 %% Constrain the value, slope, or curvature at one point
 % Local constraints act at specific coordinates. The derivative-order
-% option `D` tells `PointConstraint.equal` whether you are constraining the
-% value, the slope, or a higher derivative:
+% option `D` tells
+% [`PointConstraint.equal`](../classes/constraints/pointconstraint/equal)
+% whether you are constraining the value, the slope, or a higher
+% derivative in a [`ConstrainedSpline`](../classes/constrainedspline) fit:
 %
 % $$
 % f(t_c)=x_c,\qquad f'(t_c)=0,\qquad f''(t_c)=0.
@@ -70,8 +72,9 @@ if exist("tutorialFigureCapture", "var") && isa(tutorialFigureCapture, "function
 
 %% Combine several local conditions in one fit
 % A constrained fit can enforce several pointwise conditions at once. The
-% simplest pattern is to stack multiple `PointConstraint` objects into the
-% same `constraints` array.
+% simplest pattern is to stack multiple
+% [`PointConstraint`](../classes/constraints/pointconstraint) objects into
+% the same `constraints` array.
 
 combinedConstraints = [ ...
     PointConstraint.equal(0.42, value=0.55)

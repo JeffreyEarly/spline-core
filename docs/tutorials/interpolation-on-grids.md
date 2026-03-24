@@ -1,13 +1,13 @@
 ---
 layout: default
-title: Interpolation in 1D and on Rectilinear Grids
+title: Spline Interpolation
 parent: Tutorials
 nav_order: 1
 mathjax: true
 permalink: /tutorials/interpolation-on-grids
 ---
 
-# Interpolation in 1D and on Rectilinear Grids
+# Spline Interpolation
 
 Interpolate exact data in one dimension and on rectilinear grids, and compare the results with MATLAB's griddedInterpolant.
 
@@ -15,9 +15,10 @@ Source: `Examples/Tutorials/InterpolationOnGrids.m`
 
 ## Interpolate exact samples in one dimension
 
-`InterpolatingSpline` is the shortest path from exact samples to a
-reusable spline object. Start with one irregular 1-D grid and evaluate
-the interpolant on a denser set of query points.
+[`InterpolatingSpline`](../classes/interpolatingspline) is the shortest
+path from exact samples to a reusable spline object. Start with one
+irregular 1-D grid and evaluate the interpolant on a denser set of
+query points.
 
 ```matlab
 x = [0.00; 0.08; 0.21; 0.37; 0.55; 0.71; 0.86; 1.00];
@@ -67,10 +68,11 @@ grid on
 
 *Derivative evaluation uses the same interpolant through valueAtPoints(..., D=1).*
 
-MATLAB's closest built-in analogue here is `griddedInterpolant`. On
-this grid the values agree to machine precision, while
-`InterpolatingSpline` keeps the same spline-object workflow that the
-package uses everywhere else.
+MATLAB's closest built-in analogue here is
+[`griddedInterpolant`](https://www.mathworks.com/help/matlab/ref/griddedinterpolant.html).
+On this grid the values agree to machine precision, while
+[`InterpolatingSpline`](../classes/interpolatingspline) keeps the same
+spline-object workflow that the package uses everywhere else.
 
 ```matlab
 matlab1D = griddedInterpolant(x, y, "spline");
@@ -126,9 +128,10 @@ title("Interpolated Grid")
 
 *The same InterpolatingSpline workflow extends from one-dimensional data to rectilinear tensor grids.*
 
-`griddedInterpolant` is also the natural MATLAB comparison in two
-dimensions. On this rectilinear-grid problem the queried values again
-agree to machine precision.
+[`griddedInterpolant`](https://www.mathworks.com/help/matlab/ref/griddedinterpolant.html)
+is also the natural MATLAB comparison in two dimensions. On this
+rectilinear-grid problem the queried values again agree to machine
+precision.
 
 ```matlab
 matlab2D = griddedInterpolant({xGrid, yGrid}, F, "spline");

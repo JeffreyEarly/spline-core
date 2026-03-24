@@ -13,7 +13,7 @@ Read these tutorials in order. The first six cover interpolation, fitting, and c
 
 ## Available Tutorials
 
-- [Interpolation in 1D and on Rectilinear Grids](./interpolation-on-grids)
+- [Spline Interpolation](./interpolation-on-grids)
   Interpolate exact data in one dimension and on rectilinear grids, and compare the results with MATLAB's griddedInterpolant.
 - [Fitting Noisy Data](./fitting-noisy-data)
   Fit a smooth spline to noisy observations with a normal noise model and explore the effect of spline complexity.
@@ -23,7 +23,7 @@ Read these tutorials in order. The first six cover interpolation, fitting, and c
   Apply value, slope, and curvature constraints at specific points in a one-dimensional spline fit.
 - [Global Shape Constraints](./global-shape-constraints)
   Enforce positivity and monotonicity over an entire one-dimensional domain.
-- [2D Constraints on Rectilinear Grids](./rectilinear-grid-constraints-2d)
+- [2D Constraints](./rectilinear-grid-constraints-2d)
   Apply a global monotonicity constraint along one dimension of a noisy tensor-product fit.
 - [BSpline Foundations](./bspline-foundations)
   Build intuition for order, degree, knot placement, local support, and basis construction in one dimension.

@@ -1,13 +1,13 @@
 ---
 layout: default
-title: 2D Constraints on Rectilinear Grids
+title: 2D Constraints
 parent: Tutorials
 nav_order: 6
 mathjax: true
 permalink: /tutorials/rectilinear-grid-constraints-2d
 ---
 
-# 2D Constraints on Rectilinear Grids
+# 2D Constraints
 
 Apply a global monotonicity constraint along one dimension of a noisy tensor-product fit.
 
@@ -15,8 +15,10 @@ Source: `Examples/Tutorials/RectilinearGridConstraints2D.m`
 
 ## Constrain one derivative direction on a rectilinear grid
 
-The same constrained-fitting workflow extends to tensor-product grids.
-Here the fit is required to increase with `y` everywhere on the domain:
+The same [`ConstrainedSpline`](../classes/constrainedspline) workflow
+extends to tensor-product grids. Here the fit is required to increase
+with `y` everywhere on the domain through
+[`GlobalConstraint.monotonicIncreasing`](../classes/constraints/globalconstraint/monotonicincreasing):
 
 $$
 \frac{\partial f}{\partial y} \ge 0.
@@ -73,8 +75,10 @@ title("Monotone in y")
 
 ## Check the derivative in the constrained direction
 
-Evaluating `D=[0 1]` differentiates with respect to `y`. The constrained
-fit keeps that derivative nonnegative throughout the query grid.
+Evaluating
+[`valueAtPoints`](../classes/tensorspline/valueatpoints) with `D=[0 1]`
+differentiates with respect to `y`. The constrained fit keeps that
+derivative nonnegative throughout the query grid.
 
 ```matlab
 dFdyFree = freeFit.valueAtPoints(Xq, Yq, D=[0 1]);

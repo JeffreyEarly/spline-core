@@ -5,9 +5,12 @@
 % NavOrder: 2
 
 %% Fit noisy observations with a normal noise model
-% `ConstrainedSpline` is the fitting counterpart to `InterpolatingSpline`.
+% [`ConstrainedSpline`](../classes/constrainedspline) is the fitting
+% counterpart to [`InterpolatingSpline`](../classes/interpolatingspline).
 % Instead of matching every observation exactly, it treats the samples as
-% noisy measurements of an underlying smooth signal.
+% noisy measurements of an underlying smooth signal with a
+% [normal distribution](https://en.wikipedia.org/wiki/Normal_distribution)
+% noise model.
 %
 % $$
 % y_i = f(t_i) + \epsilon_i, \qquad \epsilon_i \sim \mathcal{N}(0,\sigma^2).

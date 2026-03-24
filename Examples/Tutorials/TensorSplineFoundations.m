@@ -5,15 +5,19 @@
 % NavOrder: 8
 
 %% Build a tensor-product basis from grid vectors
-% The low-level multidimensional spline model is
+% The low-level multidimensional
+% [`TensorSpline`](../classes/tensorspline) model is
 %
 % $$
 % f(x_1,\ldots,x_d)=\sum_{j_1,\ldots,j_d}\xi_{j_1,\ldots,j_d}\prod_{k=1}^{d} B_{j_k,S_k}(x_k;\tau_k).
 % $$
 %
-% In practice that means building one knot vector per dimension, turning a
-% rectilinear grid into a point matrix, and then assembling the tensor
-% basis with `TensorSpline.matrixForPointMatrix`.
+% In practice that means building one knot vector per dimension with
+% [`BSpline.knotPointsForDataPoints`](../classes/bspline/knotpointsfordatapoints),
+% turning a rectilinear grid into a point matrix with
+% [`pointsFromGridVectors`](../classes/tensorspline/pointsfromgridvectors),
+% and then assembling the tensor basis with
+% [`matrixForPointMatrix`](../classes/tensorspline/matrixforpointmatrix).
 
 x = linspace(-1, 1, 7)';
 y = linspace(-1.5, 1.5, 9)';
