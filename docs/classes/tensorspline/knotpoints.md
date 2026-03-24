@@ -19,8 +19,8 @@ Knot vectors defining the spline basis.
   Returns a numeric vector in 1-D and a cell array in higher dimensions.
 
   These are the per-dimension knot vectors
-  `\tau_1, \ldots, \tau_d` that define the separable basis
-  functions `B_{j_k,S_k}(x_k;\tau_k)`.
+  $$\tau_1, \ldots, \tau_d$$ that define the separable basis
+  functions $$B_{j_k,S_k}(x_k;\tau_k)$$.
 
   ```matlab
   spline.knotPoints

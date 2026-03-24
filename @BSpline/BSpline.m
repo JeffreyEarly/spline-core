@@ -293,7 +293,7 @@ classdef BSpline < handle
         % \tau = [\tau_1,\ldots,\tau_{N_k}]^\mathsf{T}
         % $$
         %
-        % that defines the basis functions `B_{j,S}(t;\tau)`. Repeating the
+        % that defines the basis functions $$B_{j,S}(t;\tau)$$. Repeating the
         % first and last knot values `K` times terminates the basis at the
         % endpoints; interior multiplicity controls continuity across knot
         % locations.

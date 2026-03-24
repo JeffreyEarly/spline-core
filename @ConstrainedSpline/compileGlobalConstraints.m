@@ -8,7 +8,7 @@ function [Aineq, bineq] = compileGlobalConstraints(globalConstraints, tKnot, K)
 % A_{\mathrm{ineq}}\xi \le 0.
 % $$
 %
-% Positivity uses `\xi_j >= 0`, which is sufficient because the terminated
+% Positivity uses $$\xi_j \ge 0$$, which is sufficient because the terminated
 % B-spline basis is nonnegative. Monotonicity uses first differences of
 % adjacent coefficients along a selected tensor dimension, via
 % [`monotonicDifferenceMatrix`](/spline-core/classes/constrainedspline/monotonicdifferencematrix.html).

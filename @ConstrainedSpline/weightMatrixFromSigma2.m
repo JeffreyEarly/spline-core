@@ -15,7 +15,7 @@ function W = weightMatrixFromSigma2(sigma2, rho_X)
 % \Sigma_{ij} = \sigma_i \rho_{ij} \sigma_j,
 % $$
 %
-% and returns a MATLAB `decomposition` object for `\Sigma`, which is then
+% and returns a MATLAB `decomposition` object for $$\Sigma$$, which is then
 % used in left-division solves by
 % [`weightedNormalEquations`](/spline-core/classes/constrainedspline/weightednormalequations.html).
 %

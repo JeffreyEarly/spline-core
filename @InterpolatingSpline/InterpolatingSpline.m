@@ -21,7 +21,7 @@ classdef InterpolatingSpline < TensorSpline
     % \tilde{y} = \frac{y - \bar{y}}{s_y},
     % $$
     %
-    % where `xMean = \bar{y}` and `xStd = s_y` are stored so later
+    % where $$xMean = \bar{y}$$ and $$xStd = s_y$$ are stored so later
     % evaluation returns values on the original scale.
     %
     % ## Basic usage

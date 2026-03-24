@@ -5,7 +5,7 @@ function [Aeq, beq, Aineq, bineq] = compilePointConstraints(pointConstraints, tK
 % basis or derivative row at the constrained points and turns the requested
 % relation into linear constraints on the coefficient vector `xi`.
 %
-% If a row of the evaluated basis is denoted by `b_m^T`, then the three
+% If a row of the evaluated basis is denoted by $$b_m^T$$, then the three
 % supported relations are compiled as
 %
 % $$
@@ -14,7 +14,7 @@ function [Aeq, beq, Aineq, bineq] = compilePointConstraints(pointConstraints, tK
 % b_m^{T}\xi \ge v_m,
 % $$
 %
-% with lower bounds rewritten as `-b_m^T \xi <= -v_m`.
+% with lower bounds rewritten as $$-b_m^T \xi \le -v_m$$.
 %
 % Rows sharing the same derivative order are batched together so the basis
 % matrix only has to be evaluated once per derivative multi-index.

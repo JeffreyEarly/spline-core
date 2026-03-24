@@ -48,7 +48,7 @@ $$
 $$
 
 and applies the corresponding weighted solve through a matrix
-factorization rather than explicitly forming `\Sigma^{-1}`.
+factorization rather than explicitly forming $$\Sigma^{-1}$$.
 
 ## Basic usage
 

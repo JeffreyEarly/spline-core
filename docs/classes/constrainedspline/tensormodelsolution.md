@@ -47,7 +47,7 @@ Solve the tensor noisy-data model with iteratively reweighted least squares.
 
   subject to the supplied equality and inequality constraints, then updates
   the per-observation variances from the current residuals
-  `r^{(n)} = y - B\xi^{(n)}` through the distribution model.
+  $$r^{(n)} = y - \mathbf{B}\xi^{(n)}$$ through the distribution model.
 
   When `rho_X` is supplied, the observation covariance is modeled as
 
