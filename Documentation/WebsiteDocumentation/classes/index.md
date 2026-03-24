@@ -8,52 +8,69 @@ permalink: /classes
 
 # Class Documentation
 
-Method and property reference pages for the public spline classes are
-generated from the class annotations in the MATLAB source.
+This section is the reference manual for the spline classes and
+constraint objects. Use it when you want the exact constructor,
+property, method, or equation used by a class.
 
-If you are deciding where to start, read [Which Class Should I Use?](../which-class-should-i-use)
-before dropping into the method-level reference.
+If you are still choosing an approach, start with
+[Which Class Should I Use?](../which-class-should-i-use) or the
+[Tutorials](../tutorials) before dropping into the reference.
 
-## Start with the highest-level class that matches your problem
+## Choose a starting point
 
-- [`InterpolatingSpline`](./interpolatingspline): exact interpolation in one dimension or on a rectilinear tensor grid
-- [`ConstrainedSpline`](./constrainedspline): noisy-data fitting, robust fitting, and local/global constraints
-- [`BSpline`](./bspline): low-level one-dimensional basis and spline operations
-- [`TensorSpline`](./tensorspline): low-level tensor-product spline operations
+| Class | Use it when | Typical job |
+| --- | --- | --- |
+| [`InterpolatingSpline`](./interpolatingspline) | your values are trusted exactly and lie on a 1-D grid or rectilinear tensor grid | exact interpolation |
+| [`ConstrainedSpline`](./constrainedspline) | your data are noisy, weighted, or subject to point or global constraints | smoothing and constrained fitting |
+| [`BSpline`](./bspline) | you want direct access to one-dimensional basis matrices, derivatives, knot utilities, or PP coefficients | low-level 1-D spline work |
+| [`TensorSpline`](./tensorspline) | you want the multidimensional tensor-product analogue of `BSpline` | low-level tensor-product spline work |
 
-## Shared notation
+Most users should start with [`InterpolatingSpline`](./interpolatingspline)
+or [`ConstrainedSpline`](./constrainedspline). The lower-level
+[`BSpline`](./bspline) and [`TensorSpline`](./tensorspline) pages are
+mainly for building custom workflows, understanding the mathematics, or
+working directly with spline bases and coefficients.
 
-The core spline classes use the same notation throughout the generated
-reference so that equations, MATLAB examples, and property names match.
+## How the classes relate
 
-- spline degree: $$S$$
-- spline order: $$K = S + 1$$
-- knot sequence or tensor-product knot cell: $$\tau$$, exposed in the API as `knotPoints`
-- spline coefficients: $$\xi$$, exposed in the API as `xi`
-- one-dimensional coordinates: $$t$$
-- tensor grid vectors: $$x_1,\ldots,x_d$$
-- matching query arrays: $$X_1,\ldots,X_d$$
-- derivative orders: $$D$$
-- observed values in fitting problems: $$y$$
-- basis matrices: $$B$$ in one dimension and $$\mathbf{B}$$ for tensor-product systems
+- [`BSpline`](./bspline) is the core one-dimensional spline object.
+- [`TensorSpline`](./tensorspline) extends the same construction to multiple dimensions by taking tensor products of one-dimensional bases.
+- [`InterpolatingSpline`](./interpolatingspline) is the exact-fit constructor built on top of `TensorSpline`.
+- [`ConstrainedSpline`](./constrainedspline) is the noisy-data fitting constructor built on top of `TensorSpline`, with weights, robust distributions, and constraints.
 
-When a class stores affine output normalization, the formulas in the
-reference treat `xMean` as an additive offset applied only to zero-order
-evaluation and `xStd` as a multiplicative scale applied to values and
-derivatives.
+## Constraint objects
 
-## Constraint classes
-
-Constraint objects live in their own section because they support
-`ConstrainedSpline` rather than standing alone.
+These helper classes support
+[`ConstrainedSpline`](./constrainedspline):
 
 - [`SplineConstraint`](./constraints/splineconstraint)
 - [`PointConstraint`](./constraints/pointconstraint)
 - [`GlobalConstraint`](./constraints/globalconstraint)
 
-## How the reference is organized
+## Shared notation
 
-Subclass pages focus on methods declared by that class, so tensor and
-constrained spline classes do not repeat the full `BSpline` or
-`TensorSpline` method surface. That keeps the higher-level API pages
-shorter and easier to scan.
+The reference pages use the same notation throughout so the equations,
+examples, and property names line up.
+
+| Symbol | Meaning | API name |
+| --- | --- | --- |
+| $$S$$ | spline degree | `S` |
+| $$K = S + 1$$ | spline order | `K` |
+| $$\tau$$ | knot vector in 1-D, or knot vectors per dimension in tensor splines | `knotPoints` |
+| $$\xi$$ | spline coefficients | `xi` |
+| $$B$$ | one-dimensional basis matrix | returned by `BSpline.matrixForDataPoints` |
+| $$\mathbf{B}$$ | tensor-product basis matrix or fitting system matrix | returned by `TensorSpline.matrixForPointMatrix` or built inside fitting classes |
+| $$xMean$$, $$xStd$$ | affine output normalization | `xMean`, `xStd` |
+
+When a class stores affine normalization, zero-order evaluation is
+written as an additive offset plus a scaled spline expansion. Derivative
+expressions keep the `xStd` scaling and drop the `xMean` offset.
+
+## Reading the reference
+
+Each class page emphasizes the methods and properties declared by that
+class. Inherited behavior lives on the parent-class page, so higher-level
+pages stay shorter and easier to scan:
+
+- [`InterpolatingSpline`](./interpolatingspline) and [`ConstrainedSpline`](./constrainedspline) inherit most evaluation and transformation behavior from [`TensorSpline`](./tensorspline).
+- [`TensorSpline`](./tensorspline) mirrors many one-dimensional ideas from [`BSpline`](./bspline), but does not duplicate the full `BSpline` reference.
