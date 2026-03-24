@@ -2,31 +2,42 @@
 layout: default
 title: Home
 nav_order: 1
-description: "Core B-spline, interpolation, and constrained fitting tools for MATLAB"
+description: "Spline interpolation and constrained fitting tools for MATLAB"
 permalink: /
 ---
 
 # Spline Core
 
-B-spline interpolation and constrained fitting for MATLAB.
+Spline interpolation, smoothing, and constrained fitting for MATLAB.
 
-`Spline Core` extends MATLAB's interpolation and fitting tools into a
-spline framework for robust fitting and constraints.
+`Spline Core` brings exact interpolation, noisy-data fitting, robust error
+models, and low-level spline-basis tools into one consistent MATLAB object
+model. It is a good fit when you want something closer to `interp1`,
+`griddedInterpolant`, and `polyfit`, but with reusable spline objects and
+built-in support for constraints.
 
-<img src="tutorials/robust-spline-fitting/robust-fit-comparison.png" alt="Comparison of ordinary least squares and robust spline fitting" width="760">
+<img src="./figures/bspline.png" alt="B-spline basis functions and their first derivatives" width="760">
 
-## MATLAB, Extended
+## Start Here
 
-- [`InterpolatingSpline`](classes/interpolatingspline) plays a role similar to `interp1` in 1D and `griddedInterpolant`.
-- [`ConstrainedSpline`](classes/constrainedspline) can recover the same least-squares polynomial fit as `polyfit`.
-- In 1D, spline knots are chosen from the sample locations, so irregularly spaced data are handled naturally.
-- `ConstrainedSpline` supports robust fitting, local point constraints, and global positivity or monotonicity constraints in the same API.
+- [Getting Started](getting-started) for the shortest path from installation to a first interpolation or fit
+- [Tutorials](tutorials) for guided workflows
+- [Common Tasks](common-tasks) for task-oriented entry points
+- [Class Documentation](classes) for method-level reference
+- [Compared with MATLAB](compared-with-matlab) for direct built-in comparisons
 
-## The Main Classes
+## Choose a starting point
 
-| Class | Use it for |
-| --- | --- |
-| [`InterpolatingSpline`](classes/interpolatingspline) | exact interpolation in 1D and on rectilinear tensor grids |
-| [`ConstrainedSpline`](classes/constrainedspline) | noisy-data fitting, robust fitting, and local or global constraints |
-| [`BSpline`](classes/bspline) | low-level one-dimensional spline basis construction and analysis |
-| [`TensorSpline`](classes/tensorspline) | low-level tensor-product spline construction and analysis |
+| Class | Start here when | Typical result |
+| --- | --- | --- |
+| [`InterpolatingSpline`](classes/interpolatingspline) | your data should be matched exactly in 1D or on a rectilinear grid | an exact spline interpolant |
+| [`ConstrainedSpline`](classes/constrainedspline) | your data are noisy or you need robust fitting or constraints | a fitted spline model |
+| [`BSpline`](classes/bspline) | you want direct control over 1D knot vectors, basis matrices, or coefficients | a low-level 1D spline representation |
+| [`TensorSpline`](classes/tensorspline) | you want the tensor-product analogue of `BSpline` | a low-level multidimensional spline representation |
+
+## What the package adds
+
+- exact interpolation and noisy fitting live in the same spline family
+- local point constraints and global shape constraints use the same fitting API
+- robust fitting is available through alternate error models such as `StudentTDistribution`
+- low-level basis access remains available when you need custom regression or inverse-problem workflows

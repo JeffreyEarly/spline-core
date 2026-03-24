@@ -17,69 +17,69 @@ If the data should be matched exactly, start with
 or if you need robust fitting or constraints, start with
 [`ConstrainedSpline`](classes/constrainedspline).
 
-## The Short Version
+## The short version
 
-| Problem | Class | MATLAB analogue | What changes here |
+| Problem | Class | MATLAB analogue | Why start there |
 | --- | --- | --- | --- |
 | Build or inspect a 1D spline basis directly | [`BSpline`](classes/bspline) | none directly | You work with knots, coefficients, basis matrices, roots, and transforms explicitly. |
-| Interpolate exact 1D data | [`InterpolatingSpline`](classes/interpolatingspline) | `interp1`, `spline` | Returns a spline object rather than only values. |
-| Interpolate exact data on a rectilinear grid | [`InterpolatingSpline`](classes/interpolatingspline) | `griddedInterpolant` | Same basic problem, but with the same spline object model as the rest of the package. |
-| Fit noisy gridded or scattered data | [`ConstrainedSpline`](classes/constrainedspline) | `polyfit` for simple 1D polynomial fits | Extends naturally to splines, robust fitting, constraints, and explicit scattered-data fitting. |
+| Interpolate exact 1D data | [`InterpolatingSpline`](classes/interpolatingspline) | `interp1`, `spline` | Returns a reusable spline object rather than only values. |
+| Interpolate exact data on a rectilinear grid | [`InterpolatingSpline`](classes/interpolatingspline) | `griddedInterpolant` | Uses the same spline object model as the rest of the package. |
+| Fit noisy 1D or rectilinear-grid data | [`ConstrainedSpline`](classes/constrainedspline) | `polyfit` for simple 1D least-squares fits | Extends naturally to splines, robust fitting, and constraints. |
 | Add local value or derivative constraints | [`ConstrainedSpline`](classes/constrainedspline) with [`PointConstraint`](classes/constraints/pointconstraint) | none directly | Constrain the fitted spline at specific points. |
 | Add global positivity or monotonicity constraints | [`ConstrainedSpline`](classes/constrainedspline) with [`GlobalConstraint`](classes/constraints/globalconstraint) | none directly | Constrain the fit over the whole model domain. |
 | Work with tensor-product spline objects directly | [`TensorSpline`](classes/tensorspline) | none directly | Lower-level tensor basis, evaluation, and transforms. |
 
-## The Main Distinction
+## Exact interpolation
 
 `InterpolatingSpline` is for exact interpolation. In one dimension, it
-chooses canonical spline knots from the sample locations and then solves
-for the spline coefficients so that the spline matches the data exactly.
-That is one reason it works naturally with irregularly spaced data.
+chooses canonical spline knots from the sample locations and solves for
+coefficients so that the spline matches the supplied values exactly.
 
 ```matlab
 t = sort(rand(20,1));
 x = sin(2*pi*t);
-f = InterpolatingSpline(t, x, K=4);
+f = InterpolatingSpline(t, x, S=3);
 ```
 
-`ConstrainedSpline` is for fitting. It uses the same underlying spline
-model, but now the coefficients are chosen to fit noisy observations. This
-is where robust fitting, local constraints, and global shape constraints
-come in.
+For rectilinear grids, pass one grid vector per dimension:
+
+```matlab
+F = InterpolatingSpline({x, y}, V, S=[3 3]);
+Vq = F(Xq, Yq);
+```
+
+## Noisy fitting and constraints
+
+`ConstrainedSpline` uses the same spline family for noisy-data fitting.
+This is where robust fitting, local point constraints, and global shape
+constraints enter the workflow.
 
 ```matlab
 t = sort(rand(50,1));
 x = exp(t) + 0.05*randn(size(t));
-fit = ConstrainedSpline(t, x, K=4, dataDOF=2);
+fit = ConstrainedSpline(t, x, S=3, splineDOF=12);
 ```
 
 In higher dimensions, use `ConstrainedSpline({x, y}, values, ...)` for
-rectilinear grids and `ConstrainedSpline.fromPoints(P, values, ...)` for
-scattered observations.
+rectilinear grids.
 
-## If You Are Coming from MATLAB
+If you usually think in terms of `polyfit`, the direct alignment is:
 
-If you usually reach for `interp1` or `griddedInterpolant`, start with
-`InterpolatingSpline`.
+- `polyfit(t, x, N-1)` corresponds to `ConstrainedSpline(t, x, S=N-1, splineDOF=N)`
 
-If you usually reach for `polyfit`, start with `ConstrainedSpline`. In one
-dimension, `ConstrainedSpline(t, x, K=N, splineDOF=N)` matches the
-least-squares polynomial fit from `polyfit(t, x, N-1)`, but it also gives
-you a direct path into richer spline spaces and constraints.
-
-## If You Want the Low-Level Model
+## Low-level spline work
 
 Use `BSpline` in 1D and `TensorSpline` in higher dimensions when you want
-direct access to basis matrices, knot vectors, spline coefficients, and
-transform operations.
+direct access to basis matrices, knot vectors, coefficients, or transform
+operations.
 
 That is usually the right choice for custom regression, inverse problems,
 or when you want to work with the spline representation itself rather than
-just fitting data.
+starting from a high-level interpolation or fitting workflow.
 
-## Where to Go Next
+## Where to go next
 
-- Read [Getting Started](getting-started) for the short package walkthrough.
-- See [Common Tasks](common-tasks) for task-oriented entry points.
-- Read [Compared with MATLAB](compared-with-matlab) for direct comparisons with built-in functions.
-- Browse [Class documentation](classes) when you need method-level reference.
+- Read [Getting Started](getting-started) for the short package walkthrough
+- See [Common Tasks](common-tasks) for task-oriented entry points
+- Read [Compared with MATLAB](compared-with-matlab) for direct built-in comparisons
+- Browse [Class Documentation](classes) for method-level reference

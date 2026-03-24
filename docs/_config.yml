@@ -1,6 +1,6 @@
 remote_theme: just-the-docs/just-the-docs
 title: Spline Core
-description: Core B-spline and interpolation classes for MATLAB
+description: Spline interpolation and constrained fitting tools for MATLAB
 
 search_enabled: false
 

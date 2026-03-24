@@ -8,83 +8,96 @@ permalink: /common-tasks
 
 # Common Tasks
 
-Use this page when you know what you want to do, but do not yet know which
-class or tutorial to open. If you are still deciding between the main
-classes, start with [Which Class Should I Use?](which-class-should-i-use).
+Use this page when you know what you want to do, but want the right class,
+tutorial, or code pattern quickly. If you are still choosing between the
+main classes, start with [Which Class Should I Use?](which-class-should-i-use).
 
 ## Interpolate exact data in one dimension
 
 - Use [`InterpolatingSpline`](classes/interpolatingspline)
-- Start with the [Interpolating Spline Basics](tutorials/interpolating-spline-basics) tutorial
+- Start with [Spline Interpolation](tutorials/interpolation-on-grids)
 
 ```matlab
 t = linspace(0, 1, 20)';
 x = sin(2*pi*t);
-f = InterpolatingSpline(t, x, K=4);
+f = InterpolatingSpline(t, x, S=3);
+xq = f(linspace(t(1), t(end), 200)');
 ```
 
 ## Interpolate exact data on a rectilinear grid
 
 - Use [`InterpolatingSpline`](classes/interpolatingspline)
-- Pass a cell array of grid vectors plus the value array
+- Pass one grid vector per dimension
 
 ```matlab
-f = InterpolatingSpline({x, y}, F, K=[4 4]);
-Fq = f(Xq, Yq);
+F = InterpolatingSpline({x, y}, V, S=[3 3]);
+Vq = F(Xq, Yq);
 ```
 
-## Fit noisy one-dimensional data
+## Fit noisy data
 
 - Use [`ConstrainedSpline`](classes/constrainedspline)
-- Start with the [Robust Fitting of Noisy Data](tutorials/robust-spline-fitting) tutorial
+- Start with [Fitting Noisy Data](tutorials/fitting-noisy-data)
 
 ```matlab
-fit = ConstrainedSpline(t, x, K=4, dataDOF=2);
+noiseModel = NormalDistribution(0.05);
+fit = ConstrainedSpline(t, xObs, S=3, splineDOF=12, distribution=noiseModel);
 ```
 
-To match the least-squares polynomial fit from `polyfit(t,x,N-1)`, use
-`K=N` and `splineDOF=N`.
+To match the least-squares polynomial fit from `polyfit(t, x, N-1)`, use
+`S=N-1` and `splineDOF=N`.
+
+## Fit noisy data with outliers
+
+- Use [`ConstrainedSpline`](classes/constrainedspline) with `StudentTDistribution`
+- Start with [Robust Fitting with Outliers](tutorials/robust-fitting-with-outliers)
+
+```matlab
+fit = ConstrainedSpline(t, xObs, S=3, splineDOF=12, ...
+    distribution=StudentTDistribution(sigma=0.05, nu=3));
+```
 
 ## Add local value or derivative constraints
 
 - Use [`PointConstraint`](classes/constraints/pointconstraint)
-- See [Local Point Constraints in 1D](tutorials/local-point-constraints-1d)
+- Start with [Local Point Constraints](tutorials/local-point-constraints)
 
 ```matlab
 constraints = [
-    PointConstraint.equal(0, D=0, value=1)
-    PointConstraint.equal(0, D=1, value=0)
+    PointConstraint.equal(0.5, value=1)
+    PointConstraint.equal(0.5, D=1, value=0)
 ];
 
-fit = ConstrainedSpline(t, x, constraints=constraints);
+fit = ConstrainedSpline(t, xObs, S=3, splineDOF=12, constraints=constraints);
 ```
 
 ## Add global positivity or monotonicity constraints
 
 - Use [`GlobalConstraint`](classes/constraints/globalconstraint)
-- See [Global Shape Constraints](tutorials/global-shape-constraints)
+- Start with [Global Shape Constraints](tutorials/global-shape-constraints)
 
 ```matlab
-fit = ConstrainedSpline(t, x, ...
+fit = ConstrainedSpline(t, xObs, S=3, splineDOF=12, ...
     constraints=GlobalConstraint.monotonicIncreasing());
 ```
 
-## Constrain a masked region on a tensor grid
+## Add a 2D constraint on a rectilinear grid
 
-- Use [`PointConstraint.equalOnMask`](classes/constraints/pointconstraint/equalonmask)
-- See [Mask-Constrained Tensor Fits](tutorials/mask-constrained-fit)
+- Use [`ConstrainedSpline`](classes/constrainedspline) with [`GlobalConstraint.monotonicIncreasing`](classes/constraints/globalconstraint/monotonicincreasing)
+- Start with [2D Constraints](tutorials/rectilinear-grid-constraints-2d)
 
 ```matlab
-constraint = PointConstraint.equalOnMask({x, y}, islandMask, D=[0 0], value=0);
-fit = ConstrainedSpline({x, y}, values, constraints=constraint);
+fit = ConstrainedSpline({x, y}, VObs, S=[3 3], splineDOF=[10 10], ...
+    constraints=GlobalConstraint.monotonicIncreasing(dimension=2));
 ```
 
 ## Work directly with basis matrices
 
 - Use [`BSpline.matrixForDataPoints`](classes/bspline/matrixfordatapoints) or [`TensorSpline.matrixForPointMatrix`](classes/tensorspline/matrixforpointmatrix)
-- This is the right entry point for custom regression or inverse problems
+- Start with [BSpline Foundations](tutorials/bspline-foundations) or [TensorSpline Foundations](tutorials/tensorspline-foundations)
 
 ```matlab
-B = BSpline.matrixForDataPoints(t, knotPoints=tKnot, S=3);
+knotPoints = BSpline.knotPointsForDataPoints(t, S=3);
+B = BSpline.matrixForDataPoints(t, knotPoints=knotPoints, S=3);
 xi = B \ x;
 ```
