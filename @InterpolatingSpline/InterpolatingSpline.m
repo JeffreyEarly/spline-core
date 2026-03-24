@@ -1,10 +1,11 @@
 classdef InterpolatingSpline < TensorSpline
     % Interpolating spline on one-dimensional samples or rectilinear grids.
     %
-    % `InterpolatingSpline` is the exact-fit, grid-native specialization of
-    % `TensorSpline`. Use it when your values are already sampled on a
-    % one-dimensional grid or a rectilinear tensor grid and you want a
-    % spline that reproduces those samples exactly.
+    % `InterpolatingSpline` is the exact-fit constructor for data already
+    % sampled on a one-dimensional grid or a rectilinear tensor grid. It is
+    % the class to use when your samples are trusted exactly and you want a
+    % spline whose evaluation reproduces those sample values at the supplied
+    % grid locations.
     %
     % Supported construction forms:
     %   spline = InterpolatingSpline(x,V)
@@ -13,7 +14,7 @@ classdef InterpolatingSpline < TensorSpline
     %
     % If $$\mathbf{B}$$ is the tensor-product basis matrix on the supplied
     % grid and $$\tilde{y}$$ is the normalized data vector, the stored
-    % coefficients solve
+    % coefficients are chosen so that
     %
     % $$
     % \mathbf{B}\xi = \tilde{y}, \qquad
@@ -25,14 +26,16 @@ classdef InterpolatingSpline < TensorSpline
     %
     % ## Basic usage
     %
-    % Use `InterpolatingSpline` when you have values on one-dimensional
-    % samples or a rectilinear grid and want a spline that matches them
-    % exactly.
+    % Use `InterpolatingSpline` when you have values on a rectilinear grid
+    % and want exact interpolation rather than smoothing or constrained
+    % regression.
     %
     % ```matlab
-    % [X,Y] = ndgrid(linspace(0,1,8), linspace(-1,1,9));
+    % x = linspace(0,1,8)';
+    % y = linspace(-1,1,9)';
+    % [X,Y] = ndgrid(x, y);
     % F = sin(2*pi*X).*cos(pi*Y);
-    % spline = InterpolatingSpline({X(:,1), Y(1,:)}, F);
+    % spline = InterpolatingSpline({x, y}, F);
     % Fq = spline(X, Y);
     % ```
     %
@@ -43,6 +46,14 @@ classdef InterpolatingSpline < TensorSpline
     properties (SetAccess = private)
         % Grid vectors used to define the interpolation lattice.
         %
+        % These are the original 1-D sample locations in each coordinate
+        % direction. In one dimension `gridVectors` contains one column
+        % vector; in higher dimensions it stores one grid vector per tensor
+        % axis.
+        %
+        % If `[X1,...,Xd] = ndgrid(gridVectors{:})`, then the spline
+        % interpolates the supplied value array exactly on that lattice.
+        %
         % - Topic: Inspect interpolation grids
         gridVectors
     end
@@ -52,9 +63,10 @@ classdef InterpolatingSpline < TensorSpline
             % Create an interpolating spline on one-dimensional samples or a rectilinear grid.
             %
             % Use this constructor when your data already live on a
-            % rectilinear grid and should be reproduced exactly by the spline.
-            % Supply a numeric vector in 1-D or a cell array of grid vectors
-            % in higher dimensions together with the sampled value array.
+            % rectilinear grid and should be reproduced exactly by the
+            % spline. Supply a numeric vector in 1-D or a cell array of grid
+            % vectors in higher dimensions together with the sampled value
+            % array.
             %
             % The implementation builds one knot vector per dimension from
             % the supplied grid vectors, standardizes the sampled values, and
@@ -65,7 +77,9 @@ classdef InterpolatingSpline < TensorSpline
             % $$
             %
             % where $$\mathbf{B}$$ is the tensor-product basis matrix
-            % evaluated on the grid points.
+            % evaluated on the grid points. Because the knot vectors are
+            % built from the supplied grid, the resulting system is square
+            % for standard interpolation setups.
             %
             % ```matlab
             % x = linspace(0,1,8)';

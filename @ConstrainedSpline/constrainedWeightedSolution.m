@@ -1,5 +1,38 @@
 function [xi, systemMatrix] = constrainedWeightedSolution(normalMatrix, rhs, Aeq, beq, Aineq, bineq)
 % Solve weighted least squares with optional linear constraints.
+%
+% If only equality constraints are present, this forms and solves the KKT
+% system
+%
+% $$
+% \begin{bmatrix}
+% N & A_{\mathrm{eq}}^T \\
+% A_{\mathrm{eq}} & 0
+% \end{bmatrix}
+% \begin{bmatrix}
+% \xi \\ \lambda
+% \end{bmatrix}
+% =
+% \begin{bmatrix}
+% r \\ b_{\mathrm{eq}}
+% \end{bmatrix}.
+% $$
+%
+% If inequality constraints are also present, the method switches to
+% `quadprog` and solves the equivalent convex quadratic program with
+% Hessian `N`.
+%
+% - Topic: Solve fit systems
+% - Developer: true
+% - Declaration: [xi,systemMatrix] = constrainedWeightedSolution(normalMatrix,rhs,Aeq,beq,Aineq,bineq)
+% - Parameter normalMatrix: weighted normal-equation matrix
+% - Parameter rhs: weighted right-hand side
+% - Parameter Aeq: equality-constraint matrix
+% - Parameter beq: equality-constraint right-hand side
+% - Parameter Aineq: inequality-constraint matrix
+% - Parameter bineq: inequality-constraint right-hand side
+% - Returns xi: fitted coefficient vector
+% - Returns systemMatrix: solved system matrix or quadratic Hessian proxy
 numCoefficients = size(normalMatrix, 1);
 
 if isempty(Aeq)

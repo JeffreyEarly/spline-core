@@ -1,5 +1,17 @@
 function [pointConstraints, globalConstraints] = normalizeConstraintInputs(constraints, numDimensions)
 % Split typed constraint inputs into point and global arrays.
+%
+% This helper partitions a mixed `SplineConstraint` array into its
+% `PointConstraint` and `GlobalConstraint` components and checks that each
+% constraint is dimensionally compatible with the target spline.
+%
+% - Topic: Prepare fit inputs
+% - Developer: true
+% - Declaration: [pointConstraints,globalConstraints] = normalizeConstraintInputs(constraints,numDimensions)
+% - Parameter constraints: mixed SplineConstraint array
+% - Parameter numDimensions: target spline dimensionality
+% - Returns pointConstraints: PointConstraint array
+% - Returns globalConstraints: GlobalConstraint array
 if isempty(constraints)
     pointConstraints = PointConstraint.empty(0,1);
     globalConstraints = GlobalConstraint.empty(0,1);

@@ -44,6 +44,22 @@ classdef TensorSpline < handle
     properties (SetAccess = private)
         % Spline order in each tensor dimension.
         %
+        % `K(k)` is the spline order along tensor dimension `k`. On each
+        % fixed tensor cell, the spline is a polynomial of degree
+        % `K(k)-1` in coordinate `x_k`, so `K=[4 4]` means a bicubic
+        % tensor spline and `K=[2 3 4]` means linear, quadratic, and cubic
+        % behavior across the three coordinates.
+        %
+        % The matching degree vector is
+        % [`S`](/spline-core/classes/tensorspline/s.html), with
+        % `S = K - 1`.
+        %
+        % ```matlab
+        % spline = TensorSpline(S=[3 3], knotPoints=knotPoints, xi=xi);
+        % spline.K
+        % % returns [4 4]
+        % ```
+        %
         % - Topic: Inspect spline properties
         K
     end
@@ -62,9 +78,40 @@ classdef TensorSpline < handle
     properties (SetAccess = private)
         % Mean added back to zero-order evaluations.
         %
+        % `xMean` is the additive term in the stored tensor-product model
+        %
+        % $$
+        % f(x_1,\ldots,x_d) = x_{\mathrm{Mean}} + x_{\mathrm{Std}}
+        % \sum_{j_1,\ldots,j_d} \xi_{j_1,\ldots,j_d}
+        % \prod_{k=1}^{d} B_{j_k,S_k}(x_k;\tau_k).
+        % $$
+        %
+        % It is mainly a numerical device: large offsets can be removed
+        % before solving for `xi`, then added back only during zero-order
+        % evaluation. As in the 1-D case, derivatives are unaffected by
+        % `xMean`.
+        %
+        % ```matlab
+        % spline = TensorSpline(S=[3 3], knotPoints=knotPoints, xi=xi, xMean=2.1, xStd=0.4);
+        % values = spline(Xq, Yq);
+        % ```
+        %
         % - Topic: Inspect spline properties
         xMean (1,1) double {mustBeReal,mustBeFinite} = 0
         % Multiplicative scale applied to evaluations.
+        %
+        % `xStd` is the multiplicative scale factor in
+        %
+        % $$
+        % f(x_1,\ldots,x_d) = x_{\mathrm{Mean}} + x_{\mathrm{Std}}
+        % \sum_{j_1,\ldots,j_d} \xi_{j_1,\ldots,j_d}
+        % \prod_{k=1}^{d} B_{j_k,S_k}(x_k;\tau_k).
+        % $$
+        %
+        % It is useful when the fitted field has large or very small
+        % amplitude: the stored coefficient array can remain close to order
+        % one while evaluations and derivatives are rescaled back to
+        % physical units.
         %
         % - Topic: Inspect spline properties
         xStd (1,1) double {mustBeReal,mustBeFinite} = 1
@@ -73,17 +120,60 @@ classdef TensorSpline < handle
     properties (Dependent)
         % Polynomial degree in each tensor dimension.
         %
+        % `S(k)` is the polynomial degree along tensor dimension `k`. So
+        % `S=[1 1]` gives bilinear pieces, `S=[3 3]` gives bicubic pieces,
+        % and mixed values such as `S=[1 3]` are allowed when different
+        % coordinates need different smoothness or complexity.
+        %
+        % The matching order vector is
+        % [`K`](/spline-core/classes/tensorspline/k.html), with `K = S + 1`.
+        %
         % - Topic: Inspect spline properties
         S
         % Number of tensor dimensions.
+        %
+        % This is the number of coordinate directions in the tensor-product
+        % spline. In one dimension it is `1`; in higher dimensions it equals
+        % the number of knot vectors in
+        % [`knotPoints`](/spline-core/classes/tensorspline/knotpoints.html).
+        %
+        % ```matlab
+        % spline.numDimensions
+        % % returns 2 for a surface spline, 3 for a volume spline
+        % ```
         %
         % - Topic: Inspect spline properties
         numDimensions
         % Number of basis functions in each dimension.
         %
+        % If tensor dimension `k` has knot vector `tau_k` and order `K_k`,
+        % then the number of one-dimensional basis functions in that
+        % direction is
+        %
+        % $$
+        % M_k = \mathrm{numel}(\tau_k) - K_k.
+        % $$
+        %
+        % `basisSize` stores the row vector `[M_1 ... M_d]`. The total
+        % coefficient count is `prod(basisSize)`.
+        %
         % - Topic: Inspect spline properties
         basisSize
         % Tensor-product spline coefficients reshaped to basisSize.
+        %
+        % The coefficient array weights the tensor basis in
+        %
+        % $$
+        % f(x_1,\ldots,x_d) = x_{\mathrm{Mean}} + x_{\mathrm{Std}}
+        % \sum_{j_1,\ldots,j_d} \xi_{j_1,\ldots,j_d}
+        % \prod_{k=1}^{d} B_{j_k,S_k}(x_k;\tau_k).
+        % $$
+        %
+        % `xi` is stored reshaped to
+        % [`basisSize`](/spline-core/classes/tensorspline/basissize.html),
+        % so in 2-D it is a matrix, in 3-D it is an array, and so on.
+        % The matrix-building helper is
+        % [`matrixForPointMatrix`](/spline-core/classes/tensorspline/matrixforpointmatrix.html).
         %
         % - Topic: Inspect spline properties
         xi
@@ -91,9 +181,28 @@ classdef TensorSpline < handle
         %
         % Returns a numeric vector in 1-D and a cell array in higher dimensions.
         %
+        % These are the per-dimension knot vectors
+        % `\tau_1, \ldots, \tau_d` that define the separable basis
+        % functions `B_{j_k,S_k}(x_k;\tau_k)`.
+        %
+        % ```matlab
+        % spline.knotPoints
+        % % one vector in 1-D, one cell entry per dimension otherwise
+        % ```
+        %
         % - Topic: Inspect spline properties
         knotPoints
         % Minimum and maximum values of the spline domain in each dimension.
+        %
+        % `domain(k,:)` gives the lower and upper coordinate limits for
+        % tensor dimension `k`:
+        %
+        % $$
+        % \mathrm{domain}(k,:) = [\tau_{k,1},\ \tau_{k,\mathrm{end}}].
+        % $$
+        %
+        % So a 2-D spline returns a `2 x 2` array of `[min max]` pairs, one
+        % row for each coordinate direction.
         %
         % - Topic: Inspect spline properties
         domain
@@ -124,7 +233,7 @@ classdef TensorSpline < handle
             % - Declaration: self = TensorSpline(options)
             % - Parameter options.S: spline degree scalar or vector with one entry per dimension
             % - Parameter options.knotPoints: knot vector in 1-D or cell array of knot vectors
-            % - Parameter xi: optional tensor-product coefficient array or vector
+            % - Parameter options.xi: optional tensor-product coefficient array or vector
             % - Parameter options.xMean: optional additive output offset
             % - Parameter options.xStd: optional multiplicative output scale
             % - Returns self: TensorSpline instance

@@ -21,7 +21,7 @@ Create a tensor-product spline from per-dimension degrees, knots, and coefficien
 ## Parameters
 + `options.S`  spline degree scalar or vector with one entry per dimension
 + `options.knotPoints`  knot vector in 1-D or cell array of knot vectors
-+ `xi`  optional tensor-product coefficient array or vector
++ `options.xi`  optional tensor-product coefficient array or vector
 + `options.xMean`  optional additive output offset
 + `options.xStd`  optional multiplicative output scale
 

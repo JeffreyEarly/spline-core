@@ -3,7 +3,7 @@ layout: default
 title: smoothingMatrix
 parent: ConstrainedSpline
 grand_parent: Classes
-nav_order: 9
+nav_order: 15
 mathjax: true
 ---
 

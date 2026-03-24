@@ -3,7 +3,7 @@ layout: default
 title: globalConstraints
 parent: ConstrainedSpline
 grand_parent: Classes
-nav_order: 5
+nav_order: 8
 mathjax: true
 ---
 
@@ -15,5 +15,9 @@ Global shape constraints used during fitting.
 ---
 
 ## Discussion
+
+  These are coefficient-level sufficient conditions for shapes such
+  as positivity and monotonicity. They are compiled into the
+  inequality system `Aineq * xi <= bineq`.
 
 

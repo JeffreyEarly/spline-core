@@ -22,10 +22,10 @@ Tensor-product spline fit through noisy data values.
 ## Overview
 
 `ConstrainedSpline` is the noisy-data fitting counterpart to
-`InterpolatingSpline`. It fits a tensor-product spline basis to values
-sampled on a one-dimensional grid or a rectilinear tensor grid, with
-optional robust weighting, observation covariance, local point
-constraints, and global shape constraints.
+`InterpolatingSpline`. It fits a tensor-product spline basis to
+observations sampled on a one-dimensional grid or a rectilinear tensor
+grid, with optional robust weighting, correlated observation errors,
+local point constraints, and global shape constraints.
 
 At each iteratively reweighted least-squares step it solves
 
@@ -41,9 +41,14 @@ A_{\mathrm{ineq}}\xi \le b_{\mathrm{ineq}}.
 $$
 
 When the distribution model provides correlated errors, the code
-forms a covariance model from the per-observation variances and the
-correlation kernel, then solves the weighted system through a matrix
-factorization rather than explicitly inverting the covariance.
+forms an observation covariance
+
+$$
+\Sigma_{ij} = \sigma_i \rho(x_i,x_j)\sigma_j
+$$
+
+and applies the corresponding weighted solve through a matrix
+factorization rather than explicitly forming `\Sigma^{-1}`.
 
 ## Basic usage
 
@@ -76,6 +81,22 @@ yFit = spline(x);
   + [`minimumConstraintPoints`](/spline-core/classes/constrainedspline/minimumconstraintpoints.html) Return a minimal set of one-dimensional locations for universal derivative constraints.
 + Prepare knot sequences
   + [`terminatedKnotPoints`](/spline-core/classes/constrainedspline/terminatedknotpoints.html) Ensure each knot vector has S+1 repeated knots at its boundaries.
+
+
+## Developer Topics
+These items document internal implementation details and are not part of the primary public API.
++ Prepare fit inputs
+  + [`normalizeConstraintInputs`](/spline-core/classes/constrainedspline/normalizeconstraintinputs.html) Split typed constraint inputs into point and global arrays.
++ Compile constraints
+  + [`compileGlobalConstraints`](/spline-core/classes/constrainedspline/compileglobalconstraints.html) Compile global constraints into coefficient inequalities.
+  + [`compilePointConstraints`](/spline-core/classes/constrainedspline/compilepointconstraints.html) Compile point constraints into equality and inequality systems.
+  + [`monotonicDifferenceMatrix`](/spline-core/classes/constrainedspline/monotonicdifferencematrix.html) Build coefficient-difference inequalities along one dimension.
++ Solve fit systems
+  + [`constrainedWeightedSolution`](/spline-core/classes/constrainedspline/constrainedweightedsolution.html) Solve weighted least squares with optional linear constraints.
+  + [`leftSolve`](/spline-core/classes/constrainedspline/leftsolve.html) Solve a linear system, falling back to a pseudoinverse if needed.
+  + [`tensorModelSolution`](/spline-core/classes/constrainedspline/tensormodelsolution.html) Solve the tensor noisy-data model with iteratively reweighted least squares.
+  + [`weightMatrixFromSigma2`](/spline-core/classes/constrainedspline/weightmatrixfromsigma2.html) Build the observation-weight matrix from per-observation variances.
+  + [`weightedNormalEquations`](/spline-core/classes/constrainedspline/weightednormalequations.html) Assemble weighted normal equations.
 
 
 ---

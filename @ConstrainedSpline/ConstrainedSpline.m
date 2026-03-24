@@ -2,10 +2,10 @@ classdef ConstrainedSpline < TensorSpline
     % Tensor-product spline fit through noisy data values.
     %
     % `ConstrainedSpline` is the noisy-data fitting counterpart to
-    % `InterpolatingSpline`. It fits a tensor-product spline basis to values
-    % sampled on a one-dimensional grid or a rectilinear tensor grid, with
-    % optional robust weighting, observation covariance, local point
-    % constraints, and global shape constraints.
+    % `InterpolatingSpline`. It fits a tensor-product spline basis to
+    % observations sampled on a one-dimensional grid or a rectilinear tensor
+    % grid, with optional robust weighting, correlated observation errors,
+    % local point constraints, and global shape constraints.
     %
     % At each iteratively reweighted least-squares step it solves
     %
@@ -21,9 +21,14 @@ classdef ConstrainedSpline < TensorSpline
     % $$
     %
     % When the distribution model provides correlated errors, the code
-    % forms a covariance model from the per-observation variances and the
-    % correlation kernel, then solves the weighted system through a matrix
-    % factorization rather than explicitly inverting the covariance.
+    % forms an observation covariance
+    %
+    % $$
+    % \Sigma_{ij} = \sigma_i \rho(x_i,x_j)\sigma_j
+    % $$
+    %
+    % and applies the corresponding weighted solve through a matrix
+    % factorization rather than explicitly forming `\Sigma^{-1}`.
     %
     % ## Basic usage
     %
@@ -42,35 +47,66 @@ classdef ConstrainedSpline < TensorSpline
     % - Topic: Analyze the fit
     % - Topic: Choose constraint locations
     % - Topic: Prepare knot sequences
+    % - Topic: Prepare fit inputs
+    % - Topic: Compile constraints
+    % - Topic: Solve fit systems
     % - Declaration: classdef ConstrainedSpline < TensorSpline
 
     properties (SetAccess = private)
         % Grid vectors used to define the fitted rectilinear lattice.
+        %
+        % These are the one-dimensional coordinate vectors that define the
+        % observation lattice passed to the constructor. They are the
+        % grid-aligned counterpart to
+        % [`dataPoints`](/spline-core/classes/constrainedspline/datapoints.html).
         %
         % - Topic: Inspect fit results
         gridVectors
 
         % Error model used while fitting the tensor spline.
         %
+        % The `distribution` object defines how residuals are converted into
+        % per-observation variances and, optionally, a correlation model. It
+        % therefore controls the weight matrix in the objective
+        %
+        % $$
+        % (y - \mathbf{B}\xi)^T W (y - \mathbf{B}\xi).
+        % $$
+        %
         % - Topic: Inspect fit results
         distribution
 
         % Observation locations as an N-by-D point matrix.
+        %
+        % Each row is one observation location in physical coordinates. For
+        % gridded inputs, `dataPoints` is the explicit point-matrix form of
+        % [`gridVectors`](/spline-core/classes/constrainedspline/gridvectors.html).
         %
         % - Topic: Inspect fit results
         dataPoints
         
         % Observation values as an N-by-1 vector.
         %
+        % This is the flattened data vector `y` that appears in the
+        % weighted least-squares objective.
+        %
         % - Topic: Inspect fit results
         dataValues
 
         % Local point constraints used during fitting.
         %
+        % These constraints are compiled into rows of
+        % `Aeq * xi = beq` or `Aineq * xi <= bineq` by evaluating the spline
+        % basis or its derivatives at specified points.
+        %
         % - Topic: Inspect fit results
         pointConstraints
 
         % Global shape constraints used during fitting.
+        %
+        % These are coefficient-level sufficient conditions for shapes such
+        % as positivity and monotonicity. They are compiled into the
+        % inequality system `Aineq * xi <= bineq`.
         %
         % - Topic: Inspect fit results
         globalConstraints
@@ -291,9 +327,6 @@ classdef ConstrainedSpline < TensorSpline
     methods (Static)
         knotPoints = terminatedKnotPoints(knotPoints, S)
         tc = minimumConstraintPoints(knotPoints, S, T)
-    end
-
-    methods (Static, Access = private)
         [xi,CmInv,W] = tensorModelSolution(values, designMatrix, distribution, rho_X, Aeq, beq, Aineq, bineq)
 
         % Constraint compilation.

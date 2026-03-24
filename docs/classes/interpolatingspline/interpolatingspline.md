@@ -29,9 +29,10 @@ Create an interpolating spline on one-dimensional samples or a rectilinear grid.
 ## Discussion
 
   Use this constructor when your data already live on a
-  rectilinear grid and should be reproduced exactly by the spline.
-  Supply a numeric vector in 1-D or a cell array of grid vectors
-  in higher dimensions together with the sampled value array.
+  rectilinear grid and should be reproduced exactly by the
+  spline. Supply a numeric vector in 1-D or a cell array of grid
+  vectors in higher dimensions together with the sampled value
+  array.
 
   The implementation builds one knot vector per dimension from
   the supplied grid vectors, standardizes the sampled values, and
@@ -42,7 +43,9 @@ Create an interpolating spline on one-dimensional samples or a rectilinear grid.
   $$
 
   where $$\mathbf{B}$$ is the tensor-product basis matrix
-  evaluated on the grid points.
+  evaluated on the grid points. Because the knot vectors are
+  built from the supplied grid, the resulting system is square
+  for standard interpolation setups.
 
   ```matlab
   x = linspace(0,1,8)';
