@@ -34,7 +34,7 @@ if options.D > self.K-1
     x_out = zeros(size(t), 'like', t);
     return;
 end
-x_out = BSpline.evaluateFromPPCoefficients(t,self.C,self.t_pp,options.D);
+x_out = BSpline.evaluateFromPPCoefficients(queryPoints=t, C=self.C, tpp=self.t_pp, D=options.D);
 if ~isempty(self.xStd)
     x_out = self.xStd*x_out;
 end

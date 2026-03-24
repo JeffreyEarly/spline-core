@@ -63,7 +63,7 @@ classdef TensorSplineUnitTests < matlab.unittest.TestCase
 
             spline = InterpolatingSpline({x, y}, F, S=[3 3]);
             queryPoints = [X(:), Y(:)];
-            basisMatrix = TensorSpline.matrix(queryPoints, spline.knotPoints, spline.S);
+            basisMatrix = TensorSpline.matrixForPointMatrix(queryPoints, knotPoints=spline.knotPoints, S=spline.S);
             values = reshape(basisMatrix * spline.xi(:), size(F));
             values = spline.xStd * values + spline.xMean;
 
@@ -255,7 +255,7 @@ classdef TensorSplineUnitTests < matlab.unittest.TestCase
             y = linspace(0,2,7)';
             spline = InterpolatingSpline({x, y}, x .* y', S=[3 3]);
 
-            [supportPoints, supportVectors] = TensorSpline.pointsOfSupport(spline.knotPoints, spline.S);
+            [supportPoints, supportVectors] = TensorSpline.pointsOfSupportFromKnotPoints(spline.knotPoints, S=spline.S);
 
             testCase.verifySize(supportPoints, [prod(spline.basisSize), spline.numDimensions])
             testCase.verifyEqual(cellfun(@numel, supportVectors), spline.basisSize)
@@ -339,9 +339,9 @@ classdef TensorSplineUnitTests < matlab.unittest.TestCase
             F = X.^2 + Y + 2;
             spline = InterpolatingSpline({x, y}, F, S=[3 3]);
             squaredSpline = spline.^2;
-            [supportPoints, supportVectors] = TensorSpline.pointsOfSupport(spline.knotPoints, spline.S);
+            [supportPoints, supportVectors] = TensorSpline.pointsOfSupportFromKnotPoints(spline.knotPoints, S=spline.S);
             [Xsup, Ysup] = ndgrid(supportVectors{:});
-            expected = reshape(TensorSpline.matrix(supportPoints, spline.knotPoints, spline.S) * spline.xi(:), cellfun(@numel, supportVectors));
+            expected = reshape(TensorSpline.matrixForPointMatrix(supportPoints, knotPoints=spline.knotPoints, S=spline.S) * spline.xi(:), cellfun(@numel, supportVectors));
             expected = spline.xStd * expected + spline.xMean;
 
             testCase.assertThat(squaredSpline(Xsup, Ysup),  IsEqualTo(expected.^2, 'Within', AbsoluteTolerance(1e-10)))
@@ -357,9 +357,9 @@ classdef TensorSplineUnitTests < matlab.unittest.TestCase
             F = (X + 1).^2 + (Y + 2).^2;
             spline = InterpolatingSpline({x, y}, F, S=[3 3]);
             rootedSpline = sqrt(spline);
-            [supportPoints, supportVectors] = TensorSpline.pointsOfSupport(spline.knotPoints, spline.S);
+            [supportPoints, supportVectors] = TensorSpline.pointsOfSupportFromKnotPoints(spline.knotPoints, S=spline.S);
             [Xsup, Ysup] = ndgrid(supportVectors{:});
-            expected = reshape(TensorSpline.matrix(supportPoints, spline.knotPoints, spline.S) * spline.xi(:), cellfun(@numel, supportVectors));
+            expected = reshape(TensorSpline.matrixForPointMatrix(supportPoints, knotPoints=spline.knotPoints, S=spline.S) * spline.xi(:), cellfun(@numel, supportVectors));
             expected = spline.xStd * expected + spline.xMean;
 
             testCase.assertThat(rootedSpline(Xsup, Ysup),  IsEqualTo(sqrt(expected), 'Within', AbsoluteTolerance(1e-10)))

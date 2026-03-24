@@ -1,10 +1,10 @@
-function B = matrix(X, knotPoints, S, options)
+function B = matrixForPointMatrix(pointMatrix, options)
 % Evaluate the tensor-product basis matrix and optional derivatives.
 %
 % Use this to assemble a tensor-product design matrix for
 % interpolation, regression, or basis inspection.
 %
-% If `X` has rows `x_i`, then row `i` of the returned matrix is the
+% If `pointMatrix` has rows `x_i`, then row `i` of the returned matrix is the
 % Kronecker product of the one-dimensional basis rows evaluated at `x_i`.
 % In other words,
 %
@@ -18,23 +18,25 @@ function B = matrix(X, knotPoints, S, options)
 %
 % ```matlab
 % [Xq, Yq] = ndgrid(xq, yq);
-% B = TensorSpline.matrix([Xq(:), Yq(:)], knotPoints, [3 3]);
+% B = TensorSpline.matrixForPointMatrix([Xq(:), Yq(:)], knotPoints=knotPoints, S=[3 3]);
 % values = B * spline.xi(:);
 % ```
 %
 % - Topic: Build spline bases
-% - Declaration: B = matrix(X, knotPoints, S, options)
-% - Parameter X: query locations as a point matrix
-% - Parameter knotPoints: knot vector in 1-D or cell array of knot vectors
-% - Parameter S: spline degree scalar or vector with one entry per dimension
+% - Declaration: B = matrixForPointMatrix(pointMatrix, options)
+% - Parameter pointMatrix: query locations as a point matrix
+% - Parameter options.knotPoints: knot vector in 1-D or cell array of knot vectors
+% - Parameter options.S: spline degree scalar or vector with one entry per dimension
 % - Parameter options.D: derivative order per dimension
 % - Returns B: basis matrix with one row per query point
 arguments
-    X {mustBeNumeric,mustBeReal}
-    knotPoints
-    S {mustBeNumeric,mustBeReal,mustBeFinite,mustBeInteger,mustBeNonnegative}
+    pointMatrix {mustBeNumeric,mustBeReal}
+    options.knotPoints
+    options.S {mustBeNumeric,mustBeReal,mustBeFinite,mustBeInteger,mustBeNonnegative}
     options.D = 0
 end
+knotPoints = options.knotPoints;
+S = options.S;
 
 if isnumeric(knotPoints)
     validateattributes(knotPoints, {'numeric'}, {'vector','real','finite','nonempty'});
@@ -49,12 +51,11 @@ derivativeOrders = TensorSpline.normalizeDerivativeOrders(options.D, numDimensio
 basisSize = TensorSpline.basisSizeFromKnotCell(tKnot, K);
 
 if numDimensions == 1
-    pointMatrix = reshape(X, [], 1);
+    pointMatrix = reshape(pointMatrix, [], 1);
 else
-    if size(X,2) ~= numDimensions
+    if size(pointMatrix,2) ~= numDimensions
         error('TensorSpline:InvalidPointMatrix', 'Point matrix must have one column per dimension.');
     end
-    pointMatrix = X;
 end
 
 if any(derivativeOrders > K - 1)
@@ -65,7 +66,7 @@ end
 numPoints = size(pointMatrix,1);
 dimensionMatrices = cell(1, numDimensions);
 for iDim = 1:numDimensions
-    Bi = BSpline.matrix(pointMatrix(:,iDim), tKnot{iDim}, K(iDim) - 1, D=derivativeOrders(iDim));
+    Bi = BSpline.matrixForDataPoints(pointMatrix(:,iDim), knotPoints=tKnot{iDim}, S=K(iDim) - 1, D=derivativeOrders(iDim));
     dimensionMatrices{iDim} = reshape(Bi(:,:,derivativeOrders(iDim)+1), numPoints, []);
 end
 

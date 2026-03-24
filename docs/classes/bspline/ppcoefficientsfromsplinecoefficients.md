@@ -18,12 +18,12 @@ Convert spline coefficients into piecewise-polynomial interval coefficients.
 
 ## Declaration
 ```matlab
- ppCoefficientsFromSplineCoefficients(xi, knotPoints, S, Xtpp)
+ [C,tpp,Xtpp] = ppCoefficientsFromSplineCoefficients(options)
 ```
 ## Parameters
-+ `xi`  spline coefficients
-+ `knotPoints`  spline knot points
-+ `S`  spline degree
++ `options.xi`  spline coefficients
++ `options.knotPoints`  spline knot points
++ `options.S`  spline degree
 + `options.Xtpp`  (optional) splines at the points tpp
 
 ## Returns
@@ -45,8 +45,8 @@ Convert spline coefficients into piecewise-polynomial interval coefficients.
   `evaluateFromPPCoefficients`.
 
   ```matlab
-  [C, tpp] = BSpline.ppCoefficientsFromSplineCoefficients(xi, knotPoints, 3);
-  xq = BSpline.evaluateFromPPCoefficients(tQuery, C, tpp);
+  [C, tpp] = BSpline.ppCoefficientsFromSplineCoefficients(xi=xi, knotPoints=knotPoints, S=3);
+  xq = BSpline.evaluateFromPPCoefficients(queryPoints=tQuery, C=C, tpp=tpp);
   ```
 
 

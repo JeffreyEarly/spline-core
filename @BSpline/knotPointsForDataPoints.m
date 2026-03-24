@@ -1,4 +1,4 @@
-function knotPoints = knotPointsForDataPoints(t, options)
+function knotPoints = knotPointsForDataPoints(dataPoints, options)
 % Construct a terminated knot sequence from sample locations.
 %
 % Use this helper to choose a knot sequence directly from sample
@@ -30,19 +30,19 @@ function knotPoints = knotPointsForDataPoints(t, options)
 %
 % ```matlab
 % knotPoints = BSpline.knotPointsForDataPoints(t, S=3);
-% X = BSpline.matrix(t, knotPoints, 3);
+% X = BSpline.matrixForDataPoints(t, knotPoints=knotPoints, S=3);
 % xi = X \ x;
 % spline = BSpline(S=3, knotPoints=knotPoints, xi=xi);
 % ```
 %
 % - Topic: Build spline bases
-% - Declaration: knotPoints = knotPointsForDataPoints(t, options)
-% - Parameter t: observation times (N)
+% - Declaration: knotPoints = knotPointsForDataPoints(dataPoints, options)
+% - Parameter dataPoints: observation times (N)
 % - Parameter options.S: (optional) spline degree
 % - Parameter options.splineDOF: (optional) approximate target number of splines
 % - Returns knotPoints: vector of knot point locations
 arguments
-    t (:,1) double
+    dataPoints (:,1) double
     options.S (1,1) double {mustBeNonnegative,mustBeInteger} = 3
     options.splineDOF (1,1) double = NaN
 end
@@ -55,12 +55,12 @@ end
 
 if ~isnan(options.splineDOF)
     targetSplines = max(options.splineDOF, K);
-    sampleStride = ceil(numel(t)/targetSplines);
+    sampleStride = ceil(numel(dataPoints)/targetSplines);
 else
     sampleStride = 1;
 end
 
-tData = sort(t);
+tData = sort(dataPoints);
 tData = [tData(1); tData(1+sampleStride:sampleStride:end-sampleStride); tData(end)];
 M = numel(tData);
 mustBeGreaterThanOrEqual(M, K);

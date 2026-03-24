@@ -1,4 +1,4 @@
-function B = matrix(t, knotPoints, S, options)
+function B = matrixForDataPoints(dataPoints, options)
 % Evaluate terminated B-spline basis functions and optional derivatives.
 %
 % Use this to assemble a design matrix for interpolation, regression, or
@@ -11,27 +11,30 @@ function B = matrix(t, knotPoints, S, options)
 % $$
 %
 % When `D > 0`, slice `B(:,:,d+1)` stores the basis values for derivative
-% order `d`, so `B(:,:,d+1) * xi` evaluates the `d`th derivative at `t`.
+% order `d`, so `B(:,:,d+1) * xi` evaluates the `d`th derivative at
+% `dataPoints`.
 %
 % ```matlab
-% B = BSpline.matrix(t, knotPoints, 3);
+% B = BSpline.matrixForDataPoints(t, knotPoints=knotPoints, S=3);
 % xi = B \ x;
 % spline = BSpline(S=3, knotPoints=knotPoints, xi=xi);
 % ```
 %
 % - Topic: Build spline bases
-% - Declaration: B = matrix(t, knotPoints, S, options)
-% - Parameter t: points at which to evaluate the splines
-% - Parameter knotPoints: spline knot points
-% - Parameter S: spline degree
+% - Declaration: B = matrixForDataPoints(dataPoints, options)
+% - Parameter dataPoints: points at which to evaluate the splines
+% - Parameter options.knotPoints: spline knot points
+% - Parameter options.S: spline degree
 % - Parameter options.D: (optional) number of spline derivatives to return, max(D)=S
-% - Returns B: array of size `numel(t) x M x (D+1)` where `M = numel(knotPoints) - S - 1`
+% - Returns B: array of size `numel(dataPoints) x M x (D+1)` where `M = numel(knotPoints) - S - 1`
 arguments
-    t (:,1) double {mustBeNumeric,mustBeReal}
-    knotPoints (:,1) double {mustBeNumeric,mustBeReal}
-    S (1,1) double {mustBeInteger,mustBeNonnegative}
+    dataPoints (:,1) double {mustBeNumeric,mustBeReal}
+    options.knotPoints (:,1) double {mustBeNumeric,mustBeReal}
+    options.S (1,1) double {mustBeInteger,mustBeNonnegative}
     options.D (1,1) double {mustBeInteger,mustBeNonnegative} = 0
 end
+knotPoints = options.knotPoints;
+S = options.S;
 K = S + 1;
 
 if any(diff(knotPoints) < 0)
@@ -55,14 +58,14 @@ end
 N_splines = M - K;
 
 % number of collocation points
-N = length(t);
+N = length(dataPoints);
 
 % 1st index is the N collocation points
 % 2nd index is the the M splines
 B = zeros(N,N_splines,D+1); % This will contain all splines and their derivatives
 delta_r = zeros(N,K);
 delta_l = zeros(N,K);
-knot_indices = discretize(t,knotPoints(1:(M-K+1)));
+knot_indices = discretize(dataPoints,knotPoints(1:(M-K+1)));
 
 % XB will contain all splines from (K-D) through order (K-1).
 % These are needed to compute the derivatives of the spline, if
@@ -81,8 +84,8 @@ end
 b = zeros(N,K);
 b(:,1) = 1;
 for j=1:(K-1) % loop through splines of increasing order: j+1
-    delta_r(:,j) = knotPoints(knot_indices+j) - t;
-    delta_l(:,j) = t - knotPoints(knot_indices+1-j);
+    delta_r(:,j) = knotPoints(knot_indices+j) - dataPoints;
+    delta_l(:,j) = dataPoints - knotPoints(knot_indices+1-j);
 
     saved = zeros(N,1);
     for r=1:j % loop through the nonzero splines

@@ -34,8 +34,8 @@ knotPoints = spline.knotPoints;
 M = length(xi);
 
 if abs(spline.xMean) > 0 || abs(spline.xStd - 1) > 0
-    t = BSpline.pointsOfSupport(spline.knotPoints, spline.S);
-    X = BSpline.matrix(t, spline.knotPoints, spline.S);
+    t = BSpline.pointsOfSupportFromKnotPoints(spline.knotPoints, S=spline.S);
+    X = BSpline.matrixForDataPoints(t, knotPoints=spline.knotPoints, S=spline.S);
     xi = spline.xStd*spline.xi + X\(spline.xMean*ones(length(t),1));
 end
 

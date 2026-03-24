@@ -245,7 +245,7 @@ classdef ConstrainedSpline < TensorSpline
             constraints = reshape(options.constraints, [], 1);
             [pointConstraints, globalConstraints] = ConstrainedSpline.normalizeConstraintInputs(constraints, numDimensions);
 
-            Xbasis = TensorSpline.matrix(pointMatrix, tKnot, S);
+            Xbasis = TensorSpline.matrixForPointMatrix(pointMatrix, knotPoints=tKnot, S=S);
             rho_X = [];
             if ~isempty(distribution.rho)
                 delta = permute(pointMatrix, [1 3 2]) - permute(pointMatrix, [3 1 2]);

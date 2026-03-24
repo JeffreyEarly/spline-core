@@ -12,7 +12,7 @@ for iConstraint = 1:numel(pointConstraints)
     [groupOrders, ~, groupIndex] = unique(constraint.D, 'rows', 'stable');
     for iGroup = 1:size(groupOrders, 1)
         isGroup = groupIndex == iGroup;
-        B = sparse(TensorSpline.matrix(constraint.points(isGroup,:), tKnot, K - 1, D=groupOrders(iGroup,:)));
+        B = sparse(TensorSpline.matrixForPointMatrix(constraint.points(isGroup,:), knotPoints=tKnot, S=K - 1, D=groupOrders(iGroup,:)));
         values = constraint.value(isGroup);
 
         switch constraint.relation

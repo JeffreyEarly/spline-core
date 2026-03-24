@@ -83,9 +83,9 @@ F = spline(Xq, Yq);
   + [`roots`](/spline-core/classes/tensorspline/roots.html) Return real roots of a one-dimensional tensor spline within its domain.
   + [`sqrt`](/spline-core/classes/tensorspline/sqrt.html) Return a tensor spline approximation to the square root of the spline output.
 + Build spline bases
-  + [`matrix`](/spline-core/classes/tensorspline/matrix.html) Evaluate the tensor-product basis matrix and optional derivatives.
+  + [`matrixForPointMatrix`](/spline-core/classes/tensorspline/matrixforpointmatrix.html) Evaluate the tensor-product basis matrix and optional derivatives.
   + [`pointsFromGridVectors`](/spline-core/classes/tensorspline/pointsfromgridvectors.html) Convert rectilinear grid vectors into an explicit point matrix.
-  + [`pointsOfSupport`](/spline-core/classes/tensorspline/pointsofsupport.html) Return representative support points for a tensor-product spline basis.
+  + [`pointsOfSupportFromKnotPoints`](/spline-core/classes/tensorspline/pointsofsupportfromknotpoints.html) Return representative support points for a tensor-product spline basis.
 
 
 ---

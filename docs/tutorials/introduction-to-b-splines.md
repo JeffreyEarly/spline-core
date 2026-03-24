@@ -118,14 +118,14 @@ exact interpolation.
 building blocks are public on `BSpline`.
 
 Use `BSpline.knotPointsForDataPoints` to construct the canonical knot
-sequence, `BSpline.matrix` to assemble the design matrix, and the
+sequence, `BSpline.matrixForDataPoints` to assemble the design matrix, and the
 `BSpline` constructor when you want to work with a basis expansion
 directly.
 
 ```matlab
 canonicalOrder = 4;
 canonicalTKnot = BSpline.knotPointsForDataPoints(tData, S=canonicalOrder-1);
-canonicalBasis = BSpline.matrix(tData, canonicalTKnot, canonicalOrder-1);
+canonicalBasis = BSpline.matrixForDataPoints(tData, knotPoints=canonicalTKnot, S=canonicalOrder-1);
 canonicalSpline = BSpline(S=canonicalOrder-1, knotPoints=canonicalTKnot, xi=canonicalBasis \ xData);
 ```
 
@@ -163,7 +163,7 @@ $$
 
 To visualize the basis directly, we keep one irregular knot sequence
 fixed and activate a single coefficient in a `BSpline` object. This is
-the same object you would get after solving against `BSpline.matrix`,
+the same object you would get after solving against `BSpline.matrixForDataPoints`,
 except here we choose the coefficients by hand to isolate one basis
 function.
 

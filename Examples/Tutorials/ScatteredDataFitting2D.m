@@ -1,7 +1,7 @@
 %% Tutorial Metadata
 % Title: Scattered Data Fitting in 2D
 % Slug: scattered-data-fitting-2d
-% Description: Fit a tensor-product spline to scattered two-dimensional observations and use dataDOF to control knot density in each coordinate direction.
+% Description: Fit a tensor-product spline to scattered two-dimensional observations and use splineDOF to control knot density in each coordinate direction.
 % NavOrder: 7
 
 %% Fit a tensor spline to scattered observations
@@ -12,10 +12,9 @@
 %
 % The tensor basis is still separable by coordinate direction, so we choose
 % one knot vector for `x` and one for `y`. The helper
-% `BSpline.knotPointsForDataPoints(..., dataDOF=...)` is useful here:
-% increasing `dataDOF` thins the sorted sample coordinates before knot
-% placement, producing fewer splines per dimension and therefore a
-% smoother, cheaper fit.
+% `BSpline.knotPointsForDataPoints(dataPoints, splineDOF=...)` is useful here:
+% increasing `splineDOF` produces more splines per dimension and therefore
+% a more flexible, more expensive fit.
 
 rng(11)
 numObservations = 450;
@@ -27,16 +26,17 @@ zTrue = truth(P(:,1), P(:,2));
 zObs = zTrue + 0.06*randn(size(zTrue));
 
 K = [4 4];
-denseDOF = [22 22];
-coarseDOF = [30 30];
+S = K - 1;
+denseSplineDOF = max(K, ceil(numObservations ./ [22 22]));
+coarseSplineDOF = max(K, ceil(numObservations ./ [30 30]));
 
 denseTKnot = {
-    BSpline.knotPointsForDataPoints(P(:,1), K=K(1), dataDOF=denseDOF(1))
-    BSpline.knotPointsForDataPoints(P(:,2), K=K(2), dataDOF=denseDOF(2))
+    BSpline.knotPointsForDataPoints(P(:,1), S=S(1), splineDOF=denseSplineDOF(1))
+    BSpline.knotPointsForDataPoints(P(:,2), S=S(2), splineDOF=denseSplineDOF(2))
     };
 coarseTKnot = {
-    BSpline.knotPointsForDataPoints(P(:,1), K=K(1), dataDOF=coarseDOF(1))
-    BSpline.knotPointsForDataPoints(P(:,2), K=K(2), dataDOF=coarseDOF(2))
+    BSpline.knotPointsForDataPoints(P(:,1), S=S(1), splineDOF=coarseSplineDOF(1))
+    BSpline.knotPointsForDataPoints(P(:,2), S=S(2), splineDOF=coarseSplineDOF(2))
     };
 
 denseFit = ConstrainedSpline.fromPoints(P, zObs, K=K, tKnot=denseTKnot);
@@ -70,7 +70,7 @@ axis xy equal tight
 colorbar
 xlabel("y")
 ylabel("x")
-title(sprintf("Fit with dataDOF = [%d %d]", denseDOF(1), denseDOF(2)))
+title(sprintf("Fit with splineDOF = [%d %d]", denseSplineDOF(1), denseSplineDOF(2)))
 
 nexttile
 imagesc(yq, xq, Zcoarse)
@@ -78,9 +78,9 @@ axis xy equal tight
 colorbar
 xlabel("y")
 ylabel("x")
-title(sprintf("Fit with dataDOF = [%d %d]", coarseDOF(1), coarseDOF(2)))
+title(sprintf("Fit with splineDOF = [%d %d]", coarseSplineDOF(1), coarseSplineDOF(2)))
 
-if exist("tutorialFigureCapture", "var") && isa(tutorialFigureCapture, "function_handle"), tutorialFigureCapture("scattered-fit-fields", Caption="ConstrainedSpline fits a tensor-product surface directly to scattered 2D observations. The per-dimension dataDOF choice controls the knot density and therefore the flexibility of the fitted field."); end
+if exist("tutorialFigureCapture", "var") && isa(tutorialFigureCapture, "function_handle"), tutorialFigureCapture("scattered-fit-fields", Caption="ConstrainedSpline fits a tensor-product surface directly to scattered 2D observations. The per-dimension splineDOF choice controls the knot density and therefore the flexibility of the fitted field."); end
 
 %% Compare dense and coarse knot choices on a transect
 % The denser fit uses more splines per coordinate direction, while the
@@ -100,20 +100,20 @@ plot(xTransect, zTransectDense, LineWidth=2)
 plot(xTransect, zTransectCoarse, LineWidth=2)
 xlabel("x")
 ylabel("z(x, 0)")
-legend(  "Truth",  sprintf("dataDOF [%d %d], basis [%d %d]", denseDOF(1), denseDOF(2), denseBasisSize(1), denseBasisSize(2)),  sprintf("dataDOF [%d %d], basis [%d %d]", coarseDOF(1), coarseDOF(2), coarseBasisSize(1), coarseBasisSize(2)),  Location="southoutside")
+legend(  "Truth",  sprintf("splineDOF [%d %d], basis [%d %d]", denseSplineDOF(1), denseSplineDOF(2), denseBasisSize(1), denseBasisSize(2)),  sprintf("splineDOF [%d %d], basis [%d %d]", coarseSplineDOF(1), coarseSplineDOF(2), coarseBasisSize(1), coarseBasisSize(2)),  Location="southoutside")
 grid on
 
-if exist("tutorialFigureCapture", "var") && isa(tutorialFigureCapture, "function_handle"), tutorialFigureCapture("scattered-fit-transect", Caption="Larger dataDOF produces fewer splines per coordinate direction, which reduces model size and yields a smoother scattered-data fit."); end
+if exist("tutorialFigureCapture", "var") && isa(tutorialFigureCapture, "function_handle"), tutorialFigureCapture("scattered-fit-transect", Caption="Smaller splineDOF produces fewer splines per coordinate direction, which reduces model size and yields a smoother scattered-data fit."); end
 
-%% Use dataDOF when the raw coordinate cloud is too dense
-% For scattered 2D fitting, `dataDOF` is often more practical than
+%% Use splineDOF when the raw coordinate cloud is too dense
+% For scattered 2D fitting, `splineDOF` is often more practical than
 % building knot vectors from every observed coordinate value. The pattern
 % is
 %
 % ```matlab
 % tKnot = {
-%     BSpline.knotPointsForDataPoints(P(:,1), K=4, dataDOF=22)
-%     BSpline.knotPointsForDataPoints(P(:,2), K=4, dataDOF=22)
+%     BSpline.knotPointsForDataPoints(P(:,1), S=3, splineDOF=21)
+%     BSpline.knotPointsForDataPoints(P(:,2), S=3, splineDOF=21)
 %     };
 %
 % fit = ConstrainedSpline.fromPoints(P, zObs, K=[4 4], tKnot=tKnot);

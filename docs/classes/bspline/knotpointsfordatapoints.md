@@ -16,10 +16,10 @@ Construct a terminated knot sequence from sample locations.
 
 ## Declaration
 ```matlab
- knotPoints = knotPointsForDataPoints(t, options)
+ knotPoints = knotPointsForDataPoints(dataPoints, options)
 ```
 ## Parameters
-+ `t`  observation times (N)
++ `dataPoints`  observation times (N)
 + `options.S`  (optional) spline degree
 + `options.splineDOF`  (optional) approximate target number of splines
 
@@ -57,7 +57,7 @@ Construct a terminated knot sequence from sample locations.
 
   ```matlab
   knotPoints = BSpline.knotPointsForDataPoints(t, S=3);
-  X = BSpline.matrix(t, knotPoints, 3);
+  X = BSpline.matrixForDataPoints(t, knotPoints=knotPoints, S=3);
   xi = X \ x;
   spline = BSpline(S=3, knotPoints=knotPoints, xi=xi);
   ```

@@ -259,9 +259,9 @@ classdef TensorSpline < handle
     end
 
     methods (Static)
-        B = matrix(X, knotPoints, S, options)
+        B = matrixForPointMatrix(pointMatrix, options)
         [pointMatrix, gridSize] = pointsFromGridVectors(gridVectors)
-        [pointMatrix, supportVectors] = pointsOfSupport(knotPoints, S)
+        [pointMatrix, supportVectors] = pointsOfSupportFromKnotPoints(knotPoints, options)
     end
 
     methods (Static, Hidden)

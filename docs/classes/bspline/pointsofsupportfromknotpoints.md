@@ -1,13 +1,13 @@
 ---
 layout: default
-title: pointsOfSupport
+title: pointsOfSupportFromKnotPoints
 parent: BSpline
 grand_parent: Classes
 nav_order: 16
 mathjax: true
 ---
 
-#  pointsOfSupport
+#  pointsOfSupportFromKnotPoints
 
 Return representative support points for a terminated spline basis.
 
@@ -16,11 +16,11 @@ Return representative support points for a terminated spline basis.
 
 ## Declaration
 ```matlab
- t = pointsOfSupport(knotPoints, S)
+ t = pointsOfSupportFromKnotPoints(knotPoints, options)
 ```
 ## Parameters
 + `knotPoints`  knot sequence
-+ `S`  spline degree
++ `options.S`  spline degree
 
 ## Returns
 + `t`  support point locations
@@ -37,7 +37,7 @@ Return representative support points for a terminated spline basis.
   sampled values.
 
   ```matlab
-  tSupport = BSpline.pointsOfSupport(knotPoints, 3);
+  tSupport = BSpline.pointsOfSupportFromKnotPoints(knotPoints, S=3);
   xSupport = spline(tSupport);
   ```
 

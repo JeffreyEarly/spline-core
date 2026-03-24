@@ -5,9 +5,9 @@
 
 K = 3;
 t = linspace(0, 20, 21)';
-tKnot = BSpline.knotPointsForDataPoints(t, K=K);
+tKnot = BSpline.knotPointsForDataPoints(t, S=K-1);
 
-B = BSpline.matrix(t, tKnot, K, D=2);
+B = BSpline.matrixForDataPoints(t, knotPoints=tKnot, S=K-1, D=2);
 X = B(:,:,1);
 A = B(:,:,3);
 splineSecondDerivativeOperator = A / X;

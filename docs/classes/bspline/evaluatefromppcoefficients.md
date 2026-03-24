@@ -18,20 +18,20 @@ Evaluate a cached piecewise-polynomial spline representation.
 
 ## Declaration
 ```matlab
- f = evaluateFromPPCoefficients(t,C,tpp, D)
+ f = evaluateFromPPCoefficients(options)
 ```
 ## Parameters
-+ `t`  points at which to evaluate the splines
-+ `C`  polynomial coefficients to be used in polyval, size(C) = [length(tpp)-1, K]
-+ `tpp`  piece-wise polynomial intervals
-+ `D`  number of derivatives
++ `options.queryPoints`  points at which to evaluate the splines
++ `options.C`  polynomial coefficients to be used in polyval, size(C) = [length(tpp)-1, K]
++ `options.tpp`  piece-wise polynomial intervals
++ `options.D`  number of derivatives
 
 ## Returns
-+ `f`  array the same size as t
++ `f`  array the same size as queryPoints
 
 ## Discussion
 
-  On interval `i`, let `u = t - tpp(i)`. This function evaluates
+  On interval `i`, let `u = queryPoints - tpp(i)`. This function evaluates
 
   $$
   f_i^{(D)}(u) = \sum_{m=D}^{S} \frac{c_{i,m}}{(m-D)!} u^{m-D},
@@ -40,8 +40,8 @@ Evaluate a cached piecewise-polynomial spline representation.
   where the interval coefficients $$c_{i,m}$$ are stored in `C`.
 
   ```matlab
-  xq = BSpline.evaluateFromPPCoefficients(tQuery, C, tpp);
-  dxq = BSpline.evaluateFromPPCoefficients(tQuery, C, tpp, 1);
+  xq = BSpline.evaluateFromPPCoefficients(queryPoints=tQuery, C=C, tpp=tpp);
+  dxq = BSpline.evaluateFromPPCoefficients(queryPoints=tQuery, C=C, tpp=tpp, D=1);
   ```
 
 

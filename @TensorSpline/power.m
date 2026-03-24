@@ -29,8 +29,8 @@ if exponent == 1
     return;
 end
 
-[supportPoints, supportVectors] = TensorSpline.pointsOfSupport(self.knotPoints, self.S);
-basisMatrix = TensorSpline.matrix(supportPoints, self.knotPoints, self.S);
+[supportPoints, supportVectors] = TensorSpline.pointsOfSupportFromKnotPoints(self.knotPoints, S=self.S);
+basisMatrix = TensorSpline.matrixForPointMatrix(supportPoints, knotPoints=self.knotPoints, S=self.S);
 values = basisMatrix * self.xi(:);
 if ~isempty(self.xStd)
     values = self.xStd * values;
@@ -48,6 +48,6 @@ for iDim = 1:self.numDimensions
     poweredTKnot{iDim} = BSpline.knotPointsForDataPoints(supportVectors{iDim}, S=poweredK(iDim)-1);
 end
 
-X = TensorSpline.matrix(supportPoints, poweredTKnot, poweredK - 1);
+X = TensorSpline.matrixForPointMatrix(supportPoints, knotPoints=poweredTKnot, S=poweredK - 1);
 xi = X \ poweredValues(:);
 poweredSpline = TensorSpline(S=poweredK-1, knotPoints=poweredTKnot, xi=xi);

@@ -10,13 +10,13 @@ classdef BSplineUnitTests < matlab.unittest.TestCase
             t = linspace(0,3,13)';
             knotPoints = BSpline.knotPointsForDataPoints(t, S=S);
 
-            X = BSpline.matrix(t, knotPoints, S);
+            X = BSpline.matrixForDataPoints(t, knotPoints=knotPoints, S=S);
             xi = X\f(t);
-            [C,tpp] = BSpline.ppCoefficientsFromSplineCoefficients(xi, knotPoints, S);
+            [C,tpp] = BSpline.ppCoefficientsFromSplineCoefficients(xi=xi, knotPoints=knotPoints, S=S);
 
             tq = linspace(t(1),t(end),301)';
-            valuesFromMatrix = BSpline.matrix(tq, knotPoints, S) * xi;
-            valuesFromPP = BSpline.evaluateFromPPCoefficients(tq,C,tpp);
+            valuesFromMatrix = BSpline.matrixForDataPoints(tq, knotPoints=knotPoints, S=S) * xi;
+            valuesFromPP = BSpline.evaluateFromPPCoefficients(queryPoints=tq, C=C, tpp=tpp);
 
             testCase.assertThat(valuesFromPP, IsEqualTo(valuesFromMatrix, 'Within', AbsoluteTolerance(1e-10)))
         end
@@ -41,15 +41,15 @@ classdef BSplineUnitTests < matlab.unittest.TestCase
             t = linspace(0,3,13)';
             knotPoints = BSpline.knotPointsForDataPoints(t, S=S);
 
-            X = BSpline.matrix(t, knotPoints, S);
+            X = BSpline.matrixForDataPoints(t, knotPoints=knotPoints, S=S);
             xi = X\f(t);
-            [C,tpp] = BSpline.ppCoefficientsFromSplineCoefficients(xi, knotPoints, S);
+            [C,tpp] = BSpline.ppCoefficientsFromSplineCoefficients(xi=xi, knotPoints=knotPoints, S=S);
 
             tqSorted = linspace(t(1),t(end),31)';
             tqUnsorted = tqSorted([7 1 19 4 31 12 2 25 16 9 22 5 29 14 3 18 27 11 6 24 15 8 30 13 10 21 17 20 23 26 28]);
 
-            expected = BSpline.matrix(tqUnsorted, knotPoints, S) * xi;
-            actual = BSpline.evaluateFromPPCoefficients(tqUnsorted,C,tpp);
+            expected = BSpline.matrixForDataPoints(tqUnsorted, knotPoints=knotPoints, S=S) * xi;
+            actual = BSpline.evaluateFromPPCoefficients(queryPoints=tqUnsorted, C=C, tpp=tpp);
 
             testCase.assertThat(actual, IsEqualTo(expected, 'Within', AbsoluteTolerance(1e-10)))
         end
@@ -58,7 +58,7 @@ classdef BSplineUnitTests < matlab.unittest.TestCase
             t = linspace(0,1,9)';
             x = sin(2*pi*t);
             knotPoints = BSpline.knotPointsForDataPoints(t, S=3);
-            spline = BSpline(S=3, knotPoints=knotPoints, xi=BSpline.matrix(t, knotPoints, 3)\x);
+            spline = BSpline(S=3, knotPoints=knotPoints, xi=BSpline.matrixForDataPoints(t, knotPoints=knotPoints, S=3)\x);
             tq = linspace(0,1,21)';
 
             testCase.verifyEqual(feval(spline, tq), spline.valueAtPoints(tq))
@@ -155,16 +155,16 @@ classdef BSplineUnitTests < matlab.unittest.TestCase
             x = [0.3214; 0.0927; 0.1944; 0.0228; 0.0278; 0.5334; 0.9278; 0.0508; 0.3518];
             exponent = 1.376389;
             knotPoints = BSpline.knotPointsForDataPoints(t, S=3);
-            spline = BSpline(S=3, knotPoints=knotPoints, xi=BSpline.matrix(t, knotPoints, 3)\x);
+            spline = BSpline(S=3, knotPoints=knotPoints, xi=BSpline.matrixForDataPoints(t, knotPoints=knotPoints, S=3)\x);
 
             poweredSpline = spline.^exponent;
 
-            supportPoints = BSpline.pointsOfSupport(spline.knotPoints, spline.S);
+            supportPoints = BSpline.pointsOfSupportFromKnotPoints(spline.knotPoints, S=spline.S);
             supportValues = spline.valueAtPoints(supportPoints);
             supportValues(abs(supportValues) < 2*eps) = 0;
             poweredK = ceil(exponent*spline.K);
             poweredKnotPoints = BSpline.knotPointsForDataPoints(supportPoints, S=poweredK-1);
-            X = BSpline.matrix(supportPoints, poweredKnotPoints, poweredK-1);
+            X = BSpline.matrixForDataPoints(supportPoints, knotPoints=poweredKnotPoints, S=poweredK-1);
             unconstrainedSpline = BSpline(S=poweredK-1, knotPoints=poweredKnotPoints, xi=X\(supportValues.^exponent));
             tq = linspace(0,1,1001)';
 

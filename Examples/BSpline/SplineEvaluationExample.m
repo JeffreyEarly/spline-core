@@ -9,17 +9,17 @@ f = @(x) sin(2*pi*x/10);
 K = 3;
 D = K - 1;
 t = (0:10)';
-tKnot = BSpline.knotPointsForDataPoints(t, K=K);
+tKnot = BSpline.knotPointsForDataPoints(t, S=K-1);
 tqBasis = linspace(min(t), max(t), 1000)';
 tqPP = linspace(min(t) - 1, max(t) + 1, 1000)';
 
-B = BSpline.matrix(t, tKnot, K, D=D);
+B = BSpline.matrixForDataPoints(t, knotPoints=tKnot, S=K-1, D=D);
 X = B(:,:,1);
 coefficients = X\f(t);
 
-Bq = BSpline.matrix(tqBasis, tKnot, K, D=D);
-[C, tPP] = BSpline.ppCoefficientsFromSplineCoefficients(coefficients, tKnot, K);
-splineFit = InterpolatingSpline(t, f(t), K=K);
+Bq = BSpline.matrixForDataPoints(tqBasis, knotPoints=tKnot, S=K-1, D=D);
+[C, tPP] = BSpline.ppCoefficientsFromSplineCoefficients(xi=coefficients, knotPoints=tKnot, S=K-1);
+splineFit = InterpolatingSpline(t, f(t), S=K-1);
 
 titles = [
     "Evaluated with basis matrices"
@@ -45,7 +45,7 @@ for iColumn = 1:3
                 values = Bq(:,:,iDerivative + 1) * coefficients;
             case 2
                 queryPoints = tqPP;
-                values = BSpline.evaluateFromPPCoefficients(tqPP, C, tPP, iDerivative);
+                values = BSpline.evaluateFromPPCoefficients(queryPoints=tqPP, C=C, tpp=tPP, D=iDerivative);
             case 3
                 queryPoints = tqBasis;
                 values = splineFit(tqBasis, iDerivative);

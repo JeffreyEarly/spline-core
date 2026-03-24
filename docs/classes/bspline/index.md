@@ -47,7 +47,7 @@ and then evaluate the resulting spline object.
 t = linspace(0,1,20)';
 x = sin(2*pi*t);
 knotPoints = BSpline.knotPointsForDataPoints(t, S=3);
-X = BSpline.matrix(t, knotPoints, 3);
+X = BSpline.matrixForDataPoints(t, knotPoints=knotPoints, S=3);
 spline = BSpline(S=3, knotPoints=knotPoints, xi=X\x);
 
 xq = spline(linspace(0,1,100)');
@@ -82,8 +82,8 @@ xq = spline(linspace(0,1,100)');
   + [`sqrt`](/spline-core/classes/bspline/sqrt.html) Return a spline approximation to the square root of the spline output.
 + Build spline bases
   + [`knotPointsForDataPoints`](/spline-core/classes/bspline/knotpointsfordatapoints.html) Construct a terminated knot sequence from sample locations.
-  + [`matrix`](/spline-core/classes/bspline/matrix.html) Evaluate terminated B-spline basis functions and optional derivatives.
-  + [`pointsOfSupport`](/spline-core/classes/bspline/pointsofsupport.html) Return representative support points for a terminated spline basis.
+  + [`matrixForDataPoints`](/spline-core/classes/bspline/matrixfordatapoints.html) Evaluate terminated B-spline basis functions and optional derivatives.
+  + [`pointsOfSupportFromKnotPoints`](/spline-core/classes/bspline/pointsofsupportfromknotpoints.html) Return representative support points for a terminated spline basis.
 
 
 ## Developer Topics

@@ -27,7 +27,7 @@ classdef BSpline < handle
     % t = linspace(0,1,20)';
     % x = sin(2*pi*t);
     % knotPoints = BSpline.knotPointsForDataPoints(t, S=3);
-    % X = BSpline.matrix(t, knotPoints, 3);
+    % X = BSpline.matrixForDataPoints(t, knotPoints=knotPoints, S=3);
     % spline = BSpline(S=3, knotPoints=knotPoints, xi=X\x);
     %
     % xq = spline(linspace(0,1,100)');
@@ -252,10 +252,10 @@ classdef BSpline < handle
     end
     
     methods (Static)
-        knotPoints = knotPointsForDataPoints(t, options)
-        t = pointsOfSupport(knotPoints, S)
-        [C,tpp,Xtpp] = ppCoefficientsFromSplineCoefficients(xi, knotPoints, S, options)
-        f = evaluateFromPPCoefficients(t,C,tpp, D)
-        B = matrix(t, knotPoints, S, options)
+        knotPoints = knotPointsForDataPoints(dataPoints, options)
+        t = pointsOfSupportFromKnotPoints(knotPoints, options)
+        [C,tpp,Xtpp] = ppCoefficientsFromSplineCoefficients(options)
+        f = evaluateFromPPCoefficients(options)
+        B = matrixForDataPoints(dataPoints, options)
     end
 end

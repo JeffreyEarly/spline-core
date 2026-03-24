@@ -91,10 +91,10 @@ Zq = fit(Xq, Yq);
 
 ## Work directly with basis matrices
 
-- Use [`BSpline.matrix`](classes/bspline/matrix) or [`TensorSpline.matrix`](classes/tensorspline/matrix)
+- Use [`BSpline.matrixForDataPoints`](classes/bspline/matrixfordatapoints) or [`TensorSpline.matrixForPointMatrix`](classes/tensorspline/matrixforpointmatrix)
 - This is the right entry point for custom regression or inverse problems
 
 ```matlab
-B = BSpline.matrix(t, tKnot, K);
+B = BSpline.matrixForDataPoints(t, knotPoints=tKnot, S=3);
 xi = B \ x;
 ```

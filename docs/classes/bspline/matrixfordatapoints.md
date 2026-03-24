@@ -1,13 +1,13 @@
 ---
 layout: default
-title: matrix
+title: matrixForDataPoints
 parent: BSpline
 grand_parent: Classes
 nav_order: 13
 mathjax: true
 ---
 
-#  matrix
+#  matrixForDataPoints
 
 Evaluate terminated B-spline basis functions and optional derivatives.
 
@@ -16,16 +16,16 @@ Evaluate terminated B-spline basis functions and optional derivatives.
 
 ## Declaration
 ```matlab
- B = matrix(t, knotPoints, S, options)
+ B = matrixForDataPoints(dataPoints, options)
 ```
 ## Parameters
-+ `t`  points at which to evaluate the splines
-+ `knotPoints`  spline knot points
-+ `S`  spline degree
++ `dataPoints`  points at which to evaluate the splines
++ `options.knotPoints`  spline knot points
++ `options.S`  spline degree
 + `options.D`  (optional) number of spline derivatives to return, max(D)=S
 
 ## Returns
-+ `B`  array of size `numel(t) x M x (D+1)` where `M = numel(knotPoints) - S - 1`
++ `B`  array of size `numel(dataPoints) x M x (D+1)` where `M = numel(knotPoints) - S - 1`
 
 ## Discussion
 
@@ -39,10 +39,11 @@ Evaluate terminated B-spline basis functions and optional derivatives.
   $$
 
   When `D > 0`, slice `B(:,:,d+1)` stores the basis values for derivative
-  order `d`, so `B(:,:,d+1) * xi` evaluates the `d`th derivative at `t`.
+  order `d`, so `B(:,:,d+1) * xi` evaluates the `d`th derivative at
+  `dataPoints`.
 
   ```matlab
-  B = BSpline.matrix(t, knotPoints, 3);
+  B = BSpline.matrixForDataPoints(t, knotPoints=knotPoints, S=3);
   xi = B \ x;
   spline = BSpline(S=3, knotPoints=knotPoints, xi=xi);
   ```

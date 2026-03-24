@@ -140,7 +140,7 @@ classdef InterpolatingSpline < TensorSpline
             end
 
             [gridPoints, ~] = TensorSpline.pointsFromGridVectors(gridVectors);
-            basisMatrix = TensorSpline.matrix(gridPoints, tKnot, S);
+            basisMatrix = TensorSpline.matrixForPointMatrix(gridPoints, knotPoints=tKnot, S=S);
             xi = basisMatrix \ values(:);
 
             self@TensorSpline(S=S, knotPoints=tKnot, xi=xi, xMean=xMean, xStd=xStd);

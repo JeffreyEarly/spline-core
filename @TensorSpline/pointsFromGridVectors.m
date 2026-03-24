@@ -2,7 +2,7 @@ function [pointMatrix, gridSize] = pointsFromGridVectors(gridVectors)
 % Convert rectilinear grid vectors into an explicit point matrix.
 %
 % Use this helper to convert rectilinear grid vectors into the
-% point-matrix format accepted by `TensorSpline.matrix`.
+% point-matrix format accepted by `TensorSpline.matrixForPointMatrix`.
 %
 % If `[X1,...,Xd] = ndgrid(gridVectors{:})`, then the returned matrix is
 %
@@ -12,7 +12,7 @@ function [pointMatrix, gridSize] = pointsFromGridVectors(gridVectors)
 %
 % ```matlab
 % [points, gridSize] = TensorSpline.pointsFromGridVectors({x,y});
-% B = TensorSpline.matrix(points, tKnot, [4 4]);
+% B = TensorSpline.matrixForPointMatrix(points, knotPoints=tKnot, S=[3 3]);
 % ```
 %
 % - Topic: Build spline bases

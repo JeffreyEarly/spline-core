@@ -1,4 +1,4 @@
-function t = pointsOfSupport(knotPoints, S)
+function t = pointsOfSupportFromKnotPoints(knotPoints, options)
 % Return representative support points for a terminated spline basis.
 %
 % This function assumes that the splines are terminated at the boundary
@@ -11,19 +11,20 @@ function t = pointsOfSupport(knotPoints, S)
 % sampled values.
 %
 % ```matlab
-% tSupport = BSpline.pointsOfSupport(knotPoints, 3);
+% tSupport = BSpline.pointsOfSupportFromKnotPoints(knotPoints, S=3);
 % xSupport = spline(tSupport);
 % ```
 %
 % - Topic: Build spline bases
-% - Declaration: t = pointsOfSupport(knotPoints, S)
+% - Declaration: t = pointsOfSupportFromKnotPoints(knotPoints, options)
 % - Parameter knotPoints: knot sequence
-% - Parameter S: spline degree
+% - Parameter options.S: spline degree
 % - Returns t: support point locations
 arguments
     knotPoints (:,1) double {mustBeNumeric,mustBeReal}
-    S (1,1) double {mustBeInteger,mustBeNonnegative}
+    options.S (1,1) double {mustBeInteger,mustBeNonnegative}
 end
+S = options.S;
 K = S + 1;
 interior_knots = knotPoints(K+1:end-K);
 

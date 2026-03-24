@@ -1,7 +1,7 @@
-function f = evaluateFromPPCoefficients(t,C,tpp, D)
+function f = evaluateFromPPCoefficients(options)
 % Evaluate a cached piecewise-polynomial spline representation.
 %
-% On interval `i`, let `u = t - tpp(i)`. This function evaluates
+% On interval `i`, let `u = queryPoints - tpp(i)`. This function evaluates
 %
 % $$
 % f_i^{(D)}(u) = \sum_{m=D}^{S} \frac{c_{i,m}}{(m-D)!} u^{m-D},
@@ -10,27 +10,31 @@ function f = evaluateFromPPCoefficients(t,C,tpp, D)
 % where the interval coefficients $$c_{i,m}$$ are stored in `C`.
 %
 % ```matlab
-% xq = BSpline.evaluateFromPPCoefficients(tQuery, C, tpp);
-% dxq = BSpline.evaluateFromPPCoefficients(tQuery, C, tpp, 1);
+% xq = BSpline.evaluateFromPPCoefficients(queryPoints=tQuery, C=C, tpp=tpp);
+% dxq = BSpline.evaluateFromPPCoefficients(queryPoints=tQuery, C=C, tpp=tpp, D=1);
 % ```
 %
 % - Topic: Represent piecewise polynomials
 % - Developer: true
-% - Declaration: f = evaluateFromPPCoefficients(t,C,tpp, D)
-% - Parameter t: points at which to evaluate the splines
-% - Parameter C: polynomial coefficients to be used in polyval, size(C) = [length(tpp)-1, K]
-% - Parameter tpp: piece-wise polynomial intervals
-% - Parameter D: number of derivatives
-% - Returns f: array the same size as t
+% - Declaration: f = evaluateFromPPCoefficients(options)
+% - Parameter options.queryPoints: points at which to evaluate the splines
+% - Parameter options.C: polynomial coefficients to be used in polyval, size(C) = [length(tpp)-1, K]
+% - Parameter options.tpp: piece-wise polynomial intervals
+% - Parameter options.D: number of derivatives
+% - Returns f: array the same size as queryPoints
 arguments
-    t {mustBeNumeric,mustBeReal}
-    C (:,:) double
-    tpp (:,1) double {mustBeNumeric,mustBeReal}
-    D (1,1) double {mustBeInteger,mustBeNonnegative} = 0
+    options.queryPoints {mustBeNumeric,mustBeReal}
+    options.C (:,:) double
+    options.tpp (:,1) double {mustBeNumeric,mustBeReal}
+    options.D (1,1) double {mustBeInteger,mustBeNonnegative} = 0
 end
+queryPoints = options.queryPoints;
+C = options.C;
+tpp = options.tpp;
+D = options.D;
 
 K = size(C,2);
-f = zeros(size(t), 'like', t);
+f = zeros(size(queryPoints), 'like', queryPoints);
 
 if D > K-1
     % By construction the splines are zero for K or more derivs
@@ -43,7 +47,7 @@ scaledC = C(:,indices)./scale;
 
 % Evaluate on a sorted copy so interval bins are contiguous, then restore
 % the original ordering and shape.
-[tSorted, sortIndices] = sort(t(:), 'ascend');
+[tSorted, sortIndices] = sort(queryPoints(:), 'ascend');
 t_pp_bin = discretize(tSorted, [-Inf; tpp(2:end-1); Inf]);
 fSorted = zeros(size(tSorted), 'like', tSorted);
 
@@ -59,7 +63,7 @@ while startIndex <= numel(tSorted)
     startIndex = endIndex + 1;
 end
 
-fFlat = zeros(numel(t), 1, 'like', t);
+fFlat = zeros(numel(queryPoints), 1, 'like', queryPoints);
 fFlat(sortIndices) = fSorted;
-f = reshape(fFlat, size(t));
+f = reshape(fFlat, size(queryPoints));
 end

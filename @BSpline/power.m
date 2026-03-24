@@ -28,7 +28,7 @@ if exponent == 1
     return;
 end
 
-supportPoints = BSpline.pointsOfSupport(spline.knotPoints, spline.S);
+supportPoints = BSpline.pointsOfSupportFromKnotPoints(spline.knotPoints, S=spline.S);
 values = spline.valueAtPoints(supportPoints);
 values(abs(values) < 2*eps) = 0;
 
@@ -41,7 +41,7 @@ if all(isfinite(poweredValues)) && all(poweredValues >= -tolerance)
     fittedSpline = ConstrainedSpline(supportPoints, poweredValues, S=poweredK-1, knotPoints=knotPoints, constraints=GlobalConstraint.positive());
     poweredSpline = BSpline(S=poweredK-1, knotPoints=fittedSpline.knotPoints, xi=fittedSpline.xi(:));
 else
-    X = BSpline.matrix(supportPoints, knotPoints, poweredK-1);
+    X = BSpline.matrixForDataPoints(supportPoints, knotPoints=knotPoints, S=poweredK-1);
     xi = X\poweredValues;
     poweredSpline = BSpline(S=poweredK-1, knotPoints=knotPoints, xi=xi);
 end

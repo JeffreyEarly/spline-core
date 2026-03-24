@@ -88,8 +88,8 @@ needed.
 t = linspace(0,1,50)';
 x = exp(t) + 0.05*randn(size(t));
 fit = ConstrainedSpline(t, x, ...
-    K=4, ...
-    dataDOF=2, ...
+    S=3, ...
+    splineDOF=25, ...
     constraints=GlobalConstraint.monotonicIncreasing());
 ```
 
@@ -97,8 +97,8 @@ The class documentation provides the full method-level reference for basis
 construction, evaluation, constrained fitting, and shape constraints.
 
 If you want `ConstrainedSpline` to reduce to the same least-squares
-polynomial fit as `polyfit(t,x,N-1)`, use `K=N` and `splineDOF=N`. For
-example, `K=4, splineDOF=4` gives the cubic least-squares fit.
+polynomial fit as `polyfit(t,x,N-1)`, use `S=N-1` and `splineDOF=N`. For
+example, `S=3, splineDOF=4` gives the cubic least-squares fit.
 
 ## Tensor-product splines
 
@@ -111,7 +111,7 @@ y = linspace(0,2,7)';
 [X,Y] = ndgrid(x,y);
 F = X.^2 .* Y.^3 + 2*X.*Y - 5;
 
-tensorSpline = InterpolatingSpline({x, y}, F, K=[4 4]);
+tensorSpline = InterpolatingSpline({x, y}, F, S=[3 3]);
 Fq = tensorSpline(X, Y);
 ```
 
@@ -145,9 +145,9 @@ named options.
 
 ```matlab
 fit = ConstrainedSpline({x, y}, Fobs, ...
-    K=[4 4], ...
-    tKnot={BSpline.knotPointsForDataPoints(x,K=4,dataDOF=2), ...
-           BSpline.knotPointsForDataPoints(y,K=4,dataDOF=2)}, ...
+    S=[3 3], ...
+    knotPoints={BSpline.knotPointsForDataPoints(x, S=3, splineDOF=4), ...
+                BSpline.knotPointsForDataPoints(y, S=3, splineDOF=4)}, ...
     distribution=StudentTDistribution(sigma=0.05,nu=3));
 ```
 

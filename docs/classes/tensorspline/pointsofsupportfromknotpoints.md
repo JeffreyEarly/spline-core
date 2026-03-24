@@ -1,13 +1,13 @@
 ---
 layout: default
-title: pointsOfSupport
+title: pointsOfSupportFromKnotPoints
 parent: TensorSpline
 grand_parent: Classes
 nav_order: 15
 mathjax: true
 ---
 
-#  pointsOfSupport
+#  pointsOfSupportFromKnotPoints
 
 Return representative support points for a tensor-product spline basis.
 
@@ -16,11 +16,11 @@ Return representative support points for a tensor-product spline basis.
 
 ## Declaration
 ```matlab
- [pointMatrix,supportVectors] = pointsOfSupport(knotPoints, S)
+ [pointMatrix,supportVectors] = pointsOfSupportFromKnotPoints(knotPoints, options)
 ```
 ## Parameters
 + `knotPoints`  knot vector in 1-D or cell array of knot vectors
-+ `S`  spline degree scalar or vector with one entry per dimension
++ `options.S`  spline degree scalar or vector with one entry per dimension
 
 ## Returns
 + `pointMatrix`  matrix with one row per tensor support point
@@ -37,7 +37,7 @@ Return representative support points for a tensor-product spline basis.
   the returned point matrix.
 
   ```matlab
-  [supportPoints, supportVectors] = TensorSpline.pointsOfSupport(knotPoints, [3 3]);
+  [supportPoints, supportVectors] = TensorSpline.pointsOfSupportFromKnotPoints(knotPoints, S=[3 3]);
   values = spline(supportVectors{:});
   ```
 
