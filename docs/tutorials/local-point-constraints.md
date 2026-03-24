@@ -1,18 +1,29 @@
-%% Tutorial Metadata
-% Title: Local Point Constraints
-% Slug: local-point-constraints
-% Description: Apply value, slope, and curvature constraints at specific points in a one-dimensional spline fit.
-% NavOrder: 4
+---
+layout: default
+title: Local Point Constraints
+parent: Tutorials
+nav_order: 4
+mathjax: true
+permalink: /tutorials/local-point-constraints
+---
 
-%% Constrain the value, slope, or curvature at one point
-% Local constraints act at specific coordinates. The derivative-order
-% option `D` tells `PointConstraint.equal` whether you are constraining the
-% value, the slope, or a higher derivative:
-%
-% $$
-% f(t_c)=x_c,\qquad f'(t_c)=0,\qquad f''(t_c)=0.
-% $$
+# Local Point Constraints
 
+Apply value, slope, and curvature constraints at specific points in a one-dimensional spline fit.
+
+Source: `Examples/Tutorials/LocalPointConstraints1D.m`
+
+## Constrain the value, slope, or curvature at one point
+
+Local constraints act at specific coordinates. The derivative-order
+option `D` tells `PointConstraint.equal` whether you are constraining the
+value, the slope, or a higher derivative:
+
+$$
+f(t_c)=x_c,\qquad f'(t_c)=0,\qquad f''(t_c)=0.
+$$
+
+```matlab
 rng(9)
 t = linspace(0, 1, 32)';
 xTrue = 0.2 + 0.45*sin(2*pi*t) + 0.18*cos(5*pi*t);
@@ -29,8 +40,11 @@ curvatureConstraint = PointConstraint.equal(0.68, D=2, value=0);
 valueFit = ConstrainedSpline(t, xObs, S=3, splineDOF=11, distribution=noiseModel, constraints=valueConstraint);
 flatFit = ConstrainedSpline(t, xObs, S=3, splineDOF=11, distribution=noiseModel, constraints=flatConstraint);
 curvatureFit = ConstrainedSpline(t, xObs, S=3, splineDOF=11, distribution=noiseModel, constraints=curvatureConstraint);
+```
 
-% Plot three single-constraint fits against the same unconstrained baseline.
+Plot three single-constraint fits against the same unconstrained baseline.
+
+```matlab
 caseFits = {valueFit, flatFit, curvatureFit};
 caseTitles = ["Value target", "Zero slope", "Zero curvature"];
 casePoints = [0.42 0.42 0.68];
@@ -66,21 +80,30 @@ xlabel("t")
 ylabel("x(t)")
 grid on
 legend("Unconstrained", "Value", "Slope", "Curvature", "Observations", Location="southoutside")
-if exist("tutorialFigureCapture", "var") && isa(tutorialFigureCapture, "function_handle"), tutorialFigureCapture("single-constraint-cases", Caption="PointConstraint.equal can enforce a target value, a zero slope, or a zero curvature at selected points."); end
+```
 
-%% Combine several local conditions in one fit
-% A constrained fit can enforce several pointwise conditions at once. The
-% simplest pattern is to stack multiple `PointConstraint` objects into the
-% same `constraints` array.
+![PointConstraint.equal can enforce a target value, a zero slope, or a zero curvature at selected points.](./local-point-constraints/single-constraint-cases.png)
 
+*PointConstraint.equal can enforce a target value, a zero slope, or a zero curvature at selected points.*
+
+## Combine several local conditions in one fit
+
+A constrained fit can enforce several pointwise conditions at once. The
+simplest pattern is to stack multiple `PointConstraint` objects into the
+same `constraints` array.
+
+```matlab
 combinedConstraints = [ ...
     PointConstraint.equal(0.42, value=0.55)
     PointConstraint.equal(0.42, D=1, value=0)];
 
 combinedFit = ConstrainedSpline(t, xObs, S=3, splineDOF=11, distribution=noiseModel, constraints=combinedConstraints);
 combinedSlope = combinedFit.valueAtPoints(tq, D=1);
+```
 
-% Plot the value constraint together with the resulting zero-slope condition.
+Plot the value constraint together with the resulting zero-slope condition.
+
+```matlab
 figure(Position=[100 100 820 680])
 tiledlayout(2, 1, TileSpacing="compact")
 
@@ -103,4 +126,9 @@ xline(0.42, ":", Color=[0.82 0.2 0.2], LineWidth=1.2)
 xlabel("t")
 ylabel("df/dt")
 grid on
-if exist("tutorialFigureCapture", "var") && isa(tutorialFigureCapture, "function_handle"), tutorialFigureCapture("combined-local-constraints", Caption="Several PointConstraint objects can be combined to enforce multiple local conditions in one fit."); end
+```
+
+![Several PointConstraint objects can be combined to enforce multiple local conditions in one fit.](./local-point-constraints/combined-local-constraints.png)
+
+*Several PointConstraint objects can be combined to enforce multiple local conditions in one fit.*
+

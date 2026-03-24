@@ -9,19 +9,23 @@ permalink: /tutorials
 
 # Tutorials
 
-These examples are written as plain MATLAB scripts and are rendered into website pages during the documentation build.
+Read these tutorials in order. The first six cover interpolation, fitting, and constraints; the final two explain the low-level BSpline and TensorSpline APIs.
 
 ## Available Tutorials
 
-- [Interpolating Spline Basics](./interpolating-spline-basics)
-  Construct and evaluate one-dimensional and tensor-product interpolating splines.
-- [Introduction to B-splines](./introduction-to-b-splines)
-  Build intuition for spline order, knot placement, interpolation, and B-spline basis functions through the first two canonical spline figures.
-- [Robust Fitting of Noisy Data](./robust-spline-fitting)
-  Compare ordinary least squares and Student-t IRLS when fitting a spline to noisy data with outliers.
-- [Local Point Constraints in 1D](./local-point-constraints-1d)
-  Apply value and derivative equality constraints at one or more points in a one-dimensional spline fit.
+- [Interpolation in 1D and on Rectilinear Grids](./interpolation-on-grids)
+  Interpolate exact data in one dimension and on rectilinear grids, and compare the results with MATLAB's griddedInterpolant.
+- [Fitting Noisy Data](./fitting-noisy-data)
+  Fit a smooth spline to noisy observations with a normal noise model and explore the effect of spline complexity.
+- [Robust Fitting with Outliers](./robust-fitting-with-outliers)
+  Replace a normal noise model with a Student-t model when a few observations are badly contaminated.
+- [Local Point Constraints](./local-point-constraints)
+  Apply value, slope, and curvature constraints at specific points in a one-dimensional spline fit.
 - [Global Shape Constraints](./global-shape-constraints)
-  Enforce positivity and monotonicity over an entire domain with GlobalConstraint objects.
-- [Mask-Constrained Tensor Fits](./mask-constrained-fit)
-  Impose value and derivative constraints over an entire masked region using PointConstraint helper methods.
+  Enforce positivity and monotonicity over an entire one-dimensional domain.
+- [2D Constraints on Rectilinear Grids](./rectilinear-grid-constraints-2d)
+  Apply a global monotonicity constraint along one dimension of a noisy tensor-product fit.
+- [BSpline Foundations](./bspline-foundations)
+  Build intuition for order, degree, knot placement, local support, and basis construction in one dimension.
+- [TensorSpline Foundations](./tensorspline-foundations)
+  Understand tensor-product spline coefficients, basis matrices, and mixed partial derivatives.

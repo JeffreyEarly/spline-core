@@ -79,16 +79,6 @@ constraint = PointConstraint.equalOnMask({x, y}, islandMask, D=[0 0], value=0);
 fit = ConstrainedSpline({x, y}, values, constraints=constraint);
 ```
 
-## Fit scattered observations in two dimensions
-
-- Use [`ConstrainedSpline`](classes/constrainedspline)
-- See [Scattered Data Fitting in 2D](tutorials/scattered-data-fitting-2d)
-
-```matlab
-fit = ConstrainedSpline.fromPoints(P, zObs, K=[4 4]);
-Zq = fit(Xq, Yq);
-```
-
 ## Work directly with basis matrices
 
 - Use [`BSpline.matrixForDataPoints`](classes/bspline/matrixfordatapoints) or [`TensorSpline.matrixForPointMatrix`](classes/tensorspline/matrixforpointmatrix)

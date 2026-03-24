@@ -164,7 +164,9 @@ Use the `constraints` option to pass any mix of `PointConstraint` and
 
 ## Where to go next
 
-- For guided workflows, go to [Tutorials](tutorials)
+- For exact interpolation workflows, start with [Interpolation in 1D and on Rectilinear Grids](tutorials/interpolation-on-grids)
+- For noisy-data fitting workflows, continue with [Fitting Noisy Data](tutorials/fitting-noisy-data)
+- For the full guided sequence, go to [Tutorials](tutorials)
 - For task-oriented entry points, see [Common Tasks](common-tasks)
 - For a short class-selection guide, read [Which Class Should I Use?](which-class-should-i-use)
 - For built-in comparisons and package positioning, read [Compared with MATLAB](compared-with-matlab)

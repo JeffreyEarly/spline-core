@@ -1,50 +1,59 @@
 %% Tutorial Metadata
 % Title: Global Shape Constraints
 % Slug: global-shape-constraints
-% Description: Enforce positivity and monotonicity over an entire domain with GlobalConstraint objects.
+% Description: Enforce positivity and monotonicity over an entire one-dimensional domain.
 % NavOrder: 5
 
-%% Fit a monotone nonnegative profile
-% Global constraints apply to the whole fitted spline rather than a few
-% selected points. In one dimension, positivity and monotonicity are often
-% the simplest way to keep a fit physically meaningful.
+%% Enforce positivity and monotonicity across the whole domain
+% Global constraints do not act at a few selected points. Instead they
+% describe the shape of the fit everywhere on the domain:
+%
+% $$
+% f(t)\ge 0,\qquad f'(t)\ge 0 \quad \text{for all } t.
+% $$
 
 rng(4)
 t = linspace(0, 1, 45)';
 xTrue = 0.15 + 0.85*(1 - exp(-4*t));
 xObs = xTrue + 0.05*randn(size(t));
-xObs([8 18 31]) = xObs([8 18 31]) - [0.09; 0.12; 0.07];
+tq = linspace(t(1), t(end), 400)';
 
-freeFit = ConstrainedSpline(t, xObs, S=3, splineDOF=12);
-shapeConstrainedFit = ConstrainedSpline(t, xObs, S=3, splineDOF=12,  constraints=[  GlobalConstraint.positive()
-        GlobalConstraint.monotonicIncreasing()]);
+noiseModel = NormalDistribution(0.05);
+freeFit = ConstrainedSpline(t, xObs, S=3, splineDOF=12, distribution=noiseModel);
 
-tDense = linspace(min(t), max(t), 400)';
-xTrueDense = 0.15 + 0.85*(1 - exp(-4*tDense));
-xFree = freeFit(tDense);
-xShapeConstrained = shapeConstrainedFit(tDense);
+shapeConstraints = [ ...
+    GlobalConstraint.positive()
+    GlobalConstraint.monotonicIncreasing()];
 
-figure(Position=[100 100 780 360])
-plot(tDense, xTrueDense, "k--", LineWidth=1.5), hold on
-plot(tDense, xFree, LineWidth=2)
-plot(tDense, xShapeConstrained, LineWidth=2)
+shapeFit = ConstrainedSpline(t, xObs, S=3, splineDOF=12, distribution=noiseModel, constraints=shapeConstraints);
+
+% Plot the unconstrained and globally constrained fits together.
+figure(Position=[100 100 820 320])
+plot(tq, 0.15 + 0.85*(1 - exp(-4*tq)), "k--", LineWidth=1.5), hold on
+plot(tq, freeFit(tq), LineWidth=2)
+plot(tq, shapeFit(tq), LineWidth=2)
 scatter(t, xObs, 28, "filled", MarkerFaceAlpha=0.65)
 xlabel("t")
 ylabel("x(t)")
-legend("Truth", "Unconstrained fit", "Positive monotone fit", "Observations",  Location="southoutside")
+legend("Underlying signal", "Unconstrained fit", "Positive monotone fit", "Observations", Location="southoutside")
 grid on
-if exist("tutorialFigureCapture", "var") && isa(tutorialFigureCapture, "function_handle"), tutorialFigureCapture("positive-monotone-fit", Caption="GlobalConstraint objects enforce whole-domain positivity and monotonicity in a single fit."); end
+if exist("tutorialFigureCapture", "var") && isa(tutorialFigureCapture, "function_handle"), tutorialFigureCapture("positive-monotone-fit", Caption="GlobalConstraint objects can enforce positivity and monotonic increase over the full domain in one fit."); end
 
-%% Check the fitted derivative
-% Once the global monotonicity constraint is active, the first derivative is
-% nonnegative throughout the fitted interval.
+%% Check the constrained derivative
+% The first derivative is the clearest way to see the monotonicity
+% condition. Once the global monotone-increasing constraint is active, the
+% fitted derivative stays nonnegative throughout the interval.
 
-dShapeConstrained = shapeConstrainedFit.valueAtPoints(tDense, D=1);
+dFree = freeFit.valueAtPoints(tq, D=1);
+dShape = shapeFit.valueAtPoints(tq, D=1);
 
+% Plot the first derivative to check the monotonicity condition directly.
 figure(Position=[100 100 780 300])
-plot(tDense, dShapeConstrained, LineWidth=2)
+plot(tq, dFree, LineWidth=1.6), hold on
+plot(tq, dShape, LineWidth=2)
 yline(0, "k--")
 xlabel("t")
 ylabel("dx/dt")
+legend("Unconstrained", "Positive monotone fit", Location="southoutside")
 grid on
-if exist("tutorialFigureCapture", "var") && isa(tutorialFigureCapture, "function_handle"), tutorialFigureCapture("positive-monotone-derivative", Caption="The derivative of the constrained fit stays nonnegative across the domain."); end
+if exist("tutorialFigureCapture", "var") && isa(tutorialFigureCapture, "function_handle"), tutorialFigureCapture("positive-monotone-derivative", Caption="The constrained fit keeps the first derivative nonnegative across the whole domain."); end

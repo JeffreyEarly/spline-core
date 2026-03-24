@@ -30,15 +30,22 @@ if isfile(changelogPath)
 end
 
 tutorialSources = {
-    fullfile(rootDir, "Examples", "Tutorials", "InterpolatingSplineBasics.m")
-    fullfile(rootDir, "Examples", "Tutorials", "IntroductionToBSplines.m")
-    fullfile(rootDir, "Examples", "Tutorials", "RobustSplineFitting.m")
+    fullfile(rootDir, "Examples", "Tutorials", "InterpolationOnGrids.m")
+    fullfile(rootDir, "Examples", "Tutorials", "FittingNoisyData.m")
+    fullfile(rootDir, "Examples", "Tutorials", "RobustFittingWithOutliers.m")
     fullfile(rootDir, "Examples", "Tutorials", "LocalPointConstraints1D.m")
     fullfile(rootDir, "Examples", "Tutorials", "GlobalShapeConstraints.m")
-    fullfile(rootDir, "Examples", "Tutorials", "MaskConstrainedFit.m")
+    fullfile(rootDir, "Examples", "Tutorials", "RectilinearGridConstraints2D.m")
+    fullfile(rootDir, "Examples", "Tutorials", "BSplineFoundations.m")
+    fullfile(rootDir, "Examples", "Tutorials", "TensorSplineFoundations.m")
 };
 tutorialDocumentation = TutorialDocumentation.documentationFromSourceFiles(tutorialSources,  buildFolder=buildFolder,  websiteRootURL="spline-core/",  websiteFolder="tutorials",  sourceRoot=rootDir,  previousBuildFolder=previousBuildFolder,  executionPaths=string(rootDir));
-TutorialDocumentation.writeMarkdownIndex(tutorialDocumentation,  buildFolder=buildFolder,  websiteFolder="tutorials",  nav_order=5);
+TutorialDocumentation.writeMarkdownIndex( ...
+    tutorialDocumentation, ...
+    buildFolder=buildFolder, ...
+    websiteFolder="tutorials", ...
+    nav_order=5, ...
+    description="Read these tutorials in order. The first six cover interpolation, fitting, and constraints; the final two explain the low-level BSpline and TensorSpline APIs.");
 arrayfun(@(a) a.writeToFile(), tutorialDocumentation)
 clear tutorialDocumentation
 if previousBuildFolder ~= "" && isfolder(previousBuildFolder)
