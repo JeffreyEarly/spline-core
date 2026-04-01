@@ -1,0 +1,116 @@
+classdef TrajectorySpline < handle
+    % Two-dimensional interpolating trajectory parameterized by time or arc parameter.
+    %
+    % `TrajectorySpline` stores a planar parametric trajectory as two
+    % one-dimensional constrained splines,
+    %
+    % $$
+    % x = x(t), \qquad y = y(t),
+    % $$
+    %
+    % built from a shared parameter vector `t`. Use this class when the
+    % trajectory should be represented componentwise so each coordinate can
+    % be evaluated independently through `trajectory.x(tq)` and
+    % `trajectory.y(tq)`.
+    %
+    % ```matlab
+    % t = linspace(0, 1, 20)';
+    % x = cos(2*pi*t);
+    % y = sin(2*pi*t);
+    %
+    % trajectory = TrajectorySpline(t, x, y, S=3);
+    % xq = trajectory.x(t);
+    % yq = trajectory.y(t);
+    % ```
+    %
+    % - Topic: Create a trajectory spline
+    % - Topic: Inspect trajectory properties
+    % - Declaration: classdef TrajectorySpline < handle
+
+    properties (SetAccess = private)
+        % Parameter samples used to define the component splines.
+        %
+        % `t` is stored as a column vector and provides the shared
+        % parameterization for both coordinate splines `x(t)` and `y(t)`.
+        %
+        % - Topic: Inspect trajectory properties
+        t (:,1) double {mustBeReal,mustBeFinite}
+
+        % Constrained spline for the x-coordinate trajectory component.
+        %
+        % Evaluate the x-coordinate along the trajectory with
+        % `trajectory.x(tq)`. The returned object is a `ConstrainedSpline`,
+        % so fit metadata such as `dataPoints` and `dataValues` remain
+        % available on the coordinate component.
+        %
+        % - Topic: Inspect trajectory properties
+        x
+
+        % Constrained spline for the y-coordinate trajectory component.
+        %
+        % Evaluate the y-coordinate along the trajectory with
+        % `trajectory.y(tq)`. The returned object is a `ConstrainedSpline`,
+        % so fit metadata such as `dataPoints` and `dataValues` remain
+        % available on the coordinate component.
+        %
+        % - Topic: Inspect trajectory properties
+        y
+    end
+
+    methods
+        function self = TrajectorySpline(t, x, y, options)
+            % Create a two-dimensional trajectory from x(t) and y(t) samples.
+            %
+            % Use this constructor when the two coordinate components of a
+            % planar trajectory are known at the same parameter samples and
+            % should each be represented by a 1-D `ConstrainedSpline`
+            % sharing the same parameter samples.
+            %
+            % The stored component splines are fit independently to
+            % `x(t)` and `y(t)` while exposing the `ConstrainedSpline`
+            % metadata for each coordinate.
+            %
+            % The resulting component models satisfy
+            %
+            % $$
+            % x(t_i) = x_i, \qquad y(t_i) = y_i,
+            % $$
+            %
+            % for each supplied sample pair `x_i`, `y_i` at parameter value
+            % `t_i`.
+            %
+            % ```matlab
+            % t = linspace(0, 1, 20)';
+            % x = cos(2*pi*t);
+            % y = sin(2*pi*t);
+            % trajectory = TrajectorySpline(t, x, y, S=3);
+            % ```
+            %
+            % - Topic: Create a trajectory spline
+            % - Declaration: self = TrajectorySpline(t,x,y,options)
+            % - Parameter t: numeric vector of shared trajectory parameter samples
+            % - Parameter x: numeric vector of x-coordinate samples at t
+            % - Parameter y: numeric vector of y-coordinate samples at t
+            % - Parameter options.S: spline degree shared by both coordinate splines
+            % - Returns self: TrajectorySpline instance
+            arguments
+                t {mustBeNumeric,mustBeReal,mustBeFinite,mustBeNonempty,mustBeVector}
+                x {mustBeNumeric,mustBeReal,mustBeFinite,mustBeNonempty,mustBeVector}
+                y {mustBeNumeric,mustBeReal,mustBeFinite,mustBeNonempty,mustBeVector}
+                options.S (1,1) double {mustBeReal,mustBeFinite,mustBeInteger,mustBeNonnegative} = 3
+            end
+
+            t = reshape(t, [], 1);
+            x = reshape(x, [], 1);
+            y = reshape(y, [], 1);
+
+            if numel(x) ~= numel(t) || numel(y) ~= numel(t)
+                error('TrajectorySpline:SizeMismatch', 't, x, and y must have the same number of elements.');
+            end
+
+            self.t = t;
+            self.x = ConstrainedSpline(t, x, S=options.S);
+            self.y = ConstrainedSpline(t, y, S=options.S);
+        end
+    end
+end
