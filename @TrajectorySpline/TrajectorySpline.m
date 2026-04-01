@@ -113,4 +113,57 @@ classdef TrajectorySpline < handle
             self.y = ConstrainedSpline(t, y, S=options.S);
         end
     end
+
+    methods (Static)
+        function self = fromComponentSplines(t, xSpline, ySpline)
+            % Create a trajectory spline from pre-fit component splines.
+            %
+            % Use this factory when the x- and y-coordinate trajectories
+            % have already been fit as one-dimensional splines and should
+            % be wrapped into a single `TrajectorySpline` container without
+            % refitting either component.
+            %
+            % The resulting trajectory stores the supplied parameter vector
+            % `t` together with the supplied component splines
+            %
+            % $$
+            % x = x(t), \qquad y = y(t).
+            % $$
+            %
+            % ```matlab
+            % trajectory = TrajectorySpline.fromComponentSplines(t, xSpline, ySpline);
+            % xq = trajectory.x(t);
+            % yq = trajectory.y(t);
+            % ```
+            %
+            % - Topic: Create a trajectory spline
+            % - Declaration: self = fromComponentSplines(t,xSpline,ySpline)
+            % - Parameter t: numeric vector of shared trajectory parameter samples
+            % - Parameter xSpline: one-dimensional spline for the x-coordinate
+            % - Parameter ySpline: one-dimensional spline for the y-coordinate
+            % - Returns self: TrajectorySpline instance
+            arguments
+                t {mustBeNumeric,mustBeReal,mustBeFinite,mustBeNonempty,mustBeVector}
+                xSpline (1,1) TensorSpline
+                ySpline (1,1) TensorSpline
+            end
+            arguments (Output)
+                self (1,1) TrajectorySpline
+            end
+
+            t = reshape(t, [], 1);
+            if any(diff(t) <= 0)
+                error('TrajectorySpline:NonmonotonicParameter', 't must be strictly increasing.');
+            end
+            if xSpline.numDimensions ~= 1 || ySpline.numDimensions ~= 1
+                error('TrajectorySpline:InvalidComponentSpline', 'xSpline and ySpline must be one-dimensional splines.');
+            end
+
+            bootstrapDegree = min([numel(t)-1, xSpline.S(1), ySpline.S(1)]);
+            self = TrajectorySpline(t, xSpline(t), ySpline(t), S=bootstrapDegree);
+            self.t = t;
+            self.x = xSpline;
+            self.y = ySpline;
+        end
+    end
 end

@@ -94,5 +94,39 @@ classdef TrajectorySplineUnitTests < matlab.unittest.TestCase
         function trajectorySplineRejectsEmptyInputs(testCase)
             testCase.verifyError(@() TrajectorySpline([], [], [], S=3), 'MATLAB:validators:mustBeNonempty')
         end
+
+        function trajectorySplineWrapsPreFitComponentSplines(testCase)
+            t = linspace(0, 1, 11)';
+            x = cos(2*pi*t);
+            y = sin(2*pi*t);
+            xSpline = ConstrainedSpline(t, x, S=3);
+            ySpline = ConstrainedSpline(t, y, S=3);
+
+            trajectory = TrajectorySpline.fromComponentSplines(t, xSpline, ySpline);
+
+            testCase.verifyEqual(trajectory.t, t)
+            testCase.verifySameHandle(trajectory.x, xSpline)
+            testCase.verifySameHandle(trajectory.y, ySpline)
+            testCase.verifyEqual(trajectory.x(t), x, "AbsTol", 10*eps)
+            testCase.verifyEqual(trajectory.y(t), y, "AbsTol", 10*eps)
+        end
+
+        function trajectorySplineWrapFactoryRejectsNonmonotonicParameter(testCase)
+            t = [0; 0.5; 0.5; 1];
+            xSpline = ConstrainedSpline([0; 0.5; 1], [0; 1; 0], S=2);
+            ySpline = ConstrainedSpline([0; 0.5; 1], [0; 0; 1], S=2);
+
+            testCase.verifyError(@() TrajectorySpline.fromComponentSplines(t, xSpline, ySpline), ...
+                'TrajectorySpline:NonmonotonicParameter')
+        end
+
+        function trajectorySplineWrapFactoryRejectsMultidimensionalSplines(testCase)
+            t = linspace(0, 1, 5)';
+            xSpline = TensorSpline(S=[1 1], knotPoints={[-1; -1; 1; 1], [-1; -1; 1; 1]}, xi=zeros(4, 1));
+            ySpline = ConstrainedSpline(t, sin(2*pi*t), S=3);
+
+            testCase.verifyError(@() TrajectorySpline.fromComponentSplines(t, xSpline, ySpline), ...
+                'TrajectorySpline:InvalidComponentSpline')
+        end
     end
 end
