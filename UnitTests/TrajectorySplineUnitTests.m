@@ -64,6 +64,39 @@ classdef TrajectorySplineUnitTests < matlab.unittest.TestCase
             testCase.verifyEqual(trajectory.y.dataValues, y)
         end
 
+        function trajectorySplineEvaluatesUAsXDerivative(testCase)
+            t = linspace(0, 1, 11)';
+            x = cos(2*pi*t);
+            y = sin(2*pi*t);
+            trajectory = TrajectorySpline(t, x, y, S=3);
+
+            testCase.verifyEqual(trajectory.u(t), trajectory.x.valueAtPoints(t, D=1), "AbsTol", 10*eps)
+        end
+
+        function trajectorySplineEvaluatesVAsYDerivative(testCase)
+            t = linspace(0, 1, 11)';
+            x = cos(2*pi*t);
+            y = sin(2*pi*t);
+            trajectory = TrajectorySpline(t, x, y, S=3);
+
+            testCase.verifyEqual(trajectory.v(t), trajectory.y.valueAtPoints(t, D=1), "AbsTol", 10*eps)
+        end
+
+        function trajectorySplineVelocityMethodsPreserveQueryShape(testCase)
+            t = linspace(0, 1, 11)';
+            x = cos(2*pi*t);
+            y = sin(2*pi*t);
+            trajectory = TrajectorySpline(t, x, y, S=3);
+
+            rowQuery = reshape(linspace(0.1, 0.9, 5), 1, []);
+            gridQuery = reshape(linspace(0.1, 0.9, 6), 2, 3);
+
+            testCase.verifySize(trajectory.u(rowQuery), size(rowQuery))
+            testCase.verifySize(trajectory.v(rowQuery), size(rowQuery))
+            testCase.verifySize(trajectory.u(gridQuery), size(gridQuery))
+            testCase.verifySize(trajectory.v(gridQuery), size(gridQuery))
+        end
+
         function trajectorySplineStoresParameterAsColumnVector(testCase)
             t = linspace(0, 1, 11);
             x = cos(2*pi*t);
@@ -109,6 +142,8 @@ classdef TrajectorySplineUnitTests < matlab.unittest.TestCase
             testCase.verifySameHandle(trajectory.y, ySpline)
             testCase.verifyEqual(trajectory.x(t), x, "AbsTol", 10*eps)
             testCase.verifyEqual(trajectory.y(t), y, "AbsTol", 10*eps)
+            testCase.verifyEqual(trajectory.u(t), xSpline.valueAtPoints(t, D=1), "AbsTol", 10*eps)
+            testCase.verifyEqual(trajectory.v(t), ySpline.valueAtPoints(t, D=1), "AbsTol", 10*eps)
         end
 
         function trajectorySplineWrapFactoryRejectsNonmonotonicParameter(testCase)

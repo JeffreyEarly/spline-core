@@ -11,7 +11,8 @@ classdef TrajectorySpline < handle
     % built from a shared parameter vector `t`. Use this class when the
     % trajectory should be represented componentwise so each coordinate can
     % be evaluated independently through `trajectory.x(tq)` and
-    % `trajectory.y(tq)`.
+    % `trajectory.y(tq)`, and the corresponding trajectory derivatives can
+    % be evaluated through `trajectory.u(tq)` and `trajectory.v(tq)`.
     %
     % ```matlab
     % t = linspace(0, 1, 20)';
@@ -25,6 +26,7 @@ classdef TrajectorySpline < handle
     %
     % - Topic: Create a trajectory spline
     % - Topic: Inspect trajectory properties
+    % - Topic: Evaluate trajectory derivatives
     % - Declaration: classdef TrajectorySpline < handle
 
     properties (SetAccess = private)
@@ -112,6 +114,50 @@ classdef TrajectorySpline < handle
             self.x = ConstrainedSpline(t, x, S=options.S);
             self.y = ConstrainedSpline(t, y, S=options.S);
         end
+
+        function values = u(self, t)
+            % Evaluate the x-velocity $$u(t) = \dot{x}(t)$$ along the trajectory.
+            %
+            % Use this method when the x-component derivative should be
+            % evaluated through the trajectory API rather than by reaching
+            % into the component spline directly.
+            %
+            % - Topic: Evaluate trajectory derivatives
+            % - Declaration: values = u(self,t)
+            % - Parameter t: numeric query points with any shape
+            % - Returns values: x-derivative values with the same shape as `t`
+            arguments (Input)
+                self (1,1) TrajectorySpline
+                t {mustBeNumeric,mustBeReal,mustBeFinite}
+            end
+            arguments (Output)
+                values
+            end
+
+            values = self.x.valueAtPoints(t, D=1);
+        end
+
+        function values = v(self, t)
+            % Evaluate the y-velocity $$v(t) = \dot{y}(t)$$ along the trajectory.
+            %
+            % Use this method when the y-component derivative should be
+            % evaluated through the trajectory API rather than by reaching
+            % into the component spline directly.
+            %
+            % - Topic: Evaluate trajectory derivatives
+            % - Declaration: values = v(self,t)
+            % - Parameter t: numeric query points with any shape
+            % - Returns values: y-derivative values with the same shape as `t`
+            arguments (Input)
+                self (1,1) TrajectorySpline
+                t {mustBeNumeric,mustBeReal,mustBeFinite}
+            end
+            arguments (Output)
+                values
+            end
+
+            values = self.y.valueAtPoints(t, D=1);
+        end
     end
 
     methods (Static)
@@ -142,7 +188,7 @@ classdef TrajectorySpline < handle
             % - Parameter xSpline: one-dimensional spline for the x-coordinate
             % - Parameter ySpline: one-dimensional spline for the y-coordinate
             % - Returns self: TrajectorySpline instance
-            arguments
+            arguments (Input)
                 t {mustBeNumeric,mustBeReal,mustBeFinite,mustBeNonempty,mustBeVector}
                 xSpline (1,1) TensorSpline
                 ySpline (1,1) TensorSpline
