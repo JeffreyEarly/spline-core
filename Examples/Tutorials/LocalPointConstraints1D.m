@@ -21,7 +21,7 @@ xTrue = 0.2 + 0.45*sin(2*pi*t) + 0.18*cos(5*pi*t);
 xObs = xTrue + 0.05*randn(size(t));
 tq = linspace(t(1), t(end), 500)';
 
-noiseModel = NormalDistribution(0.05);
+noiseModel = NormalDistribution(sigma=0.05);
 freeFit = ConstrainedSpline(t, xObs, S=3, splineDOF=11, distribution=noiseModel);
 
 valueConstraint = PointConstraint.equal(0.42, value=0.55);

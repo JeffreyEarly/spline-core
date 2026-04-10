@@ -268,7 +268,7 @@ classdef ConstrainedSpline < TensorSpline
             end
             distribution = options.distribution;
             if isempty(distribution)
-                distribution = NormalDistribution(1);
+                distribution = NormalDistribution(sigma=1);
             end
 
             pointMatrix = TensorSpline.pointsFromGridVectors(gridVectors);

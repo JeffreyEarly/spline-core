@@ -1,5 +1,9 @@
 # Version History
 
+## [2.1.0] - 2026-04-09
+- updated internal distribution construction call sites to the `Distributions` 2.0 named-argument API
+- raised the package dependency floor to `Distributions ^2.0`
+
 ## [2.0.0] - 2026-03-25
 - breaking API cleanup across the core spline classes: public APIs now use spline degree `S` and `knotPoints`, low-level `BSpline` and `TensorSpline` constructors are name-value based, and evaluation is standardized around function-call syntax for values plus `valueAtPoints(..., D=...)` for derivatives
 - added tensor-product spline support through `TensorSpline`, including tensor basis construction, tensor-grid evaluation, and tensor transforms such as differentiation, integration, nonlinear power refits, and roots in 1-D

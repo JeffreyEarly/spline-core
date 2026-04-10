@@ -1,6 +1,6 @@
 {
     "name": "SplineCore",
-    "version": "2.0.0",
+    "version": "2.1.0",
     "id": "f723c088-397a-43e5-a0ad-e19422cc3c2a",
     "formerNames": [],
     "displayName": "Spline Core",
@@ -23,7 +23,7 @@
     "dependencies": [
         {
             "name": "Distributions",
-            "compatibleVersions": "",
+            "compatibleVersions": "^2.0",
             "id": "c543ab89-e5a2-4697-830f-12cf8ed03694"
         }
     ],

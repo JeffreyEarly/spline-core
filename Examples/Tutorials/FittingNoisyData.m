@@ -22,7 +22,7 @@ xTrue = exp(-2.5*t).*sin(4*pi*t);
 xObs = xTrue + 0.08*randn(size(t));
 tq = linspace(t(1), t(end), 400)';
 
-noiseModel = NormalDistribution(0.08);
+noiseModel = NormalDistribution(sigma=0.08);
 fit = ConstrainedSpline(t, xObs, S=3, splineDOF=12, distribution=noiseModel);
 xFit = fit(tq);
 

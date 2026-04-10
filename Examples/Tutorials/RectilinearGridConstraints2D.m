@@ -21,7 +21,7 @@ y = linspace(0, 1, 20)';
 Ftrue = 0.2 + 0.5*X + 0.3*Y + 0.1*sin(pi*X).*cos(pi*Y);
 Fobs = Ftrue + 0.03*randn(size(Ftrue));
 
-noiseModel = NormalDistribution(0.03);
+noiseModel = NormalDistribution(sigma=0.03);
 freeFit = ConstrainedSpline({x, y}, Fobs, S=[3 3], splineDOF=[10 10], distribution=noiseModel);
 monotoneYFit = ConstrainedSpline({x, y}, Fobs, S=[3 3], splineDOF=[10 10], distribution=noiseModel, constraints=GlobalConstraint.monotonicIncreasing(dimension=2));
 
