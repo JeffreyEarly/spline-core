@@ -34,8 +34,52 @@ classdef GlobalConstraint < SplineConstraint
         dimension = double.empty(1,0)
     end
 
-    methods (Access = private)
-        function self = GlobalConstraint
+    properties (Dependent, Hidden, SetAccess = private)
+        dimensionPersisted
+    end
+
+    methods
+        function self = GlobalConstraint(varargin)
+            % Create a global spline-constraint object.
+            %
+            % Use the static helper methods `positive`,
+            % `monotonicIncreasing`, and `monotonicDecreasing` for the
+            % intended public construction style.
+            %
+            % - Topic: Specify global constraints
+            % - Declaration: self = GlobalConstraint(options)
+            % - Parameter options.shape: global constraint shape identifier
+            % - Parameter options.dimension: optional tensor dimension for monotonic constraints
+            % - Returns self: GlobalConstraint instance
+            self@SplineConstraint();
+            if nargin == 0
+                return;
+            end
+
+            options = GlobalConstraint.parseInputs(varargin{:});
+            self.shape = options.shape;
+            if ~isnan(options.dimensionPersisted)
+                self.dimension = options.dimensionPersisted;
+            elseif ~isnan(options.dimension)
+                self.dimension = options.dimension;
+            else
+                self.dimension = double.empty(1,0);
+            end
+        end
+
+        function value = get.dimensionPersisted(self)
+            % Return the persisted scalar view of `dimension`.
+            %
+            % - Topic: Persist spline state
+            % - Developer: true
+            % - Declaration: value = get.dimensionPersisted(self)
+            % - Parameter self: GlobalConstraint instance
+            % - Returns value: scalar dimension index or `NaN` when no dimension is associated with the constraint
+            if isempty(self.dimension)
+                value = NaN;
+            else
+                value = self.dimension;
+            end
         end
     end
 
@@ -50,8 +94,7 @@ classdef GlobalConstraint < SplineConstraint
             % - Topic: Specify global constraints
             % - Declaration: self = positive()
             % - Returns self: positivity GlobalConstraint
-            self = GlobalConstraint;
-            self.shape = GlobalConstraint.positiveShape;
+            self = GlobalConstraint(shape=GlobalConstraint.positiveShape);
         end
 
         function self = monotonicIncreasing(options)
@@ -69,9 +112,7 @@ classdef GlobalConstraint < SplineConstraint
                 options.dimension (1,1) double {mustBeInteger,mustBePositive} = 1
             end
 
-            self = GlobalConstraint;
-            self.shape = GlobalConstraint.monotonicIncreasingShape;
-            self.dimension = options.dimension;
+            self = GlobalConstraint(shape=GlobalConstraint.monotonicIncreasingShape, dimension=options.dimension);
         end
 
         function self = monotonicDecreasing(options)
@@ -89,9 +130,43 @@ classdef GlobalConstraint < SplineConstraint
                 options.dimension (1,1) double {mustBeInteger,mustBePositive} = 1
             end
 
-            self = GlobalConstraint;
-            self.shape = GlobalConstraint.monotonicDecreasingShape;
-            self.dimension = options.dimension;
+            self = GlobalConstraint(shape=GlobalConstraint.monotonicDecreasingShape, dimension=options.dimension);
+        end
+    end
+
+    methods (Static, Hidden)
+        function propertyAnnotations = classDefinedPropertyAnnotations()
+            propertyAnnotations = SplineConstraint.classDefinedPropertyAnnotations();
+            propertyAnnotations(end+1) = CAPropertyAnnotation('shape', 'Global shape-constraint kind.');
+            propertyAnnotations(end+1) = CANumericProperty('dimensionPersisted', {}, '', 'Persisted tensor dimension associated with the constraint.');
+        end
+
+        function names = classRequiredPropertyNames()
+            names = {'shape', 'dimensionPersisted'};
+        end
+    end
+
+    methods (Static, Access = private)
+        function options = parseInputs(options)
+            arguments
+                options.shape (1,1) string
+                options.dimension (1,1) double {mustBeReal} = NaN
+                options.dimensionPersisted (1,1) double {mustBeReal} = NaN
+            end
+
+            mustBeMember(options.shape, [GlobalConstraint.positiveShape, GlobalConstraint.monotonicIncreasingShape, GlobalConstraint.monotonicDecreasingShape]);
+
+            if ~isnan(options.dimension) && ~isnan(options.dimensionPersisted)
+                error('GlobalConstraint:AmbiguousDimension', 'Specify either dimension or dimensionPersisted, not both.');
+            end
+
+            if ~isnan(options.dimension) && (options.dimension <= 0 || round(options.dimension) ~= options.dimension)
+                error('GlobalConstraint:InvalidDimension', 'dimension must be a positive integer when it is supplied.');
+            end
+
+            if ~isnan(options.dimensionPersisted) && (options.dimensionPersisted <= 0 || round(options.dimensionPersisted) ~= options.dimensionPersisted)
+                error('GlobalConstraint:InvalidPersistedDimension', 'dimensionPersisted must be a positive integer or NaN.');
+            end
         end
     end
 end

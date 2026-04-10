@@ -14,7 +14,7 @@ x = [0.00; 0.08; 0.21; 0.37; 0.55; 0.71; 0.86; 1.00];
 y = exp(-1.6*x).*sin(2*pi*x);
 xq = linspace(x(1), x(end), 400)';
 
-spline1D = InterpolatingSpline(x, y, S=3);
+spline1D = InterpolatingSpline.fromGriddedValues(x, y, S=3);
 yq = spline1D(xq);
 
 % Plot the interpolant against the original samples.
@@ -64,7 +64,7 @@ xqGrid = linspace(xGrid(1), xGrid(end), 61)';
 yqGrid = linspace(yGrid(1), yGrid(end), 71)';
 [Xq, Yq] = ndgrid(xqGrid, yqGrid);
 
-spline2D = InterpolatingSpline({xGrid, yGrid}, F, S=[3 3]);
+spline2D = InterpolatingSpline.fromGriddedValues({xGrid, yGrid}, F, S=[3 3]);
 Fq = spline2D(Xq, Yq);
 
 % Plot the sampled grid beside the interpolated field.

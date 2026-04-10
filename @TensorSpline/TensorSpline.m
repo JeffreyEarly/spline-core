@@ -1,4 +1,4 @@
-classdef TensorSpline < handle
+classdef TensorSpline < CAAnnotatedClass
     % Tensor-product spline over multiple dimensions.
     %
     % `TensorSpline` is the multidimensional extension of `BSpline`. It
@@ -21,14 +21,16 @@ classdef TensorSpline < handle
     %
     % ## Basic usage
     %
-    % Use `TensorSpline` when you already have knot vectors and
-    % tensor-product coefficients and want to evaluate the resulting
-    % spline on matching-size query arrays.
+    % Use `TensorSpline.fromKnotPoints(...)` when you already have knot
+    % vectors and tensor-product coefficients and want to evaluate the
+    % resulting spline on matching-size query arrays. The low-level
+    % `TensorSpline(...)` constructor is the cheap solved-state constructor
+    % used directly by persistence and other internal bootstrap paths.
     %
     % ```matlab
     % knotPoints = {[0;0;0;0;1;1;1;1], [0;0;0;0;1;1;1;1]};
     % xi = randn(16,1);
-    % spline = TensorSpline(S=[3 3], knotPoints=knotPoints, xi=xi);
+    % spline = TensorSpline.fromKnotPoints(knotPoints, xi, S=[3 3]);
     %
     % [Xq,Yq] = ndgrid(linspace(0,1,40), linspace(0,1,40));
     % F = spline(Xq, Yq);
@@ -39,7 +41,7 @@ classdef TensorSpline < handle
     % - Topic: Evaluate the spline
     % - Topic: Transform the spline
     % - Topic: Build spline bases
-    % - Declaration: classdef TensorSpline < handle
+    % - Declaration: classdef TensorSpline < CAAnnotatedClass
 
     properties (SetAccess = private)
         % Spline order in each tensor dimension.
@@ -55,7 +57,7 @@ classdef TensorSpline < handle
         % `S = K - 1`.
         %
         % ```matlab
-        % spline = TensorSpline(S=[3 3], knotPoints=knotPoints, xi=xi);
+        % spline = TensorSpline.fromKnotPoints(knotPoints, xi, S=[3 3]);
         % spline.K
         % % returns [4 4]
         % ```
@@ -92,7 +94,7 @@ classdef TensorSpline < handle
         % `xMean`.
         %
         % ```matlab
-        % spline = TensorSpline(S=[3 3], knotPoints=knotPoints, xi=xi, xMean=2.1, xStd=0.4);
+        % spline = TensorSpline.fromKnotPoints(knotPoints, xi, S=[3 3], xMean=2.1, xStd=0.4);
         % values = spline(Xq, Yq);
         % ```
         %
@@ -177,6 +179,14 @@ classdef TensorSpline < handle
         %
         % - Topic: Inspect spline properties
         xi
+        % Knot-axis objects defining the spline basis.
+        %
+        % `knotAxes` is the public axis-object representation of the
+        % spline basis. Each axis stores one knot vector and is the
+        % canonical constructor/persistence vocabulary for tensor splines.
+        %
+        % - Topic: Inspect spline properties
+        knotAxes
         % Knot vectors defining the spline basis.
         %
         % Returns a numeric vector in 1-D and a cell array in higher dimensions.
@@ -208,12 +218,20 @@ classdef TensorSpline < handle
         domain
     end
 
+    properties (Dependent, Hidden, SetAccess = private)
+        xiPersisted
+        coefficientIndex
+        splineDimension
+    end
+
     methods
         function self = TensorSpline(options)
-            % Create a tensor-product spline from per-dimension degrees, knots, and coefficients.
+            % Create a tensor-product spline from canonical solved state.
             %
-            % Use this constructor when you already know the per-dimension
-            % knot vectors and tensor-product coefficients.
+            % Use this low-level constructor when you already have the
+            % spline degree, knot-axis objects, and coefficient state. For
+            % ordinary numeric knot-vector construction, use
+            % `TensorSpline.fromKnotPoints(...)`.
             %
             % The stored spline has the tensor-product form
             %
@@ -224,7 +242,7 @@ classdef TensorSpline < handle
             % $$
             %
             % ```matlab
-            % spline = TensorSpline(S=[3 3], knotPoints=knotPoints, xi=xi);
+            % spline = TensorSpline(S=[3 3], knotAxes=SplineAxis.arrayFromVectors(knotPoints), xi=xi);
             % [Xq,Yq] = ndgrid(linspace(0,1,40), linspace(0,1,40));
             % values = spline(Xq, Yq);
             % ```
@@ -232,41 +250,28 @@ classdef TensorSpline < handle
             % - Topic: Create a spline
             % - Declaration: self = TensorSpline(options)
             % - Parameter options.S: spline degree scalar or vector with one entry per dimension
-            % - Parameter options.knotPoints: knot vector in 1-D or cell array of knot vectors
-            % - Parameter options.xi: optional tensor-product coefficient array or vector
+            % - Parameter options.knotAxes: ordered SplineAxis array defining the tensor-product basis
+            % - Parameter options.xi: tensor-product coefficient array or vector
             % - Parameter options.xMean: optional additive output offset
             % - Parameter options.xStd: optional multiplicative output scale
             % - Returns self: TensorSpline instance
             arguments
                 options.S {mustBeNumeric,mustBeReal,mustBeFinite,mustBeInteger,mustBeNonnegative}
-                options.knotPoints
-                options.xi {mustBeNumeric,mustBeReal,mustBeFinite} = []
+                options.knotAxes (:,1) SplineAxis {mustBeNonempty}
+                options.xi {mustBeNumeric,mustBeReal,mustBeFinite}
                 options.xMean (1,1) double {mustBeReal,mustBeFinite} = 0
                 options.xStd (1,1) double {mustBeReal,mustBeFinite} = 1
             end
 
-            if isnumeric(options.knotPoints)
-                validateattributes(options.knotPoints, {'numeric'}, {'vector','real','finite','nonempty'});
-                numDimensions = 1;
-                tKnot = {reshape(options.knotPoints, [], 1)};
-            else
-                tKnot = options.knotPoints;
-                numDimensions = numel(tKnot);
-                tKnot = TensorSpline.normalizeKnotCell(tKnot, numDimensions);
-            end
-
+            knotAxes = reshape(options.knotAxes, [], 1);
+            numDimensions = numel(knotAxes);
+            tKnot = SplineAxis.vectorsFromArray(knotAxes);
             K = TensorSpline.normalizeOrders(options.S + 1, numDimensions);
-            basisSize = TensorSpline.basisSizeFromKnotCell(tKnot, K);
 
-            if isempty(options.xi)
-                xi = zeros(prod(basisSize),1);
-            else
-                xi = options.xi;
-            end
-
+            self@CAAnnotatedClass();
             self.K = K;
             self.tKnot_ = tKnot;
-            self.xi = xi;
+            self.xi = options.xi;
             self.xMean = options.xMean;
             self.xStd = options.xStd;
         end
@@ -353,6 +358,49 @@ classdef TensorSpline < handle
             end
         end
 
+        function value = get.knotAxes(self)
+            % Return the knot-axis objects defining the tensor-product basis.
+            %
+            % - Topic: Inspect spline properties
+            % - Declaration: value = get.knotAxes(self)
+            % - Parameter self: TensorSpline instance
+            % - Returns value: ordered SplineAxis array
+            value = SplineAxis.arrayFromVectors(self.tKnot_);
+        end
+
+        function value = get.xiPersisted(self)
+            % Return the flattened coefficient vector used for persistence.
+            %
+            % - Topic: Persist spline state
+            % - Developer: true
+            % - Declaration: value = get.xiPersisted(self)
+            % - Parameter self: TensorSpline instance
+            % - Returns value: coefficient column vector
+            value = reshape(self.xi_, [], 1);
+        end
+
+        function value = get.coefficientIndex(self)
+            % Return the coefficient-index coordinate for persisted coefficients.
+            %
+            % - Topic: Persist spline state
+            % - Developer: true
+            % - Declaration: value = get.coefficientIndex(self)
+            % - Parameter self: TensorSpline instance
+            % - Returns value: coefficient index vector
+            value = reshape(1:numel(self.xi_), [], 1);
+        end
+
+        function value = get.splineDimension(self)
+            % Return the dimension-index coordinate used for vector-valued persisted state.
+            %
+            % - Topic: Persist spline state
+            % - Developer: true
+            % - Declaration: value = get.splineDimension(self)
+            % - Parameter self: TensorSpline instance
+            % - Returns value: dimension index vector
+            value = reshape(1:self.numDimensions, [], 1);
+        end
+
         function value = get.domain(self)
             % Return the domain limits for each dimension.
             %
@@ -368,12 +416,84 @@ classdef TensorSpline < handle
     end
 
     methods (Static)
+        function self = fromKnotPoints(knotPoints, xi, options)
+            % Create a tensor-product spline from numeric knot vectors and coefficients.
+            %
+            % Use this factory for ordinary scientific construction when
+            % you have numeric knot vectors or a knot-vector cell array.
+            %
+            % - Topic: Create a spline
+            % - Declaration: self = fromKnotPoints(knotPoints,xi,options)
+            % - Parameter knotPoints: numeric knot vector in 1-D or cell array of knot vectors
+            % - Parameter xi: tensor-product coefficient array or vector
+            % - Parameter options.S: spline degree scalar or vector with one entry per dimension
+            % - Parameter options.xMean: optional additive output offset
+            % - Parameter options.xStd: optional multiplicative output scale
+            % - Returns self: TensorSpline instance
+            arguments
+                knotPoints {mustBeNonempty}
+                xi {mustBeNumeric,mustBeReal,mustBeFinite}
+                options.S {mustBeNumeric,mustBeReal,mustBeFinite,mustBeInteger,mustBeNonnegative}
+                options.xMean (1,1) double {mustBeReal,mustBeFinite} = 0
+                options.xStd (1,1) double {mustBeReal,mustBeFinite} = 1
+            end
+
+            if isnumeric(knotPoints)
+                validateattributes(knotPoints, {'numeric'}, {'vector','real','finite','nonempty'});
+                tKnot = {reshape(knotPoints, [], 1)};
+            else
+                tKnot = TensorSpline.normalizeKnotCell(knotPoints, numel(knotPoints));
+            end
+
+            self = TensorSpline(S=options.S, knotAxes=SplineAxis.arrayFromVectors(tKnot), xi=xi, xMean=options.xMean, xStd=options.xStd);
+        end
+
         B = matrixForPointMatrix(pointMatrix, options)
         [pointMatrix, gridSize] = pointsFromGridVectors(gridVectors)
         [pointMatrix, supportVectors] = pointsOfSupportFromKnotPoints(knotPoints, options)
     end
 
     methods (Static, Hidden)
+        function self = annotatedClassFromFile(path)
+            ncfile = NetCDFFile(path);
+            if ~isKey(ncfile.attributes, 'AnnotatedClass')
+                error('TensorSpline:MissingAnnotatedClass', 'Unable to find the AnnotatedClass attribute in %s.', path);
+            end
+
+            className = string(ncfile.attributes('AnnotatedClass'));
+            if ncfile.hasGroupWithName(className)
+                group = ncfile.groupWithName(className);
+            else
+                group = ncfile;
+            end
+            self = TensorSpline.annotatedClassFromGroup(group);
+        end
+
+        function self = annotatedClassFromGroup(group)
+            className = string(group.attributes('AnnotatedClass'));
+            vars = CAAnnotatedClass.propertyValuesFromGroup(group, feval(strcat(className, '.classRequiredPropertyNames')));
+            vars.xi = vars.xiPersisted;
+            vars = rmfield(vars, 'xiPersisted');
+            varCell = namedargs2cell(vars);
+            self = feval(className, varCell{:});
+            self.restoreOptionalPersistedPropertiesFromGroup(group);
+        end
+
+        function propertyAnnotations = classDefinedPropertyAnnotations()
+            propertyAnnotations = CAPropertyAnnotation.empty(0,0);
+            propertyAnnotations(end+1) = CADimensionProperty('splineDimension', '', 'Index over tensor dimensions.');
+            propertyAnnotations(end+1) = CANumericProperty('S', {'splineDimension'}, '', 'Spline degree vector $$S$$.');
+            propertyAnnotations(end+1) = CAObjectProperty('knotAxes', 'Ordered knot-axis objects.');
+            propertyAnnotations(end+1) = CADimensionProperty('coefficientIndex', '', 'Index over persisted spline coefficients.');
+            propertyAnnotations(end+1) = CANumericProperty('xiPersisted', {'coefficientIndex'}, '', 'Flattened tensor-product spline coefficients $$\\xi$$.');
+            propertyAnnotations(end+1) = CANumericProperty('xMean', {}, '', 'Additive output offset $$x_{\\mathrm{Mean}}$$.');
+            propertyAnnotations(end+1) = CANumericProperty('xStd', {}, '', 'Multiplicative output scale $$x_{\\mathrm{Std}}$$.');
+        end
+
+        function names = classRequiredPropertyNames()
+            names = {'S', 'knotAxes', 'xiPersisted', 'xMean', 'xStd'};
+        end
+
         K = normalizeOrders(K, numDimensions)
         tKnot = normalizeKnotCell(tKnot, numDimensions)
         basisSize = basisSizeFromKnotCell(tKnot, K)

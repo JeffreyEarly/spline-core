@@ -30,7 +30,7 @@ values = cos(pi*pointMatrix(:,1)).*exp(-0.5*pointMatrix(:,2).^2) + 0.25*pointMat
 basisMatrix = TensorSpline.matrixForPointMatrix(pointMatrix, knotPoints=knotPoints, S=[3 3]);
 xi = basisMatrix \ values;
 
-tensorSpline = TensorSpline(S=[3 3], knotPoints=knotPoints, xi=xi);
+tensorSpline = TensorSpline.fromKnotPoints(knotPoints, xi, S=[3 3]);
 
 %% Evaluate the tensor spline and a mixed partial derivative
 % Tensor-product coefficients are stored in the shape implied by the basis.

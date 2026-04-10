@@ -1,4 +1,4 @@
-classdef BSpline < handle
+classdef BSpline < CAAnnotatedClass
     % Create, evaluate, and manipulate one-dimensional terminated B-splines.
     %
     % `BSpline` is the low-level one-dimensional spline object used by the
@@ -41,7 +41,7 @@ classdef BSpline < handle
     % - Topic: Represent piecewise polynomials
     % - Topic: Maintain cached state
     %
-    % - Declaration: classdef BSpline < handle
+    % - Declaration: classdef BSpline < CAAnnotatedClass
     properties (SetAccess = private)
         % Spline order K, where polynomial degree is S = K - 1.
         %
@@ -311,6 +311,10 @@ classdef BSpline < handle
         % - Topic: Inspect spline properties
         knotPoints
     end
+
+    properties (Dependent, Hidden, SetAccess = private)
+        coefficientIndex
+    end
     
     methods
         varargout = subsref(self, index)
@@ -367,6 +371,7 @@ classdef BSpline < handle
                 xi = reshape(options.xi, [], 1);
             end
 
+            self@CAAnnotatedClass();
             self.K = K;
             self.tKnot_ = knotPoints;
             self.Xtpp = options.Xtpp;
@@ -433,6 +438,17 @@ classdef BSpline < handle
             % - Returns knotPoints: knot vector
             knotPoints = self.tKnot_;
         end
+
+        function value = get.coefficientIndex(self)
+            % Return the coefficient index vector used for persistence.
+            %
+            % - Topic: Maintain cached state
+            % - Developer: true
+            % - Declaration: value = get.coefficientIndex(self)
+            % - Parameter self: BSpline instance
+            % - Returns value: 1-based coefficient index vector
+            value = reshape(1:numel(self.xi_), [], 1);
+        end
         
         x_out = valueAtPoints(self, t, options)
         tKnotDidChange(self)
@@ -449,5 +465,21 @@ classdef BSpline < handle
         [C,tpp,Xtpp] = ppCoefficientsFromSplineCoefficients(options)
         f = evaluateFromPPCoefficients(options)
         B = matrixForDataPoints(dataPoints, options)
+    end
+
+    methods (Static, Hidden)
+        function propertyAnnotations = classDefinedPropertyAnnotations()
+            propertyAnnotations = CAPropertyAnnotation.empty(0,0);
+            propertyAnnotations(end+1) = CANumericProperty('S', {}, '', 'Spline degree $$S$$.');
+            propertyAnnotations(end+1) = CADimensionProperty('knotPoints', '', 'Terminated knot sequence $$\\tau$$.');
+            propertyAnnotations(end+1) = CADimensionProperty('coefficientIndex', '', 'Coefficient index for the persisted spline coefficients.');
+            propertyAnnotations(end+1) = CANumericProperty('xi', {'coefficientIndex'}, '', 'Spline coefficient vector $$\\xi$$.');
+            propertyAnnotations(end+1) = CANumericProperty('xMean', {}, '', 'Additive output offset $$x_{\\mathrm{Mean}}$$.');
+            propertyAnnotations(end+1) = CANumericProperty('xStd', {}, '', 'Multiplicative output scale $$x_{\\mathrm{Std}}$$.');
+        end
+
+        function names = classRequiredPropertyNames()
+            names = {'S', 'knotPoints', 'xi', 'xMean', 'xStd'};
+        end
     end
 end

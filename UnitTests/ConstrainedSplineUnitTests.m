@@ -15,7 +15,7 @@ classdef ConstrainedSplineUnitTests < matlab.unittest.TestCase
                 [y(1); y(1); y(end); y(end)]
             };
 
-            spline = ConstrainedSpline({x, y}, F, S=K-1, knotPoints=tKnot, distribution=NormalDistribution(sigma=1));
+            spline = ConstrainedSpline.fromGriddedValues({x, y}, F, S=K-1, knotPoints=tKnot, distribution=NormalDistribution(sigma=1));
 
             testCase.assertThat(spline(X, Y), IsEqualTo(F, 'Within', AbsoluteTolerance(10*eps)))
         end
@@ -31,7 +31,7 @@ classdef ConstrainedSplineUnitTests < matlab.unittest.TestCase
                 BSpline.knotPointsForDataPoints(y, S=K(2)-1)
             };
 
-            spline = ConstrainedSpline({x, y}, F, S=K-1, knotPoints=tKnot, distribution=StudentTDistribution(sigma=1, nu=3));
+            spline = ConstrainedSpline.fromGriddedValues({x, y}, F, S=K-1, knotPoints=tKnot, distribution=StudentTDistribution(sigma=1, nu=3));
 
             testCase.verifySize(spline(X, Y), size(F))
         end
@@ -48,7 +48,7 @@ classdef ConstrainedSplineUnitTests < matlab.unittest.TestCase
                 [y(1); y(1); y(end); y(end)]
             };
 
-            spline = ConstrainedSpline({x, y}, F, S=K-1, knotPoints=tKnot, distribution=NormalDistribution(sigma=1));
+            spline = ConstrainedSpline.fromGriddedValues({x, y}, F, S=K-1, knotPoints=tKnot, distribution=NormalDistribution(sigma=1));
 
             testCase.verifySize(spline.smoothingMatrix(), [numel(F) numel(F)])
         end
@@ -61,7 +61,7 @@ classdef ConstrainedSplineUnitTests < matlab.unittest.TestCase
             y = [0; 2];
             [X,Y] = ndgrid(x,y);
             F = 2*X + 3*Y + 1;
-            spline = ConstrainedSpline({x, y}, F);
+            spline = ConstrainedSpline.fromGriddedValues({x, y}, F);
 
             testCase.verifyEqual(spline.K, [4 4])
             testCase.verifyClass(spline.distribution, 'NormalDistribution')
@@ -70,6 +70,28 @@ classdef ConstrainedSplineUnitTests < matlab.unittest.TestCase
             testCase.verifyEqual(spline.dataPoints, [X(:), Y(:)])
             testCase.verifyEqual(spline.dataValues, F(:))
             testCase.assertThat(spline(X, Y), IsEqualTo(F, 'Within', AbsoluteTolerance(10*eps)))
+        end
+
+        function constrainedSplineExposesPublicGridAxesInOneDimension(testCase)
+            t = linspace(-1,1,11)';
+            x = sin(pi*t);
+            spline = ConstrainedSpline.fromGriddedValues(t, x, S=3);
+
+            testCase.verifyTrue(isnumeric(spline.gridVectors))
+            testCase.verifyEqual(spline.gridVectors, t)
+            testCase.verifyEqual(spline.gridAxes.values, t)
+        end
+
+        function constrainedSplineLowLevelConstructorAcceptsSolvedState(testCase)
+            t = linspace(-1,1,11)';
+            x = sin(pi*t);
+            fittedSpline = ConstrainedSpline.fromGriddedValues(t, x, S=3);
+
+            spline = ConstrainedSpline(S=fittedSpline.S, knotAxes=fittedSpline.knotAxes, xi=fittedSpline.xi, gridAxes=fittedSpline.gridAxes, distribution=fittedSpline.distribution, dataPoints=fittedSpline.dataPoints, dataValues=fittedSpline.dataValues, pointConstraints=fittedSpline.pointConstraints, globalConstraints=fittedSpline.globalConstraints, xMean=fittedSpline.xMean, xStd=fittedSpline.xStd);
+
+            testCase.verifyEqual(spline.gridVectors, fittedSpline.gridVectors)
+            testCase.verifyEqual({spline.gridAxes.values}, {t})
+            testCase.verifyEqual(spline(t), fittedSpline(t), AbsTol=1e-10)
         end
 
         function oneDimensionalMinimalKnotFitMatchesPolyfit(testCase)
@@ -81,7 +103,7 @@ classdef ConstrainedSplineUnitTests < matlab.unittest.TestCase
             tq = linspace(min(t), max(t), 41)';
             tKnot = [repmat(t(1), 4, 1); repmat(t(end), 4, 1)];
 
-            spline = ConstrainedSpline(t, x, S=3, knotPoints=tKnot);
+            spline = ConstrainedSpline.fromGriddedValues(t, x, S=3, knotPoints=tKnot);
 
             p = polyfit(t, x, 3);
             xFit = polyval(p, tq);
@@ -93,7 +115,7 @@ classdef ConstrainedSplineUnitTests < matlab.unittest.TestCase
             t = linspace(-2,2,11)';
             x = sin(t);
 
-            spline = ConstrainedSpline(t, x, S=3);
+            spline = ConstrainedSpline.fromGriddedValues(t, x, S=3);
             expectedTKnot = BSpline.knotPointsForDataPoints(t, S=3);
 
             testCase.verifyEqual(spline.knotPoints, expectedTKnot)
@@ -105,7 +127,7 @@ classdef ConstrainedSplineUnitTests < matlab.unittest.TestCase
             splineDOF = max(4, ceil(numel(t)/2));
             tKnot = BSpline.knotPointsForDataPoints(t, S=3, splineDOF=splineDOF);
 
-            spline = ConstrainedSpline(t, x, S=3, knotPoints=tKnot);
+            spline = ConstrainedSpline.fromGriddedValues(t, x, S=3, knotPoints=tKnot);
 
             testCase.verifyEqual(spline.knotPoints, tKnot)
         end
@@ -120,7 +142,7 @@ classdef ConstrainedSplineUnitTests < matlab.unittest.TestCase
                 BSpline.knotPointsForDataPoints(y, S=3)
                 };
 
-            spline = ConstrainedSpline({x, y}, F, S=[3 3], knotPoints=tKnot);
+            spline = ConstrainedSpline.fromGriddedValues({x, y}, F, S=[3 3], knotPoints=tKnot);
 
             testCase.verifyEqual(spline.domain, [x(1), x(end); y(1), y(end)])
         end
@@ -129,7 +151,7 @@ classdef ConstrainedSplineUnitTests < matlab.unittest.TestCase
             t = linspace(-2,2,21)';
             x = cos(2*t);
 
-            spline = ConstrainedSpline(t, x, S=3, splineDOF=6);
+            spline = ConstrainedSpline.fromGriddedValues(t, x, S=3, splineDOF=6);
             expectedTKnot = BSpline.knotPointsForDataPoints(t, S=3, splineDOF=6);
 
             testCase.verifyEqual(spline.knotPoints, expectedTKnot)
@@ -162,7 +184,7 @@ classdef ConstrainedSplineUnitTests < matlab.unittest.TestCase
             [Xq,Yq] = ndgrid(xq,yq);
             Fq = 1 + 2*Xq - Yq + 0.5*Xq.^2.*Yq - 0.25*Xq.*Yq.^3;
 
-            spline = ConstrainedSpline({x, y}, F);
+            spline = ConstrainedSpline.fromGriddedValues({x, y}, F);
 
             testCase.assertThat(spline(Xq, Yq), IsEqualTo(Fq, 'Within', AbsoluteTolerance(1e-10)))
         end
@@ -171,7 +193,7 @@ classdef ConstrainedSplineUnitTests < matlab.unittest.TestCase
             t = linspace(-1,1,9)';
             x = t;
 
-            spline = ConstrainedSpline(t, x, distribution=NormalDistribution(sigma=1), constraints=PointConstraint.equal(0, D=1, value=0));
+            spline = ConstrainedSpline.fromGriddedValues(t, x, distribution=NormalDistribution(sigma=1), constraints=PointConstraint.equal(0, D=1, value=0));
 
             testCase.verifyLessThan(abs(spline.valueAtPoints(0, D=1)), 1e-10)
         end
@@ -184,7 +206,7 @@ classdef ConstrainedSplineUnitTests < matlab.unittest.TestCase
                 GlobalConstraint.positive()
             ];
 
-            spline = ConstrainedSpline(t, x, constraints=constraints);
+            spline = ConstrainedSpline.fromGriddedValues(t, x, constraints=constraints);
 
             testCase.verifyLessThan(abs(spline.valueAtPoints(0, D=1)), 1e-10)
             testCase.verifyGreaterThanOrEqual(min(spline(linspace(-1,1,101)')), -1e-10)
@@ -204,7 +226,7 @@ classdef ConstrainedSplineUnitTests < matlab.unittest.TestCase
             points = [X(mask), Y(mask)];
             constraint = PointConstraint.equal(points, D=[0 0], value=0);
 
-            spline = ConstrainedSpline({x, y}, F, S=[3 3], knotPoints=tKnot, distribution=NormalDistribution(sigma=1), constraints=constraint);
+            spline = ConstrainedSpline.fromGriddedValues({x, y}, F, S=[3 3], knotPoints=tKnot, distribution=NormalDistribution(sigma=1), constraints=constraint);
 
             testCase.verifyLessThan(max(abs(spline(points(:,1), points(:,2)))), 1e-10)
         end
@@ -215,7 +237,7 @@ classdef ConstrainedSplineUnitTests < matlab.unittest.TestCase
             [X,Y] = ndgrid(x,y);
             F = exp(-2*(X.^2 + Y.^2));
             mask = (X.^2 + Y.^2) <= 0.2^2;
-            spline = ConstrainedSpline({x, y}, F, distribution=NormalDistribution(sigma=1), constraints=PointConstraint.equalOnMask({x,y}, mask, D=[0 0], value=0));
+            spline = ConstrainedSpline.fromGriddedValues({x, y}, F, distribution=NormalDistribution(sigma=1), constraints=PointConstraint.equalOnMask({x,y}, mask, D=[0 0], value=0));
 
             maskedPoints = [X(mask), Y(mask)];
             testCase.verifyLessThan(max(abs(spline(maskedPoints(:,1), maskedPoints(:,2)))), 1e-8)
@@ -226,7 +248,7 @@ classdef ConstrainedSplineUnitTests < matlab.unittest.TestCase
             x = t.^2 - 0.35;
             tq = linspace(min(t), max(t), 101)';
 
-            spline = ConstrainedSpline(t, x, distribution=NormalDistribution(sigma=1), constraints=GlobalConstraint.positive());
+            spline = ConstrainedSpline.fromGriddedValues(t, x, distribution=NormalDistribution(sigma=1), constraints=GlobalConstraint.positive());
 
             testCase.verifyGreaterThanOrEqual(min(spline(tq)), -1e-10)
         end
@@ -241,7 +263,7 @@ classdef ConstrainedSplineUnitTests < matlab.unittest.TestCase
                 BSpline.knotPointsForDataPoints(y, S=3)
             };
 
-            spline = ConstrainedSpline({x, y}, F, S=[3 3], knotPoints=tKnot, distribution=NormalDistribution(sigma=1), constraints=GlobalConstraint.monotonicIncreasing(dimension=2));
+            spline = ConstrainedSpline.fromGriddedValues({x, y}, F, S=[3 3], knotPoints=tKnot, distribution=NormalDistribution(sigma=1), constraints=GlobalConstraint.monotonicIncreasing(dimension=2));
 
             xq = linspace(min(x), max(x), 13)';
             yq = linspace(min(y), max(y), 19)';
@@ -256,7 +278,7 @@ classdef ConstrainedSplineUnitTests < matlab.unittest.TestCase
             x = 0.2 + 0.8*(1 - exp(-4*t)) + 0.03*sin(8*pi*t);
             tq = linspace(min(t), max(t), 151)';
 
-            spline = ConstrainedSpline(t, x, distribution=NormalDistribution(sigma=1), constraints=GlobalConstraint.monotonicIncreasing());
+            spline = ConstrainedSpline.fromGriddedValues(t, x, distribution=NormalDistribution(sigma=1), constraints=GlobalConstraint.monotonicIncreasing());
 
             testCase.verifyGreaterThanOrEqual(min(diff(spline(tq))), -1e-10)
         end
@@ -265,7 +287,7 @@ classdef ConstrainedSplineUnitTests < matlab.unittest.TestCase
             t = linspace(-1,1,9)';
             x = t.^2 - 0.2;
 
-            spline = ConstrainedSpline(t, x, distribution=NormalDistribution(sigma=1), constraints=GlobalConstraint.positive());
+            spline = ConstrainedSpline.fromGriddedValues(t, x, distribution=NormalDistribution(sigma=1), constraints=GlobalConstraint.positive());
 
             testCase.verifyError(@() spline.smoothingMatrix(),  'ConstrainedSpline:UnavailableSmoothingMatrix')
         end
@@ -273,7 +295,7 @@ classdef ConstrainedSplineUnitTests < matlab.unittest.TestCase
         function constrainedSplineCoefficientsRemainReadOnly(testCase)
             t = linspace(-1,1,9)';
             x = sin(t);
-            spline = ConstrainedSpline(t, x);
+            spline = ConstrainedSpline.fromGriddedValues(t, x);
 
             testCase.verifyError(@() assignCoefficients(spline, zeros(size(spline.xi))), 'ConstrainedSpline:ReadOnlyCoefficients')
         end
@@ -281,7 +303,7 @@ classdef ConstrainedSplineUnitTests < matlab.unittest.TestCase
         function constrainedSplineFitDiagnosticsAreReadOnly(testCase)
             t = linspace(-1,1,9)';
             x = sin(t);
-            spline = ConstrainedSpline(t, x);
+            spline = ConstrainedSpline.fromGriddedValues(t, x);
             propertyNames = ["gridVectors", "distribution", "dataPoints", "dataValues", "pointConstraints", "globalConstraints", "CmInv", "X", "W", "Aeq", "beq", "Aineq", "bineq"];
 
             for iProperty = 1:numel(propertyNames)

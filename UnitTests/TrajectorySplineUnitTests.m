@@ -121,19 +121,19 @@ classdef TrajectorySplineUnitTests < matlab.unittest.TestCase
             x = (0:5)';
             y = (0:5)';
 
-            testCase.verifyError(@() TrajectorySpline(t, x, y, S=1), 'MATLAB:validators:mustBeVector')
+            testCase.verifyError(@() TrajectorySpline(t, x, y, S=1), 'MATLAB:expectedVector')
         end
 
         function trajectorySplineRejectsEmptyInputs(testCase)
-            testCase.verifyError(@() TrajectorySpline([], [], [], S=3), 'MATLAB:validators:mustBeNonempty')
+            testCase.verifyError(@() TrajectorySpline([], [], [], S=3), 'MATLAB:expectedVector')
         end
 
         function trajectorySplineWrapsPreFitComponentSplines(testCase)
             t = linspace(0, 1, 11)';
             x = cos(2*pi*t);
             y = sin(2*pi*t);
-            xSpline = ConstrainedSpline(t, x, S=3);
-            ySpline = ConstrainedSpline(t, y, S=3);
+            xSpline = ConstrainedSpline.fromGriddedValues(t, x, S=3);
+            ySpline = ConstrainedSpline.fromGriddedValues(t, y, S=3);
 
             trajectory = TrajectorySpline.fromComponentSplines(t, xSpline, ySpline);
 
@@ -148,8 +148,8 @@ classdef TrajectorySplineUnitTests < matlab.unittest.TestCase
 
         function trajectorySplineWrapFactoryRejectsNonmonotonicParameter(testCase)
             t = [0; 0.5; 0.5; 1];
-            xSpline = ConstrainedSpline([0; 0.5; 1], [0; 1; 0], S=2);
-            ySpline = ConstrainedSpline([0; 0.5; 1], [0; 0; 1], S=2);
+            xSpline = ConstrainedSpline.fromGriddedValues([0; 0.5; 1], [0; 1; 0], S=2);
+            ySpline = ConstrainedSpline.fromGriddedValues([0; 0.5; 1], [0; 0; 1], S=2);
 
             testCase.verifyError(@() TrajectorySpline.fromComponentSplines(t, xSpline, ySpline), ...
                 'TrajectorySpline:NonmonotonicParameter')
@@ -157,8 +157,8 @@ classdef TrajectorySplineUnitTests < matlab.unittest.TestCase
 
         function trajectorySplineWrapFactoryRejectsMultidimensionalSplines(testCase)
             t = linspace(0, 1, 5)';
-            xSpline = TensorSpline(S=[1 1], knotPoints={[-1; -1; 1; 1], [-1; -1; 1; 1]}, xi=zeros(4, 1));
-            ySpline = ConstrainedSpline(t, sin(2*pi*t), S=3);
+            xSpline = TensorSpline.fromKnotPoints({[-1; -1; 1; 1], [-1; -1; 1; 1]}, zeros(4, 1), S=[1 1]);
+            ySpline = ConstrainedSpline.fromGriddedValues(t, sin(2*pi*t), S=3);
 
             testCase.verifyError(@() TrajectorySpline.fromComponentSplines(t, xSpline, ySpline), ...
                 'TrajectorySpline:InvalidComponentSpline')

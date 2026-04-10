@@ -1,16 +1,18 @@
 classdef InterpolatingSpline < TensorSpline
     % Interpolating spline on one-dimensional samples or rectilinear grids.
     %
-    % `InterpolatingSpline` is the exact-fit constructor for data already
-    % sampled on a one-dimensional grid or a rectilinear tensor grid. It is
-    % the class to use when your samples are trusted exactly and you want a
-    % spline whose evaluation reproduces those sample values at the supplied
-    % grid locations.
+    % `InterpolatingSpline` is the exact-fit counterpart to
+    % `ConstrainedSpline`. Use
+    % `InterpolatingSpline.fromGriddedValues(...)` when your samples live
+    % on a one-dimensional grid or a rectilinear tensor grid and should be
+    % reproduced exactly. The low-level `InterpolatingSpline(...)`
+    % constructor is the cheap solved-state constructor used for persisted
+    % restart and other direct bootstrap paths.
     %
     % Supported construction forms:
-    %   spline = InterpolatingSpline(x,V)
-    %   spline = InterpolatingSpline({x,y,...},V)
-    %   spline = InterpolatingSpline(grid,V,S=S)
+    %   spline = InterpolatingSpline.fromGriddedValues(x, V)
+    %   spline = InterpolatingSpline.fromGriddedValues({x, y, ...}, V)
+    %   spline = InterpolatingSpline(S=S, knotAxes=..., xi=..., gridAxes=...)
     %
     % If $$\mathbf{B}$$ is the tensor-product basis matrix on the supplied
     % grid and $$\tilde{y}$$ is the normalized data vector, the stored
@@ -26,16 +28,12 @@ classdef InterpolatingSpline < TensorSpline
     %
     % ## Basic usage
     %
-    % Use `InterpolatingSpline` when you have values on a rectilinear grid
-    % and want exact interpolation rather than smoothing or constrained
-    % regression.
-    %
     % ```matlab
     % x = linspace(0,1,8)';
     % y = linspace(-1,1,9)';
     % [X,Y] = ndgrid(x, y);
     % F = sin(2*pi*X).*cos(pi*Y);
-    % spline = InterpolatingSpline({x, y}, F);
+    % spline = InterpolatingSpline.fromGriddedValues({x, y}, F, S=[3 3]);
     % Fq = spline(X, Y);
     % ```
     %
@@ -58,63 +56,106 @@ classdef InterpolatingSpline < TensorSpline
         gridVectors
     end
 
+    properties (Dependent, SetAccess = private)
+        % Grid-axis objects used to define the interpolation lattice.
+        %
+        % `gridAxes` is the axis-object representation of the original
+        % interpolation grid and is the canonical constructor vocabulary
+        % for persisted or otherwise pre-solved interpolation state.
+        %
+        % - Topic: Inspect interpolation grids
+        gridAxes
+    end
+
     methods
-        function self = InterpolatingSpline(grid, values, options)
-            % Create an interpolating spline on one-dimensional samples or a rectilinear grid.
+        function self = InterpolatingSpline(options)
+            % Create an interpolating spline from canonical solved state.
             %
-            % Use this constructor when your data already live on a
-            % rectilinear grid and should be reproduced exactly by the
-            % spline. Supply a numeric vector in 1-D or a cell array of grid
-            % vectors in higher dimensions together with the sampled value
-            % array.
-            %
-            % The implementation builds one knot vector per dimension from
-            % the supplied grid vectors, standardizes the sampled values, and
-            % solves the interpolation system
-            %
-            % $$
-            % \mathbf{B}\xi = \tilde{y},
-            % $$
-            %
-            % where $$\mathbf{B}$$ is the tensor-product basis matrix
-            % evaluated on the grid points. Because the knot vectors are
-            % built from the supplied grid, the resulting system is square
-            % for standard interpolation setups.
+            % Use this low-level constructor when you already have the
+            % interpolation knot axes, coefficient state, and grid axes.
+            % For ordinary interpolation from gridded samples, use
+            % `InterpolatingSpline.fromGriddedValues(...)`.
             %
             % ```matlab
-            % x = linspace(0,1,8)';
-            % y = linspace(-1,1,9)';
-            % [X,Y] = ndgrid(x, y);
-            % F = sin(2*pi*X).*cos(pi*Y);
-            % spline = InterpolatingSpline({x, y}, F, S=[3 3]);
-            % Fq = spline(X, Y);
+            % spline = InterpolatingSpline( ...
+            %     S=[3 3], ...
+            %     knotAxes=SplineAxis.arrayFromVectors(knotPoints), ...
+            %     xi=xi, ...
+            %     gridAxes=SplineAxis.arrayFromVectors({x, y}));
             % ```
             %
             % - Topic: Create an interpolating spline
-            % - Declaration: self = InterpolatingSpline(grid,values,options)
-            % - Parameter grid: numeric vector in 1-D or cell array of grid vectors in higher dimensions
-            % - Parameter values: array of sampled values on the grid
+            % - Declaration: self = InterpolatingSpline(options)
+            % - Parameter options.S: spline degree scalar or vector with one entry per dimension
+            % - Parameter options.knotAxes: ordered knot-axis objects defining the spline basis
+            % - Parameter options.xi: interpolating coefficient vector or array
+            % - Parameter options.gridAxes: ordered interpolation-grid axis objects
+            % - Parameter options.xMean: optional additive output offset
+            % - Parameter options.xStd: optional multiplicative output scale
+            % - Returns self: InterpolatingSpline instance
+            arguments
+                options.S {mustBeNumeric,mustBeReal,mustBeFinite,mustBeInteger,mustBeNonnegative}
+                options.knotAxes (:,1) SplineAxis {mustBeNonempty}
+                options.xi {mustBeNumeric,mustBeReal,mustBeFinite}
+                options.gridAxes (:,1) SplineAxis {mustBeNonempty}
+                options.xMean (1,1) double {mustBeReal,mustBeFinite} = 0
+                options.xStd (1,1) double {mustBeReal,mustBeFinite} = 1
+            end
+
+            if numel(options.knotAxes) ~= numel(options.gridAxes)
+                error('InterpolatingSpline:AxisCountMismatch', 'knotAxes and gridAxes must have the same number of dimensions.');
+            end
+
+            self@TensorSpline(S=options.S, knotAxes=options.knotAxes, xi=options.xi, xMean=options.xMean, xStd=options.xStd);
+            gridVectors = SplineAxis.vectorsFromArray(options.gridAxes);
+            if numel(gridVectors) == 1
+                self.gridVectors = gridVectors{1};
+            else
+                self.gridVectors = gridVectors;
+            end
+        end
+
+        function value = get.gridAxes(self)
+            % Return the grid-axis objects defining the interpolation lattice.
+            %
+            % - Topic: Inspect interpolation grids
+            % - Declaration: value = get.gridAxes(self)
+            % - Parameter self: InterpolatingSpline instance
+            % - Returns value: ordered SplineAxis array
+            value = SplineAxis.arrayFromVectors(self.gridVectors);
+        end
+    end
+
+    methods (Static)
+        function self = fromGriddedValues(gridVectors, values, options)
+            % Create an interpolating spline from values on a rectilinear grid.
+            %
+            % Use this factory for ordinary interpolation from gridded
+            % samples. It validates the gridded input, builds the knot
+            % sequence, normalizes the values, solves for the interpolation
+            % coefficients, and then delegates to the cheap constructor.
+            %
+            % - Topic: Create an interpolating spline
+            % - Declaration: self = fromGriddedValues(gridVectors,values,options)
+            % - Parameter gridVectors: numeric vector in 1-D or cell array of grid vectors in higher dimensions
+            % - Parameter values: array of sampled values on the supplied grid
             % - Parameter options.S: spline degree scalar or vector with one entry per dimension
             % - Returns self: InterpolatingSpline instance
             arguments
-                grid
+                gridVectors {mustBeNonempty}
                 values {mustBeNumeric,mustBeReal,mustBeFinite}
                 options.S {mustBeNumeric,mustBeReal,mustBeFinite,mustBeInteger,mustBeNonnegative} = 3
             end
 
-            if iscell(grid)
-                if isempty(grid)
-                    error('InterpolatingSpline:InvalidGrid', 'grid must not be empty.');
-                end
-
-                gridVectors = reshape(grid, 1, []);
+            if iscell(gridVectors)
+                gridVectors = reshape(gridVectors, 1, []);
                 for iDim = 1:numel(gridVectors)
-                    validateattributes(gridVectors{iDim}, {'numeric'}, {'vector','real','finite','nonempty'});
+                    validateattributes(gridVectors{iDim}, {'numeric'}, {'vector', 'real', 'finite', 'nonempty'});
                     gridVectors{iDim} = reshape(gridVectors{iDim}, [], 1);
                 end
             else
-                validateattributes(grid, {'numeric'}, {'vector','real','finite','nonempty'});
-                gridVectors = {reshape(grid, [], 1)};
+                validateattributes(gridVectors, {'numeric'}, {'vector', 'real', 'finite', 'nonempty'});
+                gridVectors = {reshape(gridVectors, [], 1)};
             end
 
             numDimensions = numel(gridVectors);
@@ -134,10 +175,8 @@ classdef InterpolatingSpline < TensorSpline
                 end
             end
 
-            K = options.S + 1;
-            K = TensorSpline.normalizeOrders(K, numDimensions);
+            K = TensorSpline.normalizeOrders(options.S + 1, numDimensions);
             S = K - 1;
-
             tKnot = cell(1, numDimensions);
             for iDim = 1:numDimensions
                 tKnot{iDim} = BSpline.knotPointsForDataPoints(gridVectors{iDim}, S=S(iDim));
@@ -145,7 +184,6 @@ classdef InterpolatingSpline < TensorSpline
 
             xMean = mean(values(:));
             values = values - xMean;
-
             xStd = std(values(:));
             if xStd > 0
                 values = values / xStd;
@@ -154,11 +192,20 @@ classdef InterpolatingSpline < TensorSpline
             end
 
             [gridPoints, ~] = TensorSpline.pointsFromGridVectors(gridVectors);
-            basisMatrix = TensorSpline.matrixForPointMatrix(gridPoints, knotPoints=tKnot, S=S);
-            xi = basisMatrix \ values(:);
+            X = TensorSpline.matrixForPointMatrix(gridPoints, knotPoints=tKnot, S=S);
+            xi = X \ values(:);
+            self = InterpolatingSpline(S=S, knotAxes=SplineAxis.arrayFromVectors(tKnot), xi=xi, xMean=xMean, xStd=xStd, gridAxes=SplineAxis.arrayFromVectors(gridVectors));
+        end
+    end
 
-            self@TensorSpline(S=S, knotPoints=tKnot, xi=xi, xMean=xMean, xStd=xStd);
-            self.gridVectors = gridVectors;
+    methods (Static, Hidden)
+        function propertyAnnotations = classDefinedPropertyAnnotations()
+            propertyAnnotations = TensorSpline.classDefinedPropertyAnnotations();
+            propertyAnnotations(end+1) = CAObjectProperty('gridAxes', 'Ordered interpolation-grid axes.');
+        end
+
+        function names = classRequiredPropertyNames()
+            names = union(TensorSpline.classRequiredPropertyNames(), {'gridAxes'});
         end
     end
 end

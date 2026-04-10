@@ -9,16 +9,16 @@ S = 3;
 xDense = linspace(-1, 1, 400)';
 
 xUniform = linspace(-1, 1, N)';
-uniformSpline = InterpolatingSpline(xUniform, f(xUniform), S=S);
+uniformSpline = InterpolatingSpline.fromGriddedValues(xUniform, f(xUniform), S=S);
 uniformError = max(abs(f(xDense) - uniformSpline(xDense)));
 
 xChebyshev = cos((0:N-1)'*pi/(N-1));
-chebyshevSpline = InterpolatingSpline(xChebyshev, f(xChebyshev), S=S);
+chebyshevSpline = InterpolatingSpline.fromGriddedValues(xChebyshev, f(xChebyshev), S=S);
 chebyshevError = max(abs(f(xDense) - chebyshevSpline(xDense)));
 
 xReference = [-1; -0.33; 0.33; 1];
 yReference = [0; 1; 2; 0];
-referenceSpline = InterpolatingSpline(xReference, yReference, S=3);
+referenceSpline = InterpolatingSpline.fromGriddedValues(xReference, yReference, S=3);
 referenceInterpolant = griddedInterpolant(xReference, yReference, "spline");
 
 figure(Position=[100 100 980 620])

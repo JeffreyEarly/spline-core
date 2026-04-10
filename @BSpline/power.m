@@ -38,7 +38,7 @@ poweredValues = values.^exponent;
 tolerance = 10*eps(max(1, max(abs(poweredValues))));
 if all(isfinite(poweredValues)) && all(poweredValues >= -tolerance)
     poweredValues = max(poweredValues, 0);
-    fittedSpline = ConstrainedSpline(supportPoints, poweredValues, S=poweredK-1, knotPoints=knotPoints, constraints=GlobalConstraint.positive());
+    fittedSpline = ConstrainedSpline.fromGriddedValues(supportPoints, poweredValues, S=poweredK-1, knotPoints=knotPoints, constraints=GlobalConstraint.positive());
     poweredSpline = BSpline(S=poweredK-1, knotPoints=fittedSpline.knotPoints, xi=fittedSpline.xi(:));
 else
     X = BSpline.matrixForDataPoints(supportPoints, knotPoints=knotPoints, S=poweredK-1);

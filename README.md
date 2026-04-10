@@ -24,7 +24,7 @@ The `InterpolatingSpline` class is useful for interpolating smooth functions. In
 ```matlab
 x = linspace(0,20,10)';
 y = sin(2*pi*x/10);
-spline = InterpolatingSpline(x,y)
+spline = InterpolatingSpline.fromGriddedValues(x,y)
 ```
 and now you can evaluate the interpolated value,
 ```matlab
@@ -33,7 +33,7 @@ y_dense = spline(x_dense);
 ```
 By default the class uses cubic spline, but you can initialize with whatever order of spline you want, e.g.,
 ```matlab
-spline = InterpolatingSpline(x,y,K=5)
+spline = InterpolatingSpline.fromGriddedValues(x,y,S=4)
 ```
 
 
@@ -127,7 +127,7 @@ legend('true function', 'observations')
 ```
 Finally, let's use an interpolating spline,
 ```matlab
-spline = InterpolatingSpline(x,y);
+spline = InterpolatingSpline.fromGriddedValues(x,y);
 
 figure
 plot(x_dense,f(x_dense)), hold on
@@ -142,24 +142,23 @@ ginterp = griddedInterpolant(x,y,'spline');
 residual = ginterp(x_dense)-spline(x_dense);
 relative_error = max(abs(residual))/max(abs(y)) % returns O(1e-16)
 ```
-However, unlike Matlab's implementation, this class lets you specify the order of the spline to something other than cubic (K=4). For example, we can do a K=2 fit (which is just linear interpolation), but also a (K=5) fit.
+However, unlike Matlab's implementation, this class lets you specify the spline degree directly. Cubic interpolation uses `S=3`, linear interpolation uses `S=1`, and higher-degree fits are also available.
 ```matlab
-spline_2 = InterpolatingSpline(x,y,K=2);
-spline_5 = InterpolatingSpline(x,y,K=5);
+spline_1 = InterpolatingSpline.fromGriddedValues(x,y,S=1);
+spline_4 = InterpolatingSpline.fromGriddedValues(x,y,S=4);
 
 figure
 plot(x_dense,f(x_dense)), hold on
 scatter(x,y,'k')
-plot(x_dense,spline_2(x_dense))
-plot(x_dense,spline_5(x_dense))
-legend('true function', 'observations', 'spline fit, K=2', 'spline fit, K=5')
+plot(x_dense,spline_1(x_dense))
+plot(x_dense,spline_4(x_dense))
+legend('true function', 'observations', 'spline fit, S=1', 'spline fit, S=4')
 ```
 
 <p align="center"><img src="figures/interpolatingspline.png" width="400" /></p>
 
 ### Options
 
-The `InterpolatingSpline` class takes name/value pairs at initialization to set the spline order (or degree).
+The `InterpolatingSpline.fromGriddedValues` factory takes name/value pairs to set the spline degree.
 
-- `'K'` spline order, default is 4.
-- `'S'` spline degree (order-1), default is 3.
+- `'S'` spline degree, default is 3.

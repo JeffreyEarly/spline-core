@@ -19,7 +19,7 @@ coefficients = X\f(t);
 
 Bq = BSpline.matrixForDataPoints(tqBasis, knotPoints=tKnot, S=K-1, D=D);
 [C, tPP] = BSpline.ppCoefficientsFromSplineCoefficients(xi=coefficients, knotPoints=tKnot, S=K-1);
-splineFit = InterpolatingSpline(t, f(t), S=K-1);
+splineFit = InterpolatingSpline.fromGriddedValues(t, f(t), S=K-1);
 
 titles = [
     "Evaluated with basis matrices"

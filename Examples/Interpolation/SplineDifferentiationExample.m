@@ -12,7 +12,7 @@ S = 3;
 x = linspace(-1, 1, N)';
 xDense = linspace(-1, 1, 400)';
 
-splineFit = InterpolatingSpline(x, f(x), S=S);
+splineFit = InterpolatingSpline.fromGriddedValues(x, f(x), S=S);
 derivativeSpline = diff(splineFit, 1);
 
 figure(Position=[100 100 980 560])

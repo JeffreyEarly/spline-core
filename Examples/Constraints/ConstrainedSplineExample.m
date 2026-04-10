@@ -52,7 +52,7 @@ else
     constraints = PointConstraint.empty(0,1);
 end
 
-fit = ConstrainedSpline(t, x, S=S, knotPoints=knotPoints, constraints=constraints);
+fit = ConstrainedSpline.fromGriddedValues(t, x, S=S, knotPoints=knotPoints, constraints=constraints);
 
 figure(Position=[100 100 900 700])
 tiledlayout(3, 1, TileSpacing="compact")

@@ -1,4 +1,4 @@
-classdef TrajectorySpline < handle
+classdef TrajectorySpline < CAAnnotatedClass
     % Two-dimensional interpolating trajectory parameterized by time or arc parameter.
     %
     % `TrajectorySpline` stores a planar parametric trajectory as two
@@ -27,7 +27,7 @@ classdef TrajectorySpline < handle
     % - Topic: Create a trajectory spline
     % - Topic: Inspect trajectory properties
     % - Topic: Evaluate trajectory derivatives
-    % - Declaration: classdef TrajectorySpline < handle
+    % - Declaration: classdef TrajectorySpline < CAAnnotatedClass
 
     properties (SetAccess = private)
         % Parameter samples used to define the component splines.
@@ -96,23 +96,46 @@ classdef TrajectorySpline < handle
             % - Parameter options.S: spline degree shared by both coordinate splines
             % - Returns self: TrajectorySpline instance
             arguments
-                t {mustBeNumeric,mustBeReal,mustBeFinite,mustBeNonempty,mustBeVector}
-                x {mustBeNumeric,mustBeReal,mustBeFinite,mustBeNonempty,mustBeVector}
-                y {mustBeNumeric,mustBeReal,mustBeFinite,mustBeNonempty,mustBeVector}
+                t = []
+                x = []
+                y = []
                 options.S (1,1) double {mustBeReal,mustBeFinite,mustBeInteger,mustBeNonnegative} = 3
             end
 
-            t = reshape(t, [], 1);
-            x = reshape(x, [], 1);
-            y = reshape(y, [], 1);
+            if isa(x, 'TensorSpline') || isa(y, 'TensorSpline')
+                if isempty(t) || isempty(x) || isempty(y)
+                    error('TrajectorySpline:MissingComponentSpline', 'Persisted/component construction requires t, x, and y.');
+                end
+                if ~isa(x, 'TensorSpline') || ~isa(y, 'TensorSpline')
+                    error('TrajectorySpline:InvalidComponentSpline', 'x and y must both be TensorSpline objects when using component-spline construction.');
+                end
+                validateattributes(t, {'numeric'}, {'vector','real','finite','nonempty'});
+                t = TrajectorySpline.normalizeParameter(t, shouldRequireMonotonic=false);
+                xSpline = x;
+                ySpline = y;
+            else
+                validateattributes(t, {'numeric'}, {'vector','real','finite','nonempty'});
+                validateattributes(x, {'numeric'}, {'vector','real','finite','nonempty'});
+                validateattributes(y, {'numeric'}, {'vector','real','finite','nonempty'});
+                t = TrajectorySpline.normalizeParameter(t, shouldRequireMonotonic=false);
+                x = reshape(x, [], 1);
+                y = reshape(y, [], 1);
 
-            if numel(x) ~= numel(t) || numel(y) ~= numel(t)
-                error('TrajectorySpline:SizeMismatch', 't, x, and y must have the same number of elements.');
+                if numel(x) ~= numel(t) || numel(y) ~= numel(t)
+                    error('TrajectorySpline:SizeMismatch', 't, x, and y must have the same number of elements.');
+                end
+
+                xSpline = ConstrainedSpline.fromGriddedValues(t, x, S=options.S);
+                ySpline = ConstrainedSpline.fromGriddedValues(t, y, S=options.S);
             end
 
+            self@CAAnnotatedClass();
+            if xSpline.numDimensions ~= 1 || ySpline.numDimensions ~= 1
+                error('TrajectorySpline:InvalidComponentSpline', 'x and y must be one-dimensional splines.');
+            end
             self.t = t;
-            self.x = ConstrainedSpline(t, x, S=options.S);
-            self.y = ConstrainedSpline(t, y, S=options.S);
+            self.x = xSpline;
+            self.y = ySpline;
         end
 
         function values = u(self, t)
@@ -197,19 +220,61 @@ classdef TrajectorySpline < handle
                 self (1,1) TrajectorySpline
             end
 
-            t = reshape(t, [], 1);
-            if any(diff(t) <= 0)
-                error('TrajectorySpline:NonmonotonicParameter', 't must be strictly increasing.');
-            end
+            t = TrajectorySpline.normalizeParameter(t, shouldRequireMonotonic=true);
             if xSpline.numDimensions ~= 1 || ySpline.numDimensions ~= 1
                 error('TrajectorySpline:InvalidComponentSpline', 'xSpline and ySpline must be one-dimensional splines.');
             end
 
-            bootstrapDegree = min([numel(t)-1, xSpline.S(1), ySpline.S(1)]);
-            self = TrajectorySpline(t, xSpline(t), ySpline(t), S=bootstrapDegree);
-            self.t = t;
-            self.x = xSpline;
-            self.y = ySpline;
+            self = TrajectorySpline(t, xSpline, ySpline);
+        end
+    end
+
+    methods (Static, Hidden)
+        function self = annotatedClassFromFile(path)
+            ncfile = NetCDFFile(path, shouldReadOnly=true);
+            cleanup = onCleanup(@() ncfile.close()); %#ok<NASGU>
+            if isKey(ncfile.attributes, 'AnnotatedClass')
+                className = string(ncfile.attributes('AnnotatedClass'));
+                if ncfile.hasGroupWithName(className)
+                    group = ncfile.groupWithName(className);
+                else
+                    group = ncfile;
+                end
+            else
+                error('TrajectorySpline:MissingAnnotatedClass', 'Unable to find the AnnotatedClass attribute in %s.', path);
+            end
+            self = TrajectorySpline.annotatedClassFromGroup(group);
+        end
+
+        function self = annotatedClassFromGroup(group)
+            vars = CAAnnotatedClass.propertyValuesFromGroup(group, {'t'});
+            xSpline = TensorSpline.annotatedClassFromGroup(group.groupWithName('x'));
+            ySpline = TensorSpline.annotatedClassFromGroup(group.groupWithName('y'));
+            self = TrajectorySpline(vars.t, xSpline, ySpline);
+        end
+
+        function propertyAnnotations = classDefinedPropertyAnnotations()
+            propertyAnnotations = CAPropertyAnnotation.empty(0,0);
+            propertyAnnotations(end+1) = CADimensionProperty('t', '', 'Trajectory parameter samples.');
+            propertyAnnotations(end+1) = CAObjectProperty('x', 'Spline model for the x-coordinate trajectory component.');
+            propertyAnnotations(end+1) = CAObjectProperty('y', 'Spline model for the y-coordinate trajectory component.');
+        end
+
+        function names = classRequiredPropertyNames()
+            names = {'t', 'x', 'y'};
+        end
+    end
+
+    methods (Static, Access = private)
+        function t = normalizeParameter(t, options)
+            arguments
+                t
+                options.shouldRequireMonotonic (1,1) logical = true
+            end
+            t = reshape(t, [], 1);
+            if options.shouldRequireMonotonic && any(diff(t) <= 0)
+                error('TrajectorySpline:NonmonotonicParameter', 't must be strictly increasing.');
+            end
         end
     end
 end

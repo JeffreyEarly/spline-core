@@ -50,4 +50,4 @@ end
 
 X = TensorSpline.matrixForPointMatrix(supportPoints, knotPoints=poweredTKnot, S=poweredK - 1);
 xi = X \ poweredValues(:);
-poweredSpline = TensorSpline(S=poweredK-1, knotPoints=poweredTKnot, xi=xi);
+poweredSpline = TensorSpline(S=poweredK-1, knotAxes=SplineAxis.arrayFromVectors(poweredTKnot), xi=xi);

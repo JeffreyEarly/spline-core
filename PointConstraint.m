@@ -59,6 +59,11 @@ classdef PointConstraint < SplineConstraint
         numConstraints
     end
 
+    properties (Dependent, Hidden, SetAccess = private)
+        constraintIndex
+        constraintDimension
+    end
+
     methods
         function self = PointConstraint(points, relation, value, options)
             % Create a pointwise equality or bound constraint.
@@ -75,10 +80,18 @@ classdef PointConstraint < SplineConstraint
             % - Returns self: PointConstraint instance
             arguments
                 points = []
-                relation {mustBeTextScalar,mustBeMember(relation,["==",">=","<="])} = PointConstraint.equalRelation
+                relation {mustBeTextScalar} = PointConstraint.equalRelation
                 value = []
                 options.D {mustBeNumeric,mustBeReal,mustBeFinite,mustBeNonnegative,mustBeInteger} = 0
             end
+
+            derivativeOrders = options.D;
+            relation = string(relation);
+            if ~any(relation == PointConstraint.allowedRelations)
+                error('PointConstraint:InvalidRelation', 'relation must be one of "==", ">=", or "<=".');
+            end
+
+            self@SplineConstraint();
 
             if isempty(points)
                 return;
@@ -87,11 +100,11 @@ classdef PointConstraint < SplineConstraint
             pointMatrix = PointConstraint.normalizePoints(points);
             numPoints = size(pointMatrix,1);
             numDimensions = size(pointMatrix,2);
-            derivativeOrders = PointConstraint.normalizeDerivativeOrders(options.D, numPoints, numDimensions);
+            derivativeOrders = PointConstraint.normalizeDerivativeOrders(derivativeOrders, numPoints, numDimensions);
             targetValues = PointConstraint.normalizeValues(value, numPoints);
             self.points = pointMatrix;
             self.D = derivativeOrders;
-            self.relation = string(relation);
+            self.relation = relation;
             self.value = targetValues;
         end
 
@@ -113,6 +126,28 @@ classdef PointConstraint < SplineConstraint
             % - Parameter self: PointConstraint instance
             % - Returns value: number of rows in points
             value = size(self.points, 1);
+        end
+
+        function value = get.constraintIndex(self)
+            % Return the index coordinate for persisted point constraints.
+            %
+            % - Topic: Persist spline state
+            % - Developer: true
+            % - Declaration: value = get.constraintIndex(self)
+            % - Parameter self: PointConstraint instance
+            % - Returns value: constraint index vector
+            value = reshape(1:self.numConstraints, [], 1);
+        end
+
+        function value = get.constraintDimension(self)
+            % Return the coordinate-dimension index for persisted point-constraint matrices.
+            %
+            % - Topic: Persist spline state
+            % - Developer: true
+            % - Declaration: value = get.constraintDimension(self)
+            % - Parameter self: PointConstraint instance
+            % - Returns value: point-dimension index vector
+            value = reshape(1:self.numDimensions, [], 1);
         end
     end
 
@@ -256,6 +291,43 @@ classdef PointConstraint < SplineConstraint
             end
 
             self = PointConstraint(PointConstraint.pointsFromMask(grid, mask), PointConstraint.upperBoundRelation, options.value, D=options.D);
+        end
+    end
+
+    methods (Static, Hidden)
+        function self = annotatedClassFromFile(path)
+            ncfile = NetCDFFile(path, shouldReadOnly=true);
+            cleanup = onCleanup(@() ncfile.close()); %#ok<NASGU>
+            if isKey(ncfile.attributes, 'AnnotatedClass')
+                className = string(ncfile.attributes('AnnotatedClass'));
+                if ncfile.hasGroupWithName(className)
+                    group = ncfile.groupWithName(className);
+                else
+                    group = ncfile;
+                end
+            else
+                error('PointConstraint:MissingAnnotatedClass', 'Unable to find the AnnotatedClass attribute in %s.', path);
+            end
+            self = PointConstraint.annotatedClassFromGroup(group);
+        end
+
+        function self = annotatedClassFromGroup(group)
+            vars = CAAnnotatedClass.propertyValuesFromGroup(group, PointConstraint.classRequiredPropertyNames());
+            self = PointConstraint(vars.points, vars.relation, vars.value, D=vars.D);
+        end
+
+        function propertyAnnotations = classDefinedPropertyAnnotations()
+            propertyAnnotations = SplineConstraint.classDefinedPropertyAnnotations();
+            propertyAnnotations(end+1) = CADimensionProperty('constraintIndex', '', 'Index over constrained points.');
+            propertyAnnotations(end+1) = CADimensionProperty('constraintDimension', '', 'Index over constrained dimensions.');
+            propertyAnnotations(end+1) = CANumericProperty('points', {'constraintIndex', 'constraintDimension'}, '', 'Constraint locations as an N-by-D point matrix.');
+            propertyAnnotations(end+1) = CANumericProperty('D', {'constraintIndex', 'constraintDimension'}, '', 'Derivative orders as an N-by-D matrix.');
+            propertyAnnotations(end+1) = CAPropertyAnnotation('relation', 'Constraint relation.');
+            propertyAnnotations(end+1) = CANumericProperty('value', {'constraintIndex'}, '', 'Target values for each constrained point.');
+        end
+
+        function names = classRequiredPropertyNames()
+            names = {'points', 'relation', 'value', 'D'};
         end
     end
 

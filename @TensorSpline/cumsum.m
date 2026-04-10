@@ -33,4 +33,4 @@ K(dim) = Kdim;
 tKnot = self.tKnot_;
 tKnot{dim} = tKnotDim;
 
-intspline = TensorSpline(S=K-1, knotPoints=tKnot, xi=xi);
+intspline = TensorSpline(S=K-1, knotAxes=SplineAxis.arrayFromVectors(tKnot), xi=xi);
