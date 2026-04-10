@@ -3,7 +3,7 @@ layout: default
 title: knotPointsForDataPoints
 parent: BSpline
 grand_parent: Classes
-nav_order: 12
+nav_order: 14
 mathjax: true
 ---
 

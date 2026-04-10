@@ -1,5 +1,9 @@
 # Version History
 
+## [2.2.0] - 2026-04-10
+- added public `BSpline.integratedSplineState(...)` and `BSpline.integralMatrixForDataPoints(...)` antiderivative utilities for coefficient-state and interpolation-operator workflows
+- refactored `BSpline.cumsum(...)` and tensor-spline integration to reuse the public coefficient-state utility instead of constructing temporary per-slice splines
+
 ## [2.1.0] - 2026-04-09
 - updated internal distribution construction call sites to the `Distributions` 2.0 named-argument API
 - raised the package dependency floor to `Distributions ^2.0`

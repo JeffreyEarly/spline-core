@@ -53,6 +53,13 @@ spline = BSpline(S=3, knotPoints=knotPoints, xi=X\x);
 xq = spline(linspace(0,1,100)');
 ```
 
+For advanced antiderivative workflows,
+`BSpline.integratedSplineState(...)` returns the canonical spline
+state of the zero-anchored antiderivative, and
+`BSpline.integralMatrixForDataPoints(...)` returns the exact linear
+map from one-dimensional interpolation values to antiderivative
+values at chosen query points.
+
 
 
 
@@ -75,12 +82,14 @@ xq = spline(linspace(0,1,100)');
 + Transform the spline
   + [`cumsum`](/spline-core/classes/bspline/cumsum.html) Return the indefinite integral of a B-spline.
   + [`diff`](/spline-core/classes/bspline/diff.html) Differentiate a B-spline representation.
+  + [`integratedSplineState`](/spline-core/classes/bspline/integratedsplinestate.html) Return the canonical spline state of the zero-anchored antiderivative.
   + [`mtimes`](/spline-core/classes/bspline/mtimes.html) Multiply a spline output by a scalar.
   + [`plus`](/spline-core/classes/bspline/plus.html) Add a scalar offset to a spline output.
   + [`power`](/spline-core/classes/bspline/power.html) Raise spline values to a real scalar power by refitting support values.
   + [`roots`](/spline-core/classes/bspline/roots.html) Return real roots of a spline within its domain.
   + [`sqrt`](/spline-core/classes/bspline/sqrt.html) Return a spline approximation to the square root of the spline output.
 + Build spline bases
+  + [`integralMatrixForDataPoints`](/spline-core/classes/bspline/integralmatrixfordatapoints.html) Return the exact interpolation-to-antiderivative linear map.
   + [`knotPointsForDataPoints`](/spline-core/classes/bspline/knotpointsfordatapoints.html) Construct a terminated knot sequence from sample locations.
   + [`matrixForDataPoints`](/spline-core/classes/bspline/matrixfordatapoints.html) Evaluate terminated B-spline basis functions and optional derivatives.
   + [`pointsOfSupportFromKnotPoints`](/spline-core/classes/bspline/pointsofsupportfromknotpoints.html) Return representative support points for a terminated spline basis.

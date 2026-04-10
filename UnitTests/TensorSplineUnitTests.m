@@ -211,6 +211,24 @@ classdef TensorSplineUnitTests < matlab.unittest.TestCase
             testCase.assertThat(intspline(X, Y),  IsEqualTo(integralAlongY - integralAlongY(:,1), 'Within', AbsoluteTolerance(1e-10)))
         end
 
+        function tensorSplineCumsumWithAffineTermsMatchesLegacySliceIntegration(testCase)
+            x = linspace(-1, 1, 6)';
+            y = linspace(0, 2, 7)';
+            knotPoints = {BSpline.knotPointsForDataPoints(x, S=1), BSpline.knotPointsForDataPoints(y, S=1)};
+            xi = reshape(linspace(-0.4, 0.6, 42), 6, 7);
+            spline = TensorSpline(S=[1 1], knotAxes=SplineAxis.arrayFromVectors(knotPoints), xi=xi, xMean=3, xStd=4);
+            splineKnotPoints = spline.knotPoints;
+
+            intspline = cumsum(spline, 2);
+            [expectedXi, expectedTKnotDim, expectedK] = legacyIntegrateAlongDimension( ...
+                spline.xi, splineKnotPoints{2}, spline.K(2), 2, spline.xMean, spline.xStd);
+            expectedSpline = TensorSpline(S=[spline.S(1), expectedK - 1], ...
+                knotAxes=SplineAxis.arrayFromVectors({splineKnotPoints{1}, expectedTKnotDim}), xi=expectedXi);
+            [X, Y] = ndgrid(linspace(-1, 1, 11)', linspace(0, 2, 13)');
+
+            testCase.verifyEqual(intspline(X, Y), expectedSpline(X, Y), AbsTol=1e-12)
+        end
+
         function tensorSplineExposesDegreeVector(testCase)
             spline2D = InterpolatingSpline.fromGriddedValues({linspace(0,1,5)', linspace(-1,1,6)'}, randn(5,6), S=[2 3]);
 
@@ -397,4 +415,32 @@ classdef TensorSplineUnitTests < matlab.unittest.TestCase
             testCase.assertThat(rootedSpline(Xsup, Ysup),  IsEqualTo(sqrt(expected), 'Within', AbsoluteTolerance(1e-10)))
         end
     end
+end
+
+function [xi, tKnot, K] = legacyIntegrateAlongDimension(xi, tKnot, K, dim, xMean, xStd)
+perm = [dim, 1:(dim-1), (dim+1):ndims(xi)];
+xiPermuted = permute(xi, perm);
+xiMatrix = reshape(xiPermuted, size(xiPermuted, 1), []);
+[transformedMatrix, tKnot, SIntegrated] = legacyIntegratedSplineState(xiMatrix, tKnot, K - 1, xMean, xStd);
+K = SIntegrated + 1;
+
+outputSize = size(xiPermuted);
+outputSize(1) = size(transformedMatrix, 1);
+xi = ipermute(reshape(transformedMatrix, outputSize), perm);
+end
+
+function [xiIntegrated, knotPointsIntegrated, SIntegrated] = legacyIntegratedSplineState(xi, knotPoints, S, xMean, xStd)
+xi = reshape(xi, size(xi, 1), []);
+if abs(xMean) > 0 || abs(xStd - 1) > 0
+    supportPoints = BSpline.pointsOfSupportFromKnotPoints(knotPoints, S=S);
+    basisMatrix = BSpline.matrixForDataPoints(supportPoints, knotPoints=knotPoints, S=S);
+    xi = xStd * xi + basisMatrix \ (xMean * ones(numel(supportPoints), 1));
+end
+
+K = S + 1;
+numCoefficients = size(xi, 1);
+dt = (knotPoints(1 + K:numCoefficients + K) - knotPoints(1:numCoefficients)) / K;
+xiIntegrated = [zeros(1, size(xi, 2), 'like', xi); cumsum(xi .* reshape(dt, [], 1), 1)];
+knotPointsIntegrated = [knotPoints(1); knotPoints; knotPoints(end)];
+SIntegrated = S + 1;
 end

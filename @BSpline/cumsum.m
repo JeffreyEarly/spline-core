@@ -28,19 +28,6 @@ arguments
     spline (1,1) BSpline
 end
 
-xi = spline.xi;
-K = spline.K;
-knotPoints = spline.knotPoints;
-M = length(xi);
-
-if abs(spline.xMean) > 0 || abs(spline.xStd - 1) > 0
-    t = BSpline.pointsOfSupportFromKnotPoints(spline.knotPoints, S=spline.S);
-    X = BSpline.matrixForDataPoints(t, knotPoints=spline.knotPoints, S=spline.S);
-    xi = spline.xStd*spline.xi + X\(spline.xMean*ones(length(t),1));
-end
-
-dt = (knotPoints(1+K:M+K)-knotPoints(1:M))/K;
-beta = [0; cumsum(xi.*dt)];
-
-knotPoints = cat(1, spline.knotPoints(1), spline.knotPoints, spline.knotPoints(end));
-intspline = BSpline(S=spline.S+1, knotPoints=knotPoints, xi=beta);
+[xiIntegrated, knotPointsIntegrated, SIntegrated] = BSpline.integratedSplineState( ...
+    spline.xi, knotPoints=spline.knotPoints, S=spline.S, xMean=spline.xMean, xStd=spline.xStd);
+intspline = BSpline(S=SIntegrated, knotPoints=knotPointsIntegrated, xi=xiIntegrated);

@@ -33,6 +33,13 @@ classdef BSpline < CAAnnotatedClass
     % xq = spline(linspace(0,1,100)');
     % ```
     %
+    % For advanced antiderivative workflows,
+    % `BSpline.integratedSplineState(...)` returns the canonical spline
+    % state of the zero-anchored antiderivative, and
+    % `BSpline.integralMatrixForDataPoints(...)` returns the exact linear
+    % map from one-dimensional interpolation values to antiderivative
+    % values at chosen query points.
+    %
     % - Topic: Create a spline
     % - Topic: Inspect spline properties
     % - Topic: Evaluate the spline
@@ -465,6 +472,8 @@ classdef BSpline < CAAnnotatedClass
         [C,tpp,Xtpp] = ppCoefficientsFromSplineCoefficients(options)
         f = evaluateFromPPCoefficients(options)
         B = matrixForDataPoints(dataPoints, options)
+        [xiIntegrated,knotPointsIntegrated,SIntegrated] = integratedSplineState(xi, options)
+        W = integralMatrixForDataPoints(dataPoints, queryPoints, options)
     end
 
     methods (Static, Hidden)
