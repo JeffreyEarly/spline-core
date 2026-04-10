@@ -10,6 +10,7 @@ nav_order: 100
 - updated internal distribution construction call sites to the `Distributions` 2.0 named-argument API
 - raised the package dependency floor to `Distributions ^2.0`
 - refactored `TensorSpline`, `InterpolatingSpline`, and `ConstrainedSpline` so their public constructors are cheap canonical state constructors, while expensive scientific setup moved into explicit factories such as `fromKnotPoints(...)` and `fromGriddedValues(...)`
+- added `ConstrainedSpline.fromData(...)` as the preferred one-dimensional fitting factory, while keeping `ConstrainedSpline.fromGriddedValues(...)` as the general rectilinear-grid path
 - refactored `TrajectorySpline` to the same constructor/factory persistence model, with `TrajectorySpline(options)` now serving as the canonical solved-state constructor and `TrajectorySpline.fromData(...)` replacing the old positional sample-fitting constructor
 - added the public read-only axis vocabulary `knotAxes` and `gridAxes`, backed by the new `SplineAxis` object used for canonical solved-state and persistence paths
 - added annotated NetCDF persistence coverage for the spline and constraint classes, including restart paths that preserve solved state without rerunning constrained fitting

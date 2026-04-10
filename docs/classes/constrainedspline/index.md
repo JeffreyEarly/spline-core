@@ -52,14 +52,15 @@ factorization rather than explicitly forming $$\Sigma^{-1}$$.
 
 ## Basic usage
 
-Use `ConstrainedSpline` when you want to fit a tensor-product
-spline to noisy values on a one-dimensional grid or rectilinear grid.
+Use `ConstrainedSpline.fromData(...)` for ordinary one-dimensional
+noisy-data fitting and `ConstrainedSpline.fromGriddedValues(...)`
+when the observations lie on a rectilinear tensor grid.
 
 ```matlab
-x = linspace(0,1,20)';
-y = exp(-20*(x-0.5).^2) + 0.05*randn(size(x));
-spline = ConstrainedSpline.fromGriddedValues(x, y, S=3, constraints=GlobalConstraint.positive());
-yFit = spline(x);
+t = linspace(0,1,20)';
+x = exp(-20*(t-0.5).^2) + 0.05*randn(size(t));
+spline = ConstrainedSpline.fromData(t, x, S=3, constraints=GlobalConstraint.positive());
+xFit = spline(t);
 ```
 
 
@@ -68,6 +69,7 @@ yFit = spline(x);
 ## Topics
 + Create a constrained tensor spline
   + [`ConstrainedSpline`](/spline-core/classes/constrainedspline/constrainedspline.html) Create a constrained spline from canonical solved state.
+  + [`fromData`](/spline-core/classes/constrainedspline/fromdata.html) Create a constrained spline fit from one-dimensional samples.
   + [`fromGriddedValues`](/spline-core/classes/constrainedspline/fromgriddedvalues.html) Create a constrained spline fit from values on a rectilinear grid.
 + Inspect fit results
   + [`dataPoints`](/spline-core/classes/constrainedspline/datapoints.html) Observation locations as an N-by-D point matrix.

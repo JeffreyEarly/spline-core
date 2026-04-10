@@ -13,9 +13,9 @@ S = 2;
 knotPoints = [min(t); min(t); 0.5; 1; 1.5; max(t); max(t)];
 tq = linspace(min(t), max(t), 400)';
 
-unconstrainedSpline = ConstrainedSpline.fromGriddedValues(t, x, S=S, knotPoints=knotPoints, distribution=distribution);
+unconstrainedSpline = ConstrainedSpline.fromData(t, x, S=S, knotPoints=knotPoints, distribution=distribution);
 
-monotoneSpline = ConstrainedSpline.fromGriddedValues(t, x, S=S, knotPoints=knotPoints, distribution=distribution, constraints=GlobalConstraint.monotonicIncreasing());
+monotoneSpline = ConstrainedSpline.fromData(t, x, S=S, knotPoints=knotPoints, distribution=distribution, constraints=GlobalConstraint.monotonicIncreasing());
 
 figure(Position=[100 100 860 560])
 tiledlayout(2, 1, TileSpacing="compact")

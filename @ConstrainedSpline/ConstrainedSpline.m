@@ -32,14 +32,15 @@ classdef ConstrainedSpline < TensorSpline
     %
     % ## Basic usage
     %
-    % Use `ConstrainedSpline` when you want to fit a tensor-product
-    % spline to noisy values on a one-dimensional grid or rectilinear grid.
+    % Use `ConstrainedSpline.fromData(...)` for ordinary one-dimensional
+    % noisy-data fitting and `ConstrainedSpline.fromGriddedValues(...)`
+    % when the observations lie on a rectilinear tensor grid.
     %
     % ```matlab
-    % x = linspace(0,1,20)';
-    % y = exp(-20*(x-0.5).^2) + 0.05*randn(size(x));
-    % spline = ConstrainedSpline.fromGriddedValues(x, y, S=3, constraints=GlobalConstraint.positive());
-    % yFit = spline(x);
+    % t = linspace(0,1,20)';
+    % x = exp(-20*(t-0.5).^2) + 0.05*randn(size(t));
+    % spline = ConstrainedSpline.fromData(t, x, S=3, constraints=GlobalConstraint.positive());
+    % xFit = spline(t);
     % ```
     %
     % - Topic: Create a constrained tensor spline
@@ -189,8 +190,9 @@ classdef ConstrainedSpline < TensorSpline
             %
             % Use this low-level constructor when you already have the
             % solved spline coefficients, fit grid, observations, and
-            % semantic constraints. For ordinary fitting from gridded data,
-            % use `ConstrainedSpline.fromGriddedValues(...)`.
+            % semantic constraints. For ordinary one-dimensional fitting,
+            % use `ConstrainedSpline.fromData(...)`. For rectilinear-grid
+            % fitting, use `ConstrainedSpline.fromGriddedValues(...)`.
             %
             % - Topic: Create a constrained tensor spline
             % - Declaration: self = ConstrainedSpline(options)
@@ -206,6 +208,7 @@ classdef ConstrainedSpline < TensorSpline
             % - Parameter options.xMean: optional additive output offset
             % - Parameter options.xStd: optional multiplicative output scale
             % - Returns self: ConstrainedSpline instance
+            % - nav_order: 1
             arguments
                 options.S {mustBeNumeric,mustBeReal,mustBeFinite,mustBeInteger,mustBeNonnegative}
                 options.knotAxes (:,1) SplineAxis {mustBeNonempty}
@@ -386,11 +389,51 @@ classdef ConstrainedSpline < TensorSpline
     end
 
     methods (Static)
+        function self = fromData(t, x, options)
+            % Create a constrained spline fit from one-dimensional samples.
+            %
+            % Use this factory for ordinary one-dimensional noisy-data
+            % fitting. It validates the shared sample vectors, then
+            % delegates to the general rectilinear-grid factory so the
+            % one-dimensional behavior stays aligned with
+            % `ConstrainedSpline.fromGriddedValues(...)`.
+            %
+            % - Topic: Create a constrained tensor spline
+            % - Declaration: self = fromData(t,x,options)
+            % - Parameter t: one-dimensional sample locations
+            % - Parameter x: observation values sampled at `t`
+            % - Parameter options.S: spline degree
+            % - Parameter options.knotPoints: optional one-dimensional knot vector
+            % - Parameter options.splineDOF: optional target number of splines
+            % - Parameter options.distribution: optional error model object for the fit
+            % - Parameter options.constraints: optional mixed SplineConstraint array
+            % - Returns self: ConstrainedSpline instance
+            % - nav_order: 2
+            arguments
+                t (:,1) double {mustBeReal,mustBeFinite,mustBeNonempty}
+                x (:,1) double {mustBeReal,mustBeFinite,mustBeNonempty}
+                options.S {mustBeNumeric,mustBeReal,mustBeFinite,mustBeInteger,mustBeNonnegative} = 3
+                options.knotPoints = []
+                options.splineDOF {mustBeNumeric,mustBeReal,mustBeFinite,mustBeInteger,mustBeNonnegative} = []
+                options.distribution (1,1) Distribution = NormalDistribution(sigma=1)
+                options.constraints SplineConstraint = SplineConstraint.empty(0,1)
+            end
+
+            if numel(t) ~= numel(x)
+                error('ConstrainedSpline:SizeMismatch', 'x must have the same number of elements as t.');
+            end
+
+            optionCell = namedargs2cell(options);
+            self = ConstrainedSpline.fromGriddedValues(t, x, optionCell{:});
+        end
+
         function self = fromGriddedValues(gridVectors, values, options)
             % Create a constrained spline fit from values on a rectilinear grid.
             %
-            % Use this factory for ordinary fitting from gridded samples.
-            % It validates the gridded input, chooses the knot sequence,
+            % Use this factory for fitting from rectilinear-grid samples,
+            % especially in two or more dimensions. In one dimension,
+            % prefer `ConstrainedSpline.fromData(...)`. This method
+            % validates the gridded input, chooses the knot sequence,
             % normalizes the constraint objects, solves the fit system, and
             % then delegates to the cheap solved-state constructor.
             %
@@ -404,6 +447,7 @@ classdef ConstrainedSpline < TensorSpline
             % - Parameter options.distribution: optional error model object for the fit
             % - Parameter options.constraints: optional mixed SplineConstraint array
             % - Returns self: ConstrainedSpline instance
+            % - nav_order: 3
             arguments
                 gridVectors {mustBeNonempty}
                 values {mustBeNumeric,mustBeReal,mustBeFinite}

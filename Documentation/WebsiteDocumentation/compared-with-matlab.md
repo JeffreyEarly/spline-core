@@ -19,7 +19,7 @@ that also supports low-level basis access, robust fitting, and constraints.
 | --- | --- | --- |
 | `interp1` | `InterpolatingSpline.fromGriddedValues(t, x, S=3)` | reusable spline objects, derivatives, roots, and knot access |
 | `griddedInterpolant` | `InterpolatingSpline.fromGriddedValues({x, y}, V, S=[3 3])` | tensor derivatives, basis access, and the same family as constrained fitting |
-| `polyfit` | `ConstrainedSpline.fromGriddedValues(t, x, S=N-1, splineDOF=N)` | richer spline spaces, robust fitting, and constraints |
+| `polyfit` | `ConstrainedSpline.fromData(t, x, S=N-1, splineDOF=N)` | richer spline spaces, robust fitting, and constraints |
 | manual paired spline fits for `x(t), y(t)` | `TrajectorySpline.fromData(t, x, y, S=3)` | shared parameterization, velocity helpers, and file persistence |
 
 ## `interp1` and one-dimensional interpolation
@@ -74,19 +74,20 @@ p = polyfit(t, x, 3);
 xFit = polyval(p, tq);
 
 % spline-core
-fit = ConstrainedSpline.fromGriddedValues(t, x, S=3, splineDOF=4);
+fit = ConstrainedSpline.fromData(t, x, S=3, splineDOF=4);
 xFit = fit(tq);
 ```
 
 The direct alignment is:
 
-- `polyfit(t, x, N-1)` corresponds to `ConstrainedSpline.fromGriddedValues(t, x, S=N-1, splineDOF=N)`
+- `polyfit(t, x, N-1)` corresponds to `ConstrainedSpline.fromData(t, x, S=N-1, splineDOF=N)`
 
 Where `Spline Core` goes beyond `polyfit`:
 
 - move from a minimal polynomial basis to richer spline spaces by increasing `splineDOF`
 - keep irregularly spaced data as a natural input
 - add robust error models or constraints without leaving the same interface
+- use `ConstrainedSpline.fromGriddedValues(...)` for the rectilinear-grid extension in two or more dimensions
 
 ## What MATLAB does not bundle directly
 
@@ -94,7 +95,7 @@ Robust fitting and constraints are the clearest places where `Spline Core`
 goes beyond MATLAB's standard interpolation tools.
 
 ```matlab
-fit = ConstrainedSpline.fromGriddedValues(t, xObs, S=3, splineDOF=12, ...
+fit = ConstrainedSpline.fromData(t, xObs, S=3, splineDOF=12, ...
     distribution=StudentTDistribution(sigma=0.1, nu=3), ...
     constraints=[
         PointConstraint.equal(0, D=1, value=0)

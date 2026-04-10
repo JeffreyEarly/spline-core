@@ -41,11 +41,12 @@ Vq = F(Xq, Yq);
 
 ```matlab
 noiseModel = NormalDistribution(0.05);
-fit = ConstrainedSpline.fromGriddedValues(t, xObs, S=3, splineDOF=12, distribution=noiseModel);
+fit = ConstrainedSpline.fromData(t, xObs, S=3, splineDOF=12, distribution=noiseModel);
 ```
 
 To match the least-squares polynomial fit from `polyfit(t, x, N-1)`, use
-`S=N-1` and `splineDOF=N`.
+`S=N-1` and `splineDOF=N`. For rectilinear grids in two or more
+dimensions, use `ConstrainedSpline.fromGriddedValues(...)`.
 
 ## Fit noisy data with outliers
 
@@ -53,7 +54,7 @@ To match the least-squares polynomial fit from `polyfit(t, x, N-1)`, use
 - Start with [Robust Fitting with Outliers](tutorials/robust-fitting-with-outliers)
 
 ```matlab
-fit = ConstrainedSpline.fromGriddedValues(t, xObs, S=3, splineDOF=12, ...
+fit = ConstrainedSpline.fromData(t, xObs, S=3, splineDOF=12, ...
     distribution=StudentTDistribution(sigma=0.05, nu=3));
 ```
 
@@ -68,7 +69,7 @@ constraints = [
     PointConstraint.equal(0.5, D=1, value=0)
 ];
 
-fit = ConstrainedSpline.fromGriddedValues(t, xObs, S=3, splineDOF=12, constraints=constraints);
+fit = ConstrainedSpline.fromData(t, xObs, S=3, splineDOF=12, constraints=constraints);
 ```
 
 ## Add global positivity or monotonicity constraints
@@ -77,7 +78,7 @@ fit = ConstrainedSpline.fromGriddedValues(t, xObs, S=3, splineDOF=12, constraint
 - Start with [Global Shape Constraints](tutorials/global-shape-constraints)
 
 ```matlab
-fit = ConstrainedSpline.fromGriddedValues(t, xObs, S=3, splineDOF=12, ...
+fit = ConstrainedSpline.fromData(t, xObs, S=3, splineDOF=12, ...
     constraints=GlobalConstraint.monotonicIncreasing());
 ```
 

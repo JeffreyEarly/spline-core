@@ -62,7 +62,8 @@ The main spline classes are:
 
 For ordinary scientific setup, prefer the public factories
 `InterpolatingSpline.fromGriddedValues(...)`,
-`ConstrainedSpline.fromGriddedValues(...)`,
+`ConstrainedSpline.fromData(...)`,
+`ConstrainedSpline.fromGriddedValues(...)` for rectilinear grids,
 `TensorSpline.fromKnotPoints(...)`, and
 `TrajectorySpline.fromData(...)`. The direct constructors are the cheap
 canonical solved-state and persistence path.

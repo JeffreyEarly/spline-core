@@ -132,8 +132,8 @@ classdef TrajectorySplineUnitTests < matlab.unittest.TestCase
             t = linspace(0, 1, 11);
             x = cos(2*pi*t);
             y = sin(2*pi*t);
-            xSpline = ConstrainedSpline.fromGriddedValues(t', x', S=3);
-            ySpline = ConstrainedSpline.fromGriddedValues(t', y', S=3);
+            xSpline = ConstrainedSpline.fromData(t', x', S=3);
+            ySpline = ConstrainedSpline.fromData(t', y', S=3);
 
             trajectory = TrajectorySpline(t=t, x=xSpline, y=ySpline);
 
@@ -148,8 +148,8 @@ classdef TrajectorySplineUnitTests < matlab.unittest.TestCase
 
         function trajectorySplineCanonicalConstructorRejectsNonmonotonicParameter(testCase)
             t = [0; 0.5; 0.5; 1];
-            xSpline = ConstrainedSpline.fromGriddedValues([0; 0.5; 1], [0; 1; 0], S=2);
-            ySpline = ConstrainedSpline.fromGriddedValues([0; 0.5; 1], [0; 0; 1], S=2);
+            xSpline = ConstrainedSpline.fromData([0; 0.5; 1], [0; 1; 0], S=2);
+            ySpline = ConstrainedSpline.fromData([0; 0.5; 1], [0; 0; 1], S=2);
 
             testCase.verifyError(@() TrajectorySpline(t=t, x=xSpline, y=ySpline), 'TrajectorySpline:NonmonotonicParameter')
         end
@@ -157,7 +157,7 @@ classdef TrajectorySplineUnitTests < matlab.unittest.TestCase
         function trajectorySplineCanonicalConstructorRejectsMultidimensionalSplines(testCase)
             t = linspace(0, 1, 5)';
             xSpline = TensorSpline.fromKnotPoints({[-1; -1; 1; 1], [-1; -1; 1; 1]}, zeros(4, 1), S=[1 1]);
-            ySpline = ConstrainedSpline.fromGriddedValues(t, sin(2*pi*t), S=3);
+            ySpline = ConstrainedSpline.fromData(t, sin(2*pi*t), S=3);
 
             testCase.verifyError(@() TrajectorySpline(t=t, x=xSpline, y=ySpline), 'TrajectorySpline:InvalidComponentSpline')
         end

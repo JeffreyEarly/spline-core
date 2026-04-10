@@ -28,8 +28,8 @@ tq = linspace(t(1), t(end), 400)';
 normalModel = NormalDistribution(sigma=0.08);
 studentTModel = StudentTDistribution(sigma=0.08, nu=3);
 
-normalFit = ConstrainedSpline.fromGriddedValues(t, xObs, S=3, splineDOF=12, distribution=normalModel);
-robustFit = ConstrainedSpline.fromGriddedValues(t, xObs, S=3, splineDOF=12, distribution=studentTModel);
+normalFit = ConstrainedSpline.fromData(t, xObs, S=3, splineDOF=12, distribution=normalModel);
+robustFit = ConstrainedSpline.fromData(t, xObs, S=3, splineDOF=12, distribution=studentTModel);
 
 % Plot the normal and Student-t fits on the same contaminated data.
 figure(Position=[100 100 900 320])

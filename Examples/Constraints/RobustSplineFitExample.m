@@ -14,8 +14,8 @@ S = 2;
 knotPoints = [min(t); min(t); 0.75; 1.25; max(t); max(t)];
 tq = linspace(min(t), max(t), 400)';
 
-leastSquaresSpline = ConstrainedSpline.fromGriddedValues(t, x, S=S, knotPoints=knotPoints);
-robustSpline = ConstrainedSpline.fromGriddedValues(t, x, S=S, knotPoints=knotPoints, distribution=distribution);
+leastSquaresSpline = ConstrainedSpline.fromData(t, x, S=S, knotPoints=knotPoints);
+robustSpline = ConstrainedSpline.fromData(t, x, S=S, knotPoints=knotPoints, distribution=distribution);
 
 figure(Position=[100 100 860 520])
 tiledlayout(2, 1, TileSpacing="compact")

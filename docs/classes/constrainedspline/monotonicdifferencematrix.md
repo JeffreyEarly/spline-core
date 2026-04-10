@@ -3,7 +3,7 @@ layout: default
 title: monotonicDifferenceMatrix
 parent: ConstrainedSpline
 grand_parent: Classes
-nav_order: 14
+nav_order: 15
 mathjax: true
 ---
 

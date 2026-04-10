@@ -69,8 +69,8 @@ classdef TrajectorySpline < CAAnnotatedClass
             % use `TrajectorySpline.fromData(...)`.
             %
             % ```matlab
-            % xSpline = ConstrainedSpline.fromGriddedValues(t, x, S=3);
-            % ySpline = ConstrainedSpline.fromGriddedValues(t, y, S=3);
+            % xSpline = ConstrainedSpline.fromData(t, x, S=3);
+            % ySpline = ConstrainedSpline.fromData(t, y, S=3);
             % trajectory = TrajectorySpline(t=t, x=xSpline, y=ySpline);
             % ```
             %
@@ -191,8 +191,8 @@ classdef TrajectorySpline < CAAnnotatedClass
                 error('TrajectorySpline:NonmonotonicParameter', 't must be strictly increasing.');
             end
 
-            xSpline = ConstrainedSpline.fromGriddedValues(t, x, S=options.S);
-            ySpline = ConstrainedSpline.fromGriddedValues(t, y, S=options.S);
+            xSpline = ConstrainedSpline.fromData(t, x, S=options.S);
+            ySpline = ConstrainedSpline.fromData(t, y, S=options.S);
             self = TrajectorySpline(t=t, x=xSpline, y=ySpline);
         end
     end

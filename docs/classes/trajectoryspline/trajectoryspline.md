@@ -34,8 +34,8 @@ Create a trajectory from canonical component-spline state.
   use `TrajectorySpline.fromData(...)`.
 
   ```matlab
-  xSpline = ConstrainedSpline.fromGriddedValues(t, x, S=3);
-  ySpline = ConstrainedSpline.fromGriddedValues(t, y, S=3);
+  xSpline = ConstrainedSpline.fromData(t, x, S=3);
+  ySpline = ConstrainedSpline.fromData(t, y, S=3);
   trajectory = TrajectorySpline(t=t, x=xSpline, y=ySpline);
   ```
 

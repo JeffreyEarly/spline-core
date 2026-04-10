@@ -69,14 +69,16 @@ t = linspace(0, 1, 50)';
 xObs = exp(t) + 0.05*randn(size(t));
 
 noiseModel = NormalDistribution(0.05);
-fit = ConstrainedSpline.fromGriddedValues(t, xObs, S=3, splineDOF=12, distribution=noiseModel);
+fit = ConstrainedSpline.fromData(t, xObs, S=3, splineDOF=12, distribution=noiseModel);
 
 tq = linspace(t(1), t(end), 200)';
 xFit = fit(tq);
 ```
 
 From the same starting point you can add robust error models, local point
-constraints, and global shape constraints.
+constraints, and global shape constraints. For rectilinear grids in two or
+more dimensions, switch to
+`ConstrainedSpline.fromGriddedValues({x, y, ...}, values, ...)`.
 
 ## 5. Planar trajectory quickstart
 

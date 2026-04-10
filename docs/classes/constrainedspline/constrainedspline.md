@@ -38,7 +38,8 @@ Create a constrained spline from canonical solved state.
 
   Use this low-level constructor when you already have the
   solved spline coefficients, fit grid, observations, and
-  semantic constraints. For ordinary fitting from gridded data,
-  use `ConstrainedSpline.fromGriddedValues(...)`.
+  semantic constraints. For ordinary one-dimensional fitting,
+  use `ConstrainedSpline.fromData(...)`. For rectilinear-grid
+  fitting, use `ConstrainedSpline.fromGriddedValues(...)`.
 
 

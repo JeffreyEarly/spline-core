@@ -3,7 +3,7 @@ layout: default
 title: fromGriddedValues
 parent: ConstrainedSpline
 grand_parent: Classes
-nav_order: 8
+nav_order: 9
 mathjax: true
 ---
 
@@ -32,8 +32,10 @@ Create a constrained spline fit from values on a rectilinear grid.
 
 ## Discussion
 
-  Use this factory for ordinary fitting from gridded samples.
-  It validates the gridded input, chooses the knot sequence,
+  Use this factory for fitting from rectilinear-grid samples,
+  especially in two or more dimensions. In one dimension,
+  prefer `ConstrainedSpline.fromData(...)`. This method
+  validates the gridded input, chooses the knot sequence,
   normalizes the constraint objects, solves the fit system, and
   then delegates to the cheap solved-state constructor.
 

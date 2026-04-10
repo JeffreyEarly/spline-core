@@ -111,7 +111,7 @@ classdef SplinePersistenceUnitTests < matlab.unittest.TestCase
         function constrainedSplineRoundTripRebuildsUnconstrainedDiagnostics(testCase)
             t = linspace(-1, 1, 21)';
             values = sin(pi*t) + 0.05*cos(3*pi*t);
-            spline = ConstrainedSpline.fromGriddedValues(t, values, S=3, distribution=NormalDistribution(sigma=1));
+            spline = ConstrainedSpline.fromData(t, values, S=3, distribution=NormalDistribution(sigma=1));
             originalSmoothing = spline.smoothingMatrix();
 
             path = string(strcat(tempname, '.nc'));
@@ -150,7 +150,7 @@ classdef SplinePersistenceUnitTests < matlab.unittest.TestCase
                 PointConstraint.equal(0.5, D=1, value=0)
                 GlobalConstraint.positive()
             ];
-            spline = ConstrainedSpline.fromGriddedValues(t, values, S=3, distribution=distribution, constraints=constraints);
+            spline = ConstrainedSpline.fromData(t, values, S=3, distribution=distribution, constraints=constraints);
 
             path = string(strcat(tempname, '.nc'));
             cleanupPath = onCleanup(@() deleteIfPresent(path)); %#ok<NASGU>
@@ -207,8 +207,8 @@ classdef SplinePersistenceUnitTests < matlab.unittest.TestCase
 
         function trajectorySplineConstructorRoundTripPreservesComponentSplines(testCase)
             t = linspace(0, 1, 17)';
-            xSpline = ConstrainedSpline.fromGriddedValues(t, cos(2*pi*t), S=3);
-            ySpline = ConstrainedSpline.fromGriddedValues(t, sin(2*pi*t), S=3);
+            xSpline = ConstrainedSpline.fromData(t, cos(2*pi*t), S=3);
+            ySpline = ConstrainedSpline.fromData(t, sin(2*pi*t), S=3);
             trajectory = TrajectorySpline(t=t, x=xSpline, y=ySpline);
 
             path = string(strcat(tempname, '.nc'));

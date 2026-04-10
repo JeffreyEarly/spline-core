@@ -58,7 +58,7 @@ constraints enter the workflow.
 ```matlab
 t = sort(rand(50,1));
 x = exp(t) + 0.05*randn(size(t));
-fit = ConstrainedSpline.fromGriddedValues(t, x, S=3, splineDOF=12);
+fit = ConstrainedSpline.fromData(t, x, S=3, splineDOF=12);
 ```
 
 In higher dimensions, use
@@ -67,7 +67,7 @@ grids.
 
 If you usually think in terms of `polyfit`, the direct alignment is:
 
-- `polyfit(t, x, N-1)` corresponds to `ConstrainedSpline.fromGriddedValues(t, x, S=N-1, splineDOF=N)`
+- `polyfit(t, x, N-1)` corresponds to `ConstrainedSpline.fromData(t, x, S=N-1, splineDOF=N)`
 
 ## Planar trajectories
 
