@@ -33,8 +33,8 @@ xTrue = exp(-2.5*t).*sin(4*pi*t);
 xObs = xTrue + 0.08*randn(size(t));
 tq = linspace(t(1), t(end), 400)';
 
-noiseModel = NormalDistribution(0.08);
-fit = ConstrainedSpline(t, xObs, S=3, splineDOF=12, distribution=noiseModel);
+noiseModel = NormalDistribution(sigma=0.08);
+fit = ConstrainedSpline.fromGriddedValues(t, xObs, S=3, splineDOF=12, distribution=noiseModel);
 xFit = fit(tq);
 ```
 
@@ -65,7 +65,7 @@ larger values allow more local variation.
 splineDOF = [6 12 24];
 fits = cell(size(splineDOF));
 for iFit = 1:numel(splineDOF)
-    fits{iFit} = ConstrainedSpline(t, xObs, S=3, splineDOF=splineDOF(iFit), distribution=noiseModel);
+    fits{iFit} = ConstrainedSpline.fromGriddedValues(t, xObs, S=3, splineDOF=splineDOF(iFit), distribution=noiseModel);
 end
 ```
 

@@ -17,7 +17,7 @@ Tensor-product spline over multiple dimensions.
 
 ## Declaration
 
-<div class="language-matlab highlighter-rouge"><div class="highlight"><pre class="highlight"><code>classdef TensorSpline < handle</code></pre></div></div>
+<div class="language-matlab highlighter-rouge"><div class="highlight"><pre class="highlight"><code>classdef TensorSpline < CAAnnotatedClass</code></pre></div></div>
 
 ## Overview
 
@@ -41,14 +41,16 @@ paired column vectors evaluate paired sample locations, while matching
 
 ## Basic usage
 
-Use `TensorSpline` when you already have knot vectors and
-tensor-product coefficients and want to evaluate the resulting
-spline on matching-size query arrays.
+Use `TensorSpline.fromKnotPoints(...)` when you already have knot
+vectors and tensor-product coefficients and want to evaluate the
+resulting spline on matching-size query arrays. The low-level
+`TensorSpline(...)` constructor is the cheap solved-state constructor
+used directly by persistence and other internal bootstrap paths.
 
 ```matlab
 knotPoints = {[0;0;0;0;1;1;1;1], [0;0;0;0;1;1;1;1]};
 xi = randn(16,1);
-spline = TensorSpline(S=[3 3], knotPoints=knotPoints, xi=xi);
+spline = TensorSpline.fromKnotPoints(knotPoints, xi, S=[3 3]);
 
 [Xq,Yq] = ndgrid(linspace(0,1,40), linspace(0,1,40));
 F = spline(Xq, Yq);
@@ -59,12 +61,14 @@ F = spline(Xq, Yq);
 
 ## Topics
 + Create a spline
-  + [`TensorSpline`](/spline-core/classes/tensorspline/tensorspline.html) Create a tensor-product spline from per-dimension degrees, knots, and coefficients.
+  + [`TensorSpline`](/spline-core/classes/tensorspline/tensorspline.html) Create a tensor-product spline from canonical solved state.
+  + [`fromKnotPoints`](/spline-core/classes/tensorspline/fromknotpoints.html) Create a tensor-product spline from numeric knot vectors and coefficients.
 + Inspect spline properties
   + [`K`](/spline-core/classes/tensorspline/k.html) Spline order in each tensor dimension.
   + [`S`](/spline-core/classes/tensorspline/s.html) Polynomial degree in each tensor dimension.
   + [`basisSize`](/spline-core/classes/tensorspline/basissize.html) Number of basis functions in each dimension.
   + [`domain`](/spline-core/classes/tensorspline/domain.html) Minimum and maximum values of the spline domain in each dimension.
+  + [`knotAxes`](/spline-core/classes/tensorspline/knotaxes.html) Knot-axis objects defining the spline basis.
   + [`knotPoints`](/spline-core/classes/tensorspline/knotpoints.html) Knot vectors defining the spline basis.
   + [`numDimensions`](/spline-core/classes/tensorspline/numdimensions.html) Number of tensor dimensions.
   + [`xMean`](/spline-core/classes/tensorspline/xmean.html) Mean added back to zero-order evaluations.

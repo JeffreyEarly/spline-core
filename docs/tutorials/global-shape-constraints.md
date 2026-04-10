@@ -31,14 +31,14 @@ xTrue = 0.15 + 0.85*(1 - exp(-4*t));
 xObs = xTrue + 0.05*randn(size(t));
 tq = linspace(t(1), t(end), 400)';
 
-noiseModel = NormalDistribution(0.05);
-freeFit = ConstrainedSpline(t, xObs, S=3, splineDOF=12, distribution=noiseModel);
+noiseModel = NormalDistribution(sigma=0.05);
+freeFit = ConstrainedSpline.fromGriddedValues(t, xObs, S=3, splineDOF=12, distribution=noiseModel);
 
 shapeConstraints = [ ...
     GlobalConstraint.positive()
     GlobalConstraint.monotonicIncreasing()];
 
-shapeFit = ConstrainedSpline(t, xObs, S=3, splineDOF=12, distribution=noiseModel, constraints=shapeConstraints);
+shapeFit = ConstrainedSpline.fromGriddedValues(t, xObs, S=3, splineDOF=12, distribution=noiseModel, constraints=shapeConstraints);
 ```
 
 Plot the unconstrained and globally constrained fits together.

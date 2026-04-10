@@ -36,16 +36,18 @@ For full install details, see [Installation](installation).
 | --- | --- | --- |
 | exact and trusted | [`InterpolatingSpline`](classes/interpolatingspline) | [Spline Interpolation](tutorials/interpolation-on-grids) |
 | noisy or constrained | [`ConstrainedSpline`](classes/constrainedspline) | [Fitting Noisy Data](tutorials/fitting-noisy-data) |
+| planar `x(t), y(t)` samples | [`TrajectorySpline`](classes/trajectoryspline) | [TrajectorySpline reference](classes/trajectoryspline) |
 
 If you only remember one distinction, use `InterpolatingSpline` for exact
-interpolation and `ConstrainedSpline` for fitting.
+interpolation, `ConstrainedSpline` for fitting, and `TrajectorySpline`
+when you want a shared-parameter planar trajectory model.
 
 ## 3. Exact interpolation quickstart
 
 ```matlab
 t = linspace(0, 1, 12)';
 x = sin(2*pi*t);
-f = InterpolatingSpline(t, x, S=3);
+f = InterpolatingSpline.fromGriddedValues(t, x, S=3);
 
 tq = linspace(t(1), t(end), 200)';
 xq = f(tq);
@@ -56,7 +58,7 @@ This gives you a reusable spline object for values and derivatives. For
 rectilinear grids, pass one grid vector per dimension:
 
 ```matlab
-F = InterpolatingSpline({x, y}, V, S=[3 3]);
+F = InterpolatingSpline.fromGriddedValues({x, y}, V, S=[3 3]);
 Vq = F(Xq, Yq);
 ```
 
@@ -67,7 +69,7 @@ t = linspace(0, 1, 50)';
 xObs = exp(t) + 0.05*randn(size(t));
 
 noiseModel = NormalDistribution(0.05);
-fit = ConstrainedSpline(t, xObs, S=3, splineDOF=12, distribution=noiseModel);
+fit = ConstrainedSpline.fromGriddedValues(t, xObs, S=3, splineDOF=12, distribution=noiseModel);
 
 tq = linspace(t(1), t(end), 200)';
 xFit = fit(tq);
@@ -75,6 +77,26 @@ xFit = fit(tq);
 
 From the same starting point you can add robust error models, local point
 constraints, and global shape constraints.
+
+## 5. Planar trajectory quickstart
+
+```matlab
+t = linspace(0, 1, 24)';
+x = cos(2*pi*t);
+y = sin(2*pi*t);
+
+trajectory = TrajectorySpline.fromData(t, x, y, S=3);
+
+tq = linspace(t(1), t(end), 200)';
+xq = trajectory.x(tq);
+yq = trajectory.y(tq);
+uq = trajectory.u(tq);
+vq = trajectory.v(tq);
+```
+
+Use `TrajectorySpline.fromData(...)` for raw trajectory samples. The direct
+`TrajectorySpline(t=t, x=xSpline, y=ySpline)` constructor is the canonical
+solved-state path used for persisted restart and other bootstrap cases.
 
 ## Where to go next
 
@@ -85,4 +107,5 @@ constraints, and global shape constraints.
 - [Common Tasks](common-tasks)
 - [BSpline Foundations](tutorials/bspline-foundations)
 - [TensorSpline Foundations](tutorials/tensorspline-foundations)
+- [TrajectorySpline Reference](classes/trajectoryspline)
 - [Class Documentation](classes)

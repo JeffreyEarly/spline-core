@@ -45,7 +45,7 @@ tiledlayout(2, 2, TileSpacing="compact")
 
 for Splot = 0:3
     nexttile
-    splineFit = InterpolatingSpline(tData, xData, S=Splot);
+    splineFit = InterpolatingSpline.fromGriddedValues(tData, xData, S=Splot);
     plot(tq, splineFit(tq), LineWidth=2), hold on
     scatter(tData, xData, 22, "filled")
     for knotValue = unique(splineFit.knotPoints(:)).'
@@ -81,7 +81,7 @@ basisMatrix = BSpline.matrixForDataPoints(tData, knotPoints=knotPoints, S=S);
 xi = basisMatrix \ xData;
 
 directSpline = BSpline(S=S, knotPoints=knotPoints, xi=xi);
-interpolatingSpline = InterpolatingSpline(tData, xData, S=S);
+interpolatingSpline = InterpolatingSpline.fromGriddedValues(tData, xData, S=S);
 ```
 
 Plot the direct BSpline construction against InterpolatingSpline.

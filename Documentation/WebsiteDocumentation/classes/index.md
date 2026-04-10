@@ -22,14 +22,16 @@ If you are still choosing an approach, start with
 | --- | --- | --- |
 | [`InterpolatingSpline`](./interpolatingspline) | your values are trusted exactly and lie on a 1-D grid or rectilinear tensor grid | exact interpolation |
 | [`ConstrainedSpline`](./constrainedspline) | your data are noisy, weighted, or subject to point or global constraints | smoothing and constrained fitting |
+| [`TrajectorySpline`](./trajectoryspline) | you want a planar `x(t), y(t)` model with shared parameterization and persisted restart | fit and persist a two-dimensional trajectory |
 | [`BSpline`](./bspline) | you want direct access to one-dimensional basis matrices, derivatives, knot utilities, or PP coefficients | low-level 1-D spline work |
 | [`TensorSpline`](./tensorspline) | you want the multidimensional tensor-product analogue of `BSpline` | low-level tensor-product spline work |
 
-Most users should start with [`InterpolatingSpline`](./interpolatingspline)
-or [`ConstrainedSpline`](./constrainedspline). The lower-level
-[`BSpline`](./bspline) and [`TensorSpline`](./tensorspline) pages are
-mainly for building custom workflows, understanding the mathematics, or
-working directly with spline bases and coefficients.
+Most users should start with [`InterpolatingSpline`](./interpolatingspline),
+[`ConstrainedSpline`](./constrainedspline), or
+[`TrajectorySpline`](./trajectoryspline). The lower-level
+[`BSpline`](./bspline) and [`TensorSpline`](./tensorspline) pages are mainly
+for building custom workflows, understanding the mathematics, or working
+directly with spline bases and coefficients.
 
 ## How the classes relate
 
@@ -37,6 +39,7 @@ working directly with spline bases and coefficients.
 - [`TensorSpline`](./tensorspline) extends the same construction to multiple dimensions by taking tensor products of one-dimensional bases.
 - [`InterpolatingSpline`](./interpolatingspline) is the exact-fit constructor built on top of `TensorSpline`.
 - [`ConstrainedSpline`](./constrainedspline) is the noisy-data fitting constructor built on top of `TensorSpline`, with weights, robust distributions, and constraints.
+- [`TrajectorySpline`](./trajectoryspline) stores a shared-parameter planar trajectory as paired one-dimensional component splines and exposes direct `u(t)` and `v(t)` helpers.
 
 ## Constraint objects
 
@@ -73,4 +76,5 @@ class. Inherited behavior lives on the parent-class page, so higher-level
 pages stay shorter and easier to scan:
 
 - [`InterpolatingSpline`](./interpolatingspline) and [`ConstrainedSpline`](./constrainedspline) inherit most evaluation and transformation behavior from [`TensorSpline`](./tensorspline).
+- [`TrajectorySpline`](./trajectoryspline) documents the trajectory-specific construction and derivative helpers, while its `x` and `y` properties point back to the underlying spline components.
 - [`TensorSpline`](./tensorspline) mirrors many one-dimensional ideas from [`BSpline`](./bspline), but does not duplicate the full `BSpline` reference.

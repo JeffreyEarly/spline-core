@@ -3,7 +3,7 @@ layout: default
 title: valueAtPoints
 parent: TensorSpline
 grand_parent: Classes
-nav_order: 20
+nav_order: 22
 mathjax: true
 ---
 

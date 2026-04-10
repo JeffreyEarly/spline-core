@@ -1,9 +1,15 @@
-Interpolating splines and b-splines 
+Interpolating splines and b-splines
 ==============
 
-Core b-spline classes.
+Core spline classes for interpolation, constrained fitting, tensor-product
+construction, and planar trajectories.
 
-The `InterpolatingSpline` class is useful for interpolating between points when the data is not noisy, which is a subclass of `BSpline`---a class to generate b-splines from any set of knot points. These classes are the foundation of a variety of smoothing splines, which take noisy data and create a smoothed version.
+The main user-facing workflows in `spline-core` are exact interpolation
+with `InterpolatingSpline`, noisy or constrained fitting with
+`ConstrainedSpline`, and shared-parameter planar trajectory modeling with
+`TrajectorySpline`. The lower-level `BSpline` and `TensorSpline` classes
+provide direct access to spline bases, knot sequences, coefficients, and
+evaluation.
 
 If you use these classes, please cite the following paper,
 - Early, J. J., & Sykulski, A. M. (2020). [Smoothing and Interpolating Noisy GPS Data with Smoothing Splines](https://journals.ametsoc.org/view/journals/atot/37/3/JTECH-D-19-0087.1.xml), *Journal of Atmospheric and Oceanic Technology*, 37(3), 449-465.
@@ -42,17 +48,24 @@ Overview
 
 The `BSpline` class is a primitive class that creates b-splines given some set of knot points, and then evaluates the splines given some set of coefficients for the splines. This class is just for generating b-splines and doesn't do anything with data.
 
-The main user-facing spline classes are,
+The main spline classes are:
 
-- An `InterpolatingSpline` uses local b-splines to interpolate between data points. The (K-1)th derivative of a K order spline is piecewise continuous. This is a generalization of Matlab's cubic spline interpolation function.
-- The `ConstrainedSpline` class does a least-squares fit to given data points with a chosen tensor-product spline basis. Constraints can be added at any point in the domain and the class can also accommodate non-gaussian errors.
-- A `SmoothingSpline` can be used to smooth noisy data and attempt to recover the "true" underlying function.
+- `InterpolatingSpline` for exact interpolation on one-dimensional grids and
+  rectilinear tensor grids.
+- `ConstrainedSpline` for noisy-data fitting, robust fitting, and local or
+  global constraints.
+- `TrajectorySpline` for planar `x(t), y(t)` models built from a shared
+  parameter vector.
+- `TensorSpline` for low-level tensor-product spline construction and
+  evaluation.
+- `BSpline` for low-level one-dimensional spline construction and analysis.
 
-The `BivariateSmoothingSpline` essentially takes  (t,x,y) as input data and creates smoothing splines for both x, y *after* removing a mean  `ConstrainedSpline` fit from both directions. The idea is to make the data stationary and therefore treat tension parameter optimization isotropically. 
-
-The `GPSSmoothingSpline`  inherits from `BivariateSmoothingSpline` but takes latitude and longitude as arguments, and assume the noise follows a Student's t-distribution.
-
-All of these classes include extensive documentation within the code itself.
+For ordinary scientific setup, prefer the public factories
+`InterpolatingSpline.fromGriddedValues(...)`,
+`ConstrainedSpline.fromGriddedValues(...)`,
+`TensorSpline.fromKnotPoints(...)`, and
+`TrajectorySpline.fromData(...)`. The direct constructors are the cheap
+canonical solved-state and persistence path.
 
 Basis spline
 ------------
@@ -61,27 +74,22 @@ The `BSpline` class is a primitive class that creates b-splines given some set o
 
 The class would be initialized as follows,
 ```matlab
-K = 3; % order of spline
-D = K-1; % number of derivatives to return
+S = 3; % spline degree
 t = (0:10)'; % observation points
 
-% increase the multiplicity of the end knots for higher order splines
-t_knot = [repmat(t(1),K-1,1); t; repmat(t(end),K-1,1)];
-
-nSplines = length(t)+K-2;
-
-% coefficients for the bsplines---set all of them to zero for now.
-m = zeros(nSplines,1);
+knotPoints = BSpline.knotPointsForDataPoints(t, S=S);
+nSplines = numel(knotPoints) - (S + 1);
+xi = zeros(nSplines,1);
 
 % initialize the BSpline class
-B = BSpline(K,t_knot,m);
+B = BSpline(S=S, knotPoints=knotPoints, xi=xi);
 ```
 
 If you set the coefficient of one of the splines to 1, e.g.,
 ```matlab
-m = zeros(nSplines,1);
-m(3) = 1;
-B.m = m;
+xi = zeros(nSplines,1);
+xi(3) = 1;
+B = BSpline(S=S, knotPoints=knotPoints, xi=xi);
 ```
 Then you can plot that particular spline,
 ```matlab
@@ -91,7 +99,9 @@ figure, plot(tq,B(tq),'LineWidth',2)
 Here's an image of all the splines and their first derivatives plotted,
 <p align="center"><img src="figures/bspline.png" width="400" /></p>
 
-**Note the usage here that calling `B(t)` evaluates the splines at points `t`.** This same notation also works for derivatives where  `B(t,n)` will return the `n`-th derivative the spline at points `t`.
+**Note the usage here that calling `B(t)` evaluates the spline at points
+`t`.** Derivatives use
+`B.valueAtPoints(t, D=n)` for derivative order `n`.
 
 This class serves as a useful building block for other classes.
 

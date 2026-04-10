@@ -32,16 +32,16 @@ xTrue = 0.2 + 0.45*sin(2*pi*t) + 0.18*cos(5*pi*t);
 xObs = xTrue + 0.05*randn(size(t));
 tq = linspace(t(1), t(end), 500)';
 
-noiseModel = NormalDistribution(0.05);
-freeFit = ConstrainedSpline(t, xObs, S=3, splineDOF=11, distribution=noiseModel);
+noiseModel = NormalDistribution(sigma=0.05);
+freeFit = ConstrainedSpline.fromGriddedValues(t, xObs, S=3, splineDOF=11, distribution=noiseModel);
 
 valueConstraint = PointConstraint.equal(0.42, value=0.55);
 flatConstraint = PointConstraint.equal(0.42, D=1, value=0);
 curvatureConstraint = PointConstraint.equal(0.68, D=2, value=0);
 
-valueFit = ConstrainedSpline(t, xObs, S=3, splineDOF=11, distribution=noiseModel, constraints=valueConstraint);
-flatFit = ConstrainedSpline(t, xObs, S=3, splineDOF=11, distribution=noiseModel, constraints=flatConstraint);
-curvatureFit = ConstrainedSpline(t, xObs, S=3, splineDOF=11, distribution=noiseModel, constraints=curvatureConstraint);
+valueFit = ConstrainedSpline.fromGriddedValues(t, xObs, S=3, splineDOF=11, distribution=noiseModel, constraints=valueConstraint);
+flatFit = ConstrainedSpline.fromGriddedValues(t, xObs, S=3, splineDOF=11, distribution=noiseModel, constraints=flatConstraint);
+curvatureFit = ConstrainedSpline.fromGriddedValues(t, xObs, S=3, splineDOF=11, distribution=noiseModel, constraints=curvatureConstraint);
 ```
 
 Plot three single-constraint fits against the same unconstrained baseline.
@@ -100,7 +100,7 @@ combinedConstraints = [ ...
     PointConstraint.equal(0.42, value=0.55)
     PointConstraint.equal(0.42, D=1, value=0)];
 
-combinedFit = ConstrainedSpline(t, xObs, S=3, splineDOF=11, distribution=noiseModel, constraints=combinedConstraints);
+combinedFit = ConstrainedSpline.fromGriddedValues(t, xObs, S=3, splineDOF=11, distribution=noiseModel, constraints=combinedConstraints);
 combinedSlope = combinedFit.valueAtPoints(tq, D=1);
 ```
 

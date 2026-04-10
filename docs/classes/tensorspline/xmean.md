@@ -3,7 +3,7 @@ layout: default
 title: xMean
 parent: TensorSpline
 grand_parent: Classes
-nav_order: 21
+nav_order: 23
 mathjax: true
 ---
 
@@ -30,7 +30,7 @@ Mean added back to zero-order evaluations.
   `xMean`.
 
   ```matlab
-  spline = TensorSpline(S=[3 3], knotPoints=knotPoints, xi=xi, xMean=2.1, xStd=0.4);
+  spline = TensorSpline.fromKnotPoints(knotPoints, xi, S=[3 3], xMean=2.1, xStd=0.4);
   values = spline(Xq, Yq);
   ```
 

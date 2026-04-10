@@ -3,7 +3,7 @@ layout: default
 title: gridVectors
 parent: InterpolatingSpline
 grand_parent: Classes
-nav_order: 2
+nav_order: 4
 mathjax: true
 ---
 

@@ -9,7 +9,7 @@ mathjax: true
 
 #  TensorSpline
 
-Create a tensor-product spline from per-dimension degrees, knots, and coefficients.
+Create a tensor-product spline from canonical solved state.
 
 
 ---
@@ -20,8 +20,8 @@ Create a tensor-product spline from per-dimension degrees, knots, and coefficien
 ```
 ## Parameters
 + `options.S`  spline degree scalar or vector with one entry per dimension
-+ `options.knotPoints`  knot vector in 1-D or cell array of knot vectors
-+ `options.xi`  optional tensor-product coefficient array or vector
++ `options.knotAxes`  ordered SplineAxis array defining the tensor-product basis
++ `options.xi`  tensor-product coefficient array or vector
 + `options.xMean`  optional additive output offset
 + `options.xStd`  optional multiplicative output scale
 
@@ -30,8 +30,10 @@ Create a tensor-product spline from per-dimension degrees, knots, and coefficien
 
 ## Discussion
 
-  Use this constructor when you already know the per-dimension
-  knot vectors and tensor-product coefficients.
+  Use this low-level constructor when you already have the
+  spline degree, knot-axis objects, and coefficient state. For
+  ordinary numeric knot-vector construction, use
+  `TensorSpline.fromKnotPoints(...)`.
 
   The stored spline has the tensor-product form
 
@@ -42,7 +44,7 @@ Create a tensor-product spline from per-dimension degrees, knots, and coefficien
   $$
 
   ```matlab
-  spline = TensorSpline(S=[3 3], knotPoints=knotPoints, xi=xi);
+  spline = TensorSpline(S=[3 3], knotAxes=SplineAxis.arrayFromVectors(knotPoints), xi=xi);
   [Xq,Yq] = ndgrid(linspace(0,1,40), linspace(0,1,40));
   values = spline(Xq, Yq);
   ```

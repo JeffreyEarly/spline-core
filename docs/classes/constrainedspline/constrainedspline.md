@@ -9,47 +9,36 @@ mathjax: true
 
 #  ConstrainedSpline
 
-Create a tensor-product spline fit to noisy observations.
+Create a constrained spline from canonical solved state.
 
 
 ---
 
 ## Declaration
 ```matlab
- self = ConstrainedSpline(grid,values,options)
+ self = ConstrainedSpline(options)
 ```
 ## Parameters
-+ `grid`  numeric vector in 1-D or cell array of grid vectors in higher dimensions
-+ `values`  observation values
-+ `options.S`  optional spline degree scalar or vector with one entry per dimension
-+ `options.knotPoints`  optional knot vector in 1-D or cell array of knot vectors
-+ `options.splineDOF`  optional target number of splines per dimension
-+ `options.distribution`  optional error model object for the fit
-+ `options.constraints`  optional mixed SplineConstraint array
++ `options.S`  spline degree scalar or vector with one entry per dimension
++ `options.knotAxes`  ordered knot-axis objects defining the spline basis
++ `options.xi`  fitted coefficient vector or array
++ `options.gridAxes`  ordered fit-grid axis objects
++ `options.distribution`  error model used during the fit
++ `options.dataPoints`  observation locations as an N-by-D point matrix
++ `options.dataValues`  observation values as an N-by-1 vector
++ `options.pointConstraints`  optional PointConstraint array used during fitting
++ `options.globalConstraints`  optional GlobalConstraint array used during fitting
++ `options.xMean`  optional additive output offset
++ `options.xStd`  optional multiplicative output scale
 
 ## Returns
 + `self`  ConstrainedSpline instance
 
 ## Discussion
 
-  Use this constructor with a numeric vector in 1-D or a cell
-  array of grid vectors in higher dimensions when fitting noisy
-  tensor-product data sampled on a rectilinear grid.
-
-  If the design matrix is $$\mathbf{B}$$, the coefficient vector
-  is estimated by an iteratively reweighted least-squares solve
-  with optional linear equality and inequality constraints. The
-  weights are updated from the current residuals through the
-  supplied error `distribution`.
-
-  In one dimension, `S=N-1` together with `splineDOF=N` gives the
-  same least-squares polynomial fit as `polyfit(t,x,N-1)`.
-
-  ```matlab
-  x = linspace(0,1,20)';
-  y = exp(-20*(x-0.5).^2) + 0.05*randn(size(x));
-  spline = ConstrainedSpline(x, y, S=3, constraints=GlobalConstraint.positive());
-  yFit = spline(x);
-  ```
+  Use this low-level constructor when you already have the
+  solved spline coefficients, fit grid, observations, and
+  semantic constraints. For ordinary fitting from gridded data,
+  use `ConstrainedSpline.fromGriddedValues(...)`.
 
 

@@ -27,7 +27,7 @@ Spline order in each tensor dimension.
   `S = K - 1`.
 
   ```matlab
-  spline = TensorSpline(S=[3 3], knotPoints=knotPoints, xi=xi);
+  spline = TensorSpline.fromKnotPoints(knotPoints, xi, S=[3 3]);
   spline.K
   % returns [4 4]
   ```

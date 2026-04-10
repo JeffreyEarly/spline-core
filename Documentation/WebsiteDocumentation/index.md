@@ -19,6 +19,7 @@ spline framework for robust fitting and constraints.
 
 - [`InterpolatingSpline`](classes/interpolatingspline) plays a role similar to `interp1` in 1D and `griddedInterpolant`.
 - [`ConstrainedSpline`](classes/constrainedspline) can recover the same least-squares polynomial fit as `polyfit`.
+- [`TrajectorySpline`](classes/trajectoryspline) fits and persists planar `x(t), y(t)` trajectories with shared-parameter derivative helpers.
 - In 1D, spline knots are chosen from the sample locations, so irregularly spaced data are handled naturally.
 - `ConstrainedSpline` supports robust fitting, local point constraints, and global positivity or monotonicity constraints in the same API.
 
@@ -28,5 +29,6 @@ spline framework for robust fitting and constraints.
 | --- | --- |
 | [`InterpolatingSpline`](classes/interpolatingspline) | exact interpolation in 1D and on rectilinear tensor grids |
 | [`ConstrainedSpline`](classes/constrainedspline) | noisy-data fitting, robust fitting, and local or global constraints |
+| [`TrajectorySpline`](classes/trajectoryspline) | planar trajectory fitting and persistence with shared-parameter component splines |
 | [`BSpline`](classes/bspline) | low-level one-dimensional spline basis construction and analysis |
 | [`TensorSpline`](classes/tensorspline) | low-level tensor-product spline construction and analysis |

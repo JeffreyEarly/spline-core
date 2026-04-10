@@ -21,16 +21,18 @@ Interpolating spline on one-dimensional samples or rectilinear grids.
 
 ## Overview
 
-`InterpolatingSpline` is the exact-fit constructor for data already
-sampled on a one-dimensional grid or a rectilinear tensor grid. It is
-the class to use when your samples are trusted exactly and you want a
-spline whose evaluation reproduces those sample values at the supplied
-grid locations.
+`InterpolatingSpline` is the exact-fit counterpart to
+`ConstrainedSpline`. Use
+`InterpolatingSpline.fromGriddedValues(...)` when your samples live
+on a one-dimensional grid or a rectilinear tensor grid and should be
+reproduced exactly. The low-level `InterpolatingSpline(...)`
+constructor is the cheap solved-state constructor used for persisted
+restart and other direct bootstrap paths.
 
 Supported construction forms:
-  spline = InterpolatingSpline(x,V)
-  spline = InterpolatingSpline({x,y,...},V)
-  spline = InterpolatingSpline(grid,V,S=S)
+  spline = InterpolatingSpline.fromGriddedValues(x, V)
+  spline = InterpolatingSpline.fromGriddedValues({x, y, ...}, V)
+  spline = InterpolatingSpline(S=S, knotAxes=..., xi=..., gridAxes=...)
 
 If $$\mathbf{B}$$ is the tensor-product basis matrix on the supplied
 grid and $$\tilde{y}$$ is the normalized data vector, the stored
@@ -46,16 +48,12 @@ evaluation returns values on the original scale.
 
 ## Basic usage
 
-Use `InterpolatingSpline` when you have values on a rectilinear grid
-and want exact interpolation rather than smoothing or constrained
-regression.
-
 ```matlab
 x = linspace(0,1,8)';
 y = linspace(-1,1,9)';
 [X,Y] = ndgrid(x, y);
 F = sin(2*pi*X).*cos(pi*Y);
-spline = InterpolatingSpline({x, y}, F);
+spline = InterpolatingSpline.fromGriddedValues({x, y}, F, S=[3 3]);
 Fq = spline(X, Y);
 ```
 
@@ -64,8 +62,10 @@ Fq = spline(X, Y);
 
 ## Topics
 + Create an interpolating spline
-  + [`InterpolatingSpline`](/spline-core/classes/interpolatingspline/interpolatingspline.html) Create an interpolating spline on one-dimensional samples or a rectilinear grid.
+  + [`InterpolatingSpline`](/spline-core/classes/interpolatingspline/interpolatingspline.html) Create an interpolating spline from canonical solved state.
+  + [`fromGriddedValues`](/spline-core/classes/interpolatingspline/fromgriddedvalues.html) Create an interpolating spline from values on a rectilinear grid.
 + Inspect interpolation grids
+  + [`gridAxes`](/spline-core/classes/interpolatingspline/gridaxes.html) Grid-axis objects used to define the interpolation lattice.
   + [`gridVectors`](/spline-core/classes/interpolatingspline/gridvectors.html) Grid vectors used to define the interpolation lattice.
 
 

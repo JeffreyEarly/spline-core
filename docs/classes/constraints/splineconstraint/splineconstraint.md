@@ -9,25 +9,18 @@ mathjax: true
 
 #  SplineConstraint
 
-Common superclass for local and global spline constraint objects.
+Initialize the heterogeneous spline-constraint root.
 
 
 ---
 
 ## Declaration
 ```matlab
- classdef SplineConstraint < matlab.mixin.Heterogeneous
+ self = SplineConstraint()
 ```
+## Returns
++ `self`  SplineConstraint base-class instance
+
 ## Discussion
-
-  Use `SplineConstraint` when you want to pass a mixed array of
-  `PointConstraint` and `GlobalConstraint` objects through one API.
-
-  ```matlab
-  constraints = [
-      PointConstraint.equal(0, D=1, value=0)
-      GlobalConstraint.positive()
-  ];
-  ```
 
 

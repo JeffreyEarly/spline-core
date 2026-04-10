@@ -17,9 +17,10 @@ that also supports low-level basis access, robust fitting, and constraints.
 
 | Familiar MATLAB tool | `Spline Core` alignment | What `Spline Core` adds |
 | --- | --- | --- |
-| `interp1` | `InterpolatingSpline(t, x, S=3)` | reusable spline objects, derivatives, roots, and knot access |
-| `griddedInterpolant` | `InterpolatingSpline({x, y}, V, S=[3 3])` | tensor derivatives, basis access, and the same family as constrained fitting |
-| `polyfit` | `ConstrainedSpline(t, x, S=N-1, splineDOF=N)` | richer spline spaces, robust fitting, and constraints |
+| `interp1` | `InterpolatingSpline.fromGriddedValues(t, x, S=3)` | reusable spline objects, derivatives, roots, and knot access |
+| `griddedInterpolant` | `InterpolatingSpline.fromGriddedValues({x, y}, V, S=[3 3])` | tensor derivatives, basis access, and the same family as constrained fitting |
+| `polyfit` | `ConstrainedSpline.fromGriddedValues(t, x, S=N-1, splineDOF=N)` | richer spline spaces, robust fitting, and constraints |
+| manual paired spline fits for `x(t), y(t)` | `TrajectorySpline.fromData(t, x, y, S=3)` | shared parameterization, velocity helpers, and file persistence |
 
 ## `interp1` and one-dimensional interpolation
 
@@ -30,7 +31,7 @@ If your mental model is `interp1`, the alignment is straightforward:
 vq = interp1(t, x, tq, "spline");
 
 % spline-core
-f = InterpolatingSpline(t, x, S=3);
+f = InterpolatingSpline.fromGriddedValues(t, x, S=3);
 vq = f(tq);
 ```
 
@@ -52,7 +53,7 @@ F = griddedInterpolant({x, y}, V, "spline");
 Vq = F({xq, yq});
 
 % spline-core
-F = InterpolatingSpline({x, y}, V, S=[3 3]);
+F = InterpolatingSpline.fromGriddedValues({x, y}, V, S=[3 3]);
 Vq = F(Xq, Yq);
 ```
 
@@ -73,13 +74,13 @@ p = polyfit(t, x, 3);
 xFit = polyval(p, tq);
 
 % spline-core
-fit = ConstrainedSpline(t, x, S=3, splineDOF=4);
+fit = ConstrainedSpline.fromGriddedValues(t, x, S=3, splineDOF=4);
 xFit = fit(tq);
 ```
 
 The direct alignment is:
 
-- `polyfit(t, x, N-1)` corresponds to `ConstrainedSpline(t, x, S=N-1, splineDOF=N)`
+- `polyfit(t, x, N-1)` corresponds to `ConstrainedSpline.fromGriddedValues(t, x, S=N-1, splineDOF=N)`
 
 Where `Spline Core` goes beyond `polyfit`:
 
@@ -93,7 +94,7 @@ Robust fitting and constraints are the clearest places where `Spline Core`
 goes beyond MATLAB's standard interpolation tools.
 
 ```matlab
-fit = ConstrainedSpline(t, xObs, S=3, splineDOF=12, ...
+fit = ConstrainedSpline.fromGriddedValues(t, xObs, S=3, splineDOF=12, ...
     distribution=StudentTDistribution(sigma=0.1, nu=3), ...
     constraints=[
         PointConstraint.equal(0, D=1, value=0)
@@ -107,6 +108,27 @@ That single object can combine:
 - robust error models
 - local value or derivative constraints
 - global positivity or monotonicity constraints
+
+## Parametric trajectories
+
+MATLAB does not bundle a trajectory object that keeps `x(t)`, `y(t)`, and
+their derivatives together. The usual workflow is two separate fits plus
+manual bookkeeping. `TrajectorySpline` packages that shared-parameter path
+directly:
+
+```matlab
+trajectory = TrajectorySpline.fromData(t, x, y, S=3);
+xq = trajectory.x(tq);
+yq = trajectory.y(tq);
+uq = trajectory.u(tq);
+vq = trajectory.v(tq);
+```
+
+Where `Spline Core` goes beyond manual paired fits:
+
+- one object keeps the shared parameter and both component splines together
+- first derivatives are exposed directly through `u(...)` and `v(...)`
+- the canonical constructor aligns with annotated file persistence
 
 ## Where to go next
 

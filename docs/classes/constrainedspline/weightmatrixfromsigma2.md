@@ -3,7 +3,7 @@ layout: default
 title: weightMatrixFromSigma2
 parent: ConstrainedSpline
 grand_parent: Classes
-nav_order: 18
+nav_order: 20
 mathjax: true
 ---
 

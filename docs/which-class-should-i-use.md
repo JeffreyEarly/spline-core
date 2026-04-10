@@ -25,6 +25,7 @@ or if you need robust fitting or constraints, start with
 | Interpolate exact 1D data | [`InterpolatingSpline`](classes/interpolatingspline) | `interp1`, `spline` | Returns a reusable spline object rather than only values. |
 | Interpolate exact data on a rectilinear grid | [`InterpolatingSpline`](classes/interpolatingspline) | `griddedInterpolant` | Uses the same spline object model as the rest of the package. |
 | Fit noisy 1D or rectilinear-grid data | [`ConstrainedSpline`](classes/constrainedspline) | `polyfit` for simple 1D least-squares fits | Extends naturally to splines, robust fitting, and constraints. |
+| Fit a planar trajectory with shared parameter `t` | [`TrajectorySpline`](classes/trajectoryspline) | none directly | Keeps `x(t)`, `y(t)`, `u(t)`, and `v(t)` together in one persisted object. |
 | Add local value or derivative constraints | [`ConstrainedSpline`](classes/constrainedspline) with [`PointConstraint`](classes/constraints/pointconstraint) | none directly | Constrain the fitted spline at specific points. |
 | Add global positivity or monotonicity constraints | [`ConstrainedSpline`](classes/constrainedspline) with [`GlobalConstraint`](classes/constraints/globalconstraint) | none directly | Constrain the fit over the whole model domain. |
 | Work with tensor-product spline objects directly | [`TensorSpline`](classes/tensorspline) | none directly | Lower-level tensor basis, evaluation, and transforms. |
@@ -38,13 +39,13 @@ coefficients so that the spline matches the supplied values exactly.
 ```matlab
 t = sort(rand(20,1));
 x = sin(2*pi*t);
-f = InterpolatingSpline(t, x, S=3);
+f = InterpolatingSpline.fromGriddedValues(t, x, S=3);
 ```
 
 For rectilinear grids, pass one grid vector per dimension:
 
 ```matlab
-F = InterpolatingSpline({x, y}, V, S=[3 3]);
+F = InterpolatingSpline.fromGriddedValues({x, y}, V, S=[3 3]);
 Vq = F(Xq, Yq);
 ```
 
@@ -57,15 +58,33 @@ constraints enter the workflow.
 ```matlab
 t = sort(rand(50,1));
 x = exp(t) + 0.05*randn(size(t));
-fit = ConstrainedSpline(t, x, S=3, splineDOF=12);
+fit = ConstrainedSpline.fromGriddedValues(t, x, S=3, splineDOF=12);
 ```
 
-In higher dimensions, use `ConstrainedSpline({x, y}, values, ...)` for
-rectilinear grids.
+In higher dimensions, use
+`ConstrainedSpline.fromGriddedValues({x, y}, values, ...)` for rectilinear
+grids.
 
 If you usually think in terms of `polyfit`, the direct alignment is:
 
-- `polyfit(t, x, N-1)` corresponds to `ConstrainedSpline(t, x, S=N-1, splineDOF=N)`
+- `polyfit(t, x, N-1)` corresponds to `ConstrainedSpline.fromGriddedValues(t, x, S=N-1, splineDOF=N)`
+
+## Planar trajectories
+
+`TrajectorySpline` is a thin planar wrapper for paired component splines
+that share the same parameter `t`. Use it when you want `x(t)`, `y(t)`,
+and their first derivatives to stay together in one object and persist
+cleanly to file.
+
+```matlab
+t = linspace(0, 1, 40)';
+x = cos(2*pi*t);
+y = sin(2*pi*t);
+
+trajectory = TrajectorySpline.fromData(t, x, y, S=3);
+u = trajectory.u(t);
+v = trajectory.v(t);
+```
 
 ## Low-level spline work
 

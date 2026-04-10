@@ -20,7 +20,7 @@ main classes, start with [Which Class Should I Use?](which-class-should-i-use).
 ```matlab
 t = linspace(0, 1, 20)';
 x = sin(2*pi*t);
-f = InterpolatingSpline(t, x, S=3);
+f = InterpolatingSpline.fromGriddedValues(t, x, S=3);
 xq = f(linspace(t(1), t(end), 200)');
 ```
 
@@ -30,7 +30,7 @@ xq = f(linspace(t(1), t(end), 200)');
 - Pass one grid vector per dimension
 
 ```matlab
-F = InterpolatingSpline({x, y}, V, S=[3 3]);
+F = InterpolatingSpline.fromGriddedValues({x, y}, V, S=[3 3]);
 Vq = F(Xq, Yq);
 ```
 
@@ -41,7 +41,7 @@ Vq = F(Xq, Yq);
 
 ```matlab
 noiseModel = NormalDistribution(0.05);
-fit = ConstrainedSpline(t, xObs, S=3, splineDOF=12, distribution=noiseModel);
+fit = ConstrainedSpline.fromGriddedValues(t, xObs, S=3, splineDOF=12, distribution=noiseModel);
 ```
 
 To match the least-squares polynomial fit from `polyfit(t, x, N-1)`, use
@@ -53,7 +53,7 @@ To match the least-squares polynomial fit from `polyfit(t, x, N-1)`, use
 - Start with [Robust Fitting with Outliers](tutorials/robust-fitting-with-outliers)
 
 ```matlab
-fit = ConstrainedSpline(t, xObs, S=3, splineDOF=12, ...
+fit = ConstrainedSpline.fromGriddedValues(t, xObs, S=3, splineDOF=12, ...
     distribution=StudentTDistribution(sigma=0.05, nu=3));
 ```
 
@@ -68,7 +68,7 @@ constraints = [
     PointConstraint.equal(0.5, D=1, value=0)
 ];
 
-fit = ConstrainedSpline(t, xObs, S=3, splineDOF=12, constraints=constraints);
+fit = ConstrainedSpline.fromGriddedValues(t, xObs, S=3, splineDOF=12, constraints=constraints);
 ```
 
 ## Add global positivity or monotonicity constraints
@@ -77,7 +77,7 @@ fit = ConstrainedSpline(t, xObs, S=3, splineDOF=12, constraints=constraints);
 - Start with [Global Shape Constraints](tutorials/global-shape-constraints)
 
 ```matlab
-fit = ConstrainedSpline(t, xObs, S=3, splineDOF=12, ...
+fit = ConstrainedSpline.fromGriddedValues(t, xObs, S=3, splineDOF=12, ...
     constraints=GlobalConstraint.monotonicIncreasing());
 ```
 
@@ -87,9 +87,27 @@ fit = ConstrainedSpline(t, xObs, S=3, splineDOF=12, ...
 - Start with [2D Constraints](tutorials/rectilinear-grid-constraints-2d)
 
 ```matlab
-fit = ConstrainedSpline({x, y}, VObs, S=[3 3], splineDOF=[10 10], ...
+fit = ConstrainedSpline.fromGriddedValues({x, y}, VObs, S=[3 3], splineDOF=[10 10], ...
     constraints=GlobalConstraint.monotonicIncreasing(dimension=2));
 ```
+
+## Fit a planar trajectory from shared-parameter samples
+
+- Use [`TrajectorySpline`](classes/trajectoryspline)
+- Start with the [`TrajectorySpline`](classes/trajectoryspline) class reference
+
+```matlab
+trajectory = TrajectorySpline.fromData(t, x, y, S=3);
+tq = linspace(t(1), t(end), 200)';
+
+xq = trajectory.x(tq);
+yq = trajectory.y(tq);
+uq = trajectory.u(tq);
+vq = trajectory.v(tq);
+```
+
+For persisted restart or prefit component splines, construct the canonical
+state directly with `TrajectorySpline(t=t, x=xSpline, y=ySpline)`.
 
 ## Work directly with basis matrices
 

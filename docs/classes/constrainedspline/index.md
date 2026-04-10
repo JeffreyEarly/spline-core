@@ -58,7 +58,7 @@ spline to noisy values on a one-dimensional grid or rectilinear grid.
 ```matlab
 x = linspace(0,1,20)';
 y = exp(-20*(x-0.5).^2) + 0.05*randn(size(x));
-spline = ConstrainedSpline(x, y, S=3, constraints=GlobalConstraint.positive());
+spline = ConstrainedSpline.fromGriddedValues(x, y, S=3, constraints=GlobalConstraint.positive());
 yFit = spline(x);
 ```
 
@@ -67,12 +67,14 @@ yFit = spline(x);
 
 ## Topics
 + Create a constrained tensor spline
-  + [`ConstrainedSpline`](/spline-core/classes/constrainedspline/constrainedspline.html) Create a tensor-product spline fit to noisy observations.
+  + [`ConstrainedSpline`](/spline-core/classes/constrainedspline/constrainedspline.html) Create a constrained spline from canonical solved state.
+  + [`fromGriddedValues`](/spline-core/classes/constrainedspline/fromgriddedvalues.html) Create a constrained spline fit from values on a rectilinear grid.
 + Inspect fit results
   + [`dataPoints`](/spline-core/classes/constrainedspline/datapoints.html) Observation locations as an N-by-D point matrix.
   + [`dataValues`](/spline-core/classes/constrainedspline/datavalues.html) Observation values as an N-by-1 vector.
   + [`distribution`](/spline-core/classes/constrainedspline/distribution.html) Error model used while fitting the tensor spline.
   + [`globalConstraints`](/spline-core/classes/constrainedspline/globalconstraints.html) Global shape constraints used during fitting.
+  + [`gridAxes`](/spline-core/classes/constrainedspline/gridaxes.html) Grid-axis objects used to define the fitted rectilinear lattice.
   + [`gridVectors`](/spline-core/classes/constrainedspline/gridvectors.html) Grid vectors used to define the fitted rectilinear lattice.
   + [`pointConstraints`](/spline-core/classes/constrainedspline/pointconstraints.html) Local point constraints used during fitting.
 + Analyze the fit

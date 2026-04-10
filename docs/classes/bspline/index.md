@@ -17,7 +17,7 @@ Create, evaluate, and manipulate one-dimensional terminated B-splines.
 
 ## Declaration
 
-<div class="language-matlab highlighter-rouge"><div class="highlight"><pre class="highlight"><code>classdef BSpline < handle</code></pre></div></div>
+<div class="language-matlab highlighter-rouge"><div class="highlight"><pre class="highlight"><code>classdef BSpline < CAAnnotatedClass</code></pre></div></div>
 
 ## Overview
 

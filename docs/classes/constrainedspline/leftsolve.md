@@ -3,7 +3,7 @@ layout: default
 title: leftSolve
 parent: ConstrainedSpline
 grand_parent: Classes
-nav_order: 10
+nav_order: 12
 mathjax: true
 ---
 

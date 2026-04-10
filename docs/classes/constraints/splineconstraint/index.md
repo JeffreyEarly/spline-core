@@ -17,7 +17,7 @@ Common superclass for local and global spline constraint objects.
 
 ## Declaration
 
-<div class="language-matlab highlighter-rouge"><div class="highlight"><pre class="highlight"><code>classdef SplineConstraint < matlab.mixin.Heterogeneous</code></pre></div></div>
+<div class="language-matlab highlighter-rouge"><div class="highlight"><pre class="highlight"><code>classdef SplineConstraint < matlab.mixin.Heterogeneous & CAAnnotatedClass</code></pre></div></div>
 
 ## Overview
 
@@ -36,7 +36,7 @@ constraints = [
 
 ## Topics
 + Specify constraints
-  + [`SplineConstraint`](/spline-core/classes/constraints/splineconstraint/splineconstraint.html) Common superclass for local and global spline constraint objects.
+  + [`SplineConstraint`](/spline-core/classes/constraints/splineconstraint/splineconstraint.html) Initialize the heterogeneous spline-constraint root.
 
 
 ---
