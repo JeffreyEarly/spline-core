@@ -205,11 +205,11 @@ classdef SplinePersistenceUnitTests < matlab.unittest.TestCase
             testCase.verifyEqual(loadedMonotonic.dimension, monotonicConstraint.dimension)
         end
 
-        function trajectorySplineRoundTripPreservesComponentSplines(testCase)
+        function trajectorySplineConstructorRoundTripPreservesComponentSplines(testCase)
             t = linspace(0, 1, 17)';
             xSpline = ConstrainedSpline.fromGriddedValues(t, cos(2*pi*t), S=3);
             ySpline = ConstrainedSpline.fromGriddedValues(t, sin(2*pi*t), S=3);
-            trajectory = TrajectorySpline.fromComponentSplines(t, xSpline, ySpline);
+            trajectory = TrajectorySpline(t=t, x=xSpline, y=ySpline);
 
             path = string(strcat(tempname, '.nc'));
             cleanupPath = onCleanup(@() deleteIfPresent(path)); %#ok<NASGU>
@@ -221,6 +221,27 @@ classdef SplinePersistenceUnitTests < matlab.unittest.TestCase
 
             testCase.verifyTrue(ncfile.hasGroupWithName('x'))
             testCase.verifyTrue(ncfile.hasGroupWithName('y'))
+            testCase.verifyEqual(loaded.t, trajectory.t)
+            testCase.verifyClass(loaded.x, 'ConstrainedSpline')
+            testCase.verifyClass(loaded.y, 'ConstrainedSpline')
+            testCase.verifyEqual(loaded.x(t), trajectory.x(t), AbsTol=1e-10)
+            testCase.verifyEqual(loaded.y(t), trajectory.y(t), AbsTol=1e-10)
+            testCase.verifyEqual(loaded.u(t), trajectory.u(t), AbsTol=1e-10)
+            testCase.verifyEqual(loaded.v(t), trajectory.v(t), AbsTol=1e-10)
+        end
+
+        function trajectorySplineFromDataRoundTripPreservesSolvedState(testCase)
+            t = linspace(0, 1, 17)';
+            x = cos(2*pi*t);
+            y = sin(2*pi*t);
+            trajectory = TrajectorySpline.fromData(t, x, y, S=3);
+
+            path = string(strcat(tempname, '.nc'));
+            cleanupPath = onCleanup(@() deleteIfPresent(path)); %#ok<NASGU>
+            trajectory.writeToFile(path, shouldOverwriteExisting=true);
+
+            loaded = TrajectorySpline.annotatedClassFromFile(path);
+
             testCase.verifyEqual(loaded.t, trajectory.t)
             testCase.verifyClass(loaded.x, 'ConstrainedSpline')
             testCase.verifyClass(loaded.y, 'ConstrainedSpline')

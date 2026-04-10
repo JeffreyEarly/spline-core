@@ -1,25 +1,25 @@
 classdef TrajectorySpline < CAAnnotatedClass
-    % Two-dimensional interpolating trajectory parameterized by time or arc parameter.
+    % Two-dimensional trajectory model parameterized by a shared scalar variable.
     %
     % `TrajectorySpline` stores a planar parametric trajectory as two
-    % one-dimensional constrained splines,
+    % one-dimensional component splines,
     %
     % $$
     % x = x(t), \qquad y = y(t),
     % $$
     %
-    % built from a shared parameter vector `t`. Use this class when the
-    % trajectory should be represented componentwise so each coordinate can
-    % be evaluated independently through `trajectory.x(tq)` and
-    % `trajectory.y(tq)`, and the corresponding trajectory derivatives can
-    % be evaluated through `trajectory.u(tq)` and `trajectory.v(tq)`.
+    % built from a shared parameter vector `t`. Use
+    % `TrajectorySpline.fromData(...)` when raw coordinate samples should be
+    % fit as one-dimensional `ConstrainedSpline` objects. The low-level
+    % `TrajectorySpline(...)` constructor is the cheap canonical constructor
+    % used for persisted restart and other direct bootstrap paths.
     %
     % ```matlab
     % t = linspace(0, 1, 20)';
     % x = cos(2*pi*t);
     % y = sin(2*pi*t);
     %
-    % trajectory = TrajectorySpline(t, x, y, S=3);
+    % trajectory = TrajectorySpline.fromData(t, x, y, S=3);
     % xq = trajectory.x(t);
     % yq = trajectory.y(t);
     % ```
@@ -30,7 +30,7 @@ classdef TrajectorySpline < CAAnnotatedClass
     % - Declaration: classdef TrajectorySpline < CAAnnotatedClass
 
     properties (SetAccess = private)
-        % Parameter samples used to define the component splines.
+        % Parameter samples shared by both component splines.
         %
         % `t` is stored as a column vector and provides the shared
         % parameterization for both coordinate splines `x(t)` and `y(t)`.
@@ -38,104 +38,66 @@ classdef TrajectorySpline < CAAnnotatedClass
         % - Topic: Inspect trajectory properties
         t (:,1) double {mustBeReal,mustBeFinite}
 
-        % Constrained spline for the x-coordinate trajectory component.
+        % One-dimensional spline for the x-coordinate trajectory component.
         %
         % Evaluate the x-coordinate along the trajectory with
-        % `trajectory.x(tq)`. The returned object is a `ConstrainedSpline`,
-        % so fit metadata such as `dataPoints` and `dataValues` remain
-        % available on the coordinate component.
+        % `trajectory.x(tq)`. When the trajectory is created through
+        % `TrajectorySpline.fromData(...)`, this component is a
+        % `ConstrainedSpline`.
         %
         % - Topic: Inspect trajectory properties
         x
 
-        % Constrained spline for the y-coordinate trajectory component.
+        % One-dimensional spline for the y-coordinate trajectory component.
         %
         % Evaluate the y-coordinate along the trajectory with
-        % `trajectory.y(tq)`. The returned object is a `ConstrainedSpline`,
-        % so fit metadata such as `dataPoints` and `dataValues` remain
-        % available on the coordinate component.
+        % `trajectory.y(tq)`. When the trajectory is created through
+        % `TrajectorySpline.fromData(...)`, this component is a
+        % `ConstrainedSpline`.
         %
         % - Topic: Inspect trajectory properties
         y
     end
 
     methods
-        function self = TrajectorySpline(t, x, y, options)
-            % Create a two-dimensional trajectory from x(t) and y(t) samples.
+        function self = TrajectorySpline(options)
+            % Create a trajectory from canonical component-spline state.
             %
-            % Use this constructor when the two coordinate components of a
-            % planar trajectory are known at the same parameter samples and
-            % should each be represented by a 1-D `ConstrainedSpline`
-            % sharing the same parameter samples.
-            %
-            % The stored component splines are fit independently to
-            % `x(t)` and `y(t)` while exposing the `ConstrainedSpline`
-            % metadata for each coordinate.
-            %
-            % The resulting component models satisfy
-            %
-            % $$
-            % x(t_i) = x_i, \qquad y(t_i) = y_i,
-            % $$
-            %
-            % for each supplied sample pair `x_i`, `y_i` at parameter value
-            % `t_i`.
+            % Use this low-level constructor when you already have the
+            % shared trajectory parameter and the one-dimensional component
+            % spline objects. For ordinary fitting from raw sample values,
+            % use `TrajectorySpline.fromData(...)`.
             %
             % ```matlab
-            % t = linspace(0, 1, 20)';
-            % x = cos(2*pi*t);
-            % y = sin(2*pi*t);
-            % trajectory = TrajectorySpline(t, x, y, S=3);
+            % xSpline = ConstrainedSpline.fromGriddedValues(t, x, S=3);
+            % ySpline = ConstrainedSpline.fromGriddedValues(t, y, S=3);
+            % trajectory = TrajectorySpline(t=t, x=xSpline, y=ySpline);
             % ```
             %
             % - Topic: Create a trajectory spline
-            % - Declaration: self = TrajectorySpline(t,x,y,options)
-            % - Parameter t: numeric vector of shared trajectory parameter samples
-            % - Parameter x: numeric vector of x-coordinate samples at t
-            % - Parameter y: numeric vector of y-coordinate samples at t
-            % - Parameter options.S: spline degree shared by both coordinate splines
+            % - Declaration: self = TrajectorySpline(options)
+            % - Parameter options.t: strictly increasing shared trajectory parameter vector
+            % - Parameter options.x: one-dimensional spline for the x-coordinate
+            % - Parameter options.y: one-dimensional spline for the y-coordinate
             % - Returns self: TrajectorySpline instance
             arguments
-                t = []
-                x = []
-                y = []
-                options.S (1,1) double {mustBeReal,mustBeFinite,mustBeInteger,mustBeNonnegative} = 3
+                options.t (:,1) double {mustBeReal,mustBeFinite,mustBeNonempty}
+                options.x (1,1) TensorSpline
+                options.y (1,1) TensorSpline
             end
 
-            if isa(x, 'TensorSpline') || isa(y, 'TensorSpline')
-                if isempty(t) || isempty(x) || isempty(y)
-                    error('TrajectorySpline:MissingComponentSpline', 'Persisted/component construction requires t, x, and y.');
-                end
-                if ~isa(x, 'TensorSpline') || ~isa(y, 'TensorSpline')
-                    error('TrajectorySpline:InvalidComponentSpline', 'x and y must both be TensorSpline objects when using component-spline construction.');
-                end
-                validateattributes(t, {'numeric'}, {'vector','real','finite','nonempty'});
-                t = TrajectorySpline.normalizeParameter(t, shouldRequireMonotonic=false);
-                xSpline = x;
-                ySpline = y;
-            else
-                validateattributes(t, {'numeric'}, {'vector','real','finite','nonempty'});
-                validateattributes(x, {'numeric'}, {'vector','real','finite','nonempty'});
-                validateattributes(y, {'numeric'}, {'vector','real','finite','nonempty'});
-                t = TrajectorySpline.normalizeParameter(t, shouldRequireMonotonic=false);
-                x = reshape(x, [], 1);
-                y = reshape(y, [], 1);
+            if any(diff(options.t) <= 0)
+                error('TrajectorySpline:NonmonotonicParameter', 't must be strictly increasing.');
+            end
 
-                if numel(x) ~= numel(t) || numel(y) ~= numel(t)
-                    error('TrajectorySpline:SizeMismatch', 't, x, and y must have the same number of elements.');
-                end
-
-                xSpline = ConstrainedSpline.fromGriddedValues(t, x, S=options.S);
-                ySpline = ConstrainedSpline.fromGriddedValues(t, y, S=options.S);
+            if options.x.numDimensions ~= 1 || options.y.numDimensions ~= 1
+                error('TrajectorySpline:InvalidComponentSpline', 'x and y must be one-dimensional splines.');
             end
 
             self@CAAnnotatedClass();
-            if xSpline.numDimensions ~= 1 || ySpline.numDimensions ~= 1
-                error('TrajectorySpline:InvalidComponentSpline', 'x and y must be one-dimensional splines.');
-            end
-            self.t = t;
-            self.x = xSpline;
-            self.y = ySpline;
+            self.t = options.t;
+            self.x = options.x;
+            self.y = options.y;
         end
 
         function values = u(self, t)
@@ -184,48 +146,54 @@ classdef TrajectorySpline < CAAnnotatedClass
     end
 
     methods (Static)
-        function self = fromComponentSplines(t, xSpline, ySpline)
-            % Create a trajectory spline from pre-fit component splines.
+        function self = fromData(t, x, y, options)
+            % Create a trajectory spline from raw x(t) and y(t) samples.
             %
-            % Use this factory when the x- and y-coordinate trajectories
-            % have already been fit as one-dimensional splines and should
-            % be wrapped into a single `TrajectorySpline` container without
-            % refitting either component.
+            % Use this factory when the coordinate components of a planar
+            % trajectory are known at the same parameter samples and should
+            % each be fit as a one-dimensional `ConstrainedSpline`.
             %
-            % The resulting trajectory stores the supplied parameter vector
-            % `t` together with the supplied component splines
+            % The resulting component models satisfy
             %
             % $$
-            % x = x(t), \qquad y = y(t).
+            % x(t_i) = x_i, \qquad y(t_i) = y_i,
             % $$
+            %
+            % for each supplied sample pair `x_i`, `y_i` at parameter value
+            % `t_i`.
             %
             % ```matlab
-            % trajectory = TrajectorySpline.fromComponentSplines(t, xSpline, ySpline);
-            % xq = trajectory.x(t);
-            % yq = trajectory.y(t);
+            % t = linspace(0, 1, 20)';
+            % x = cos(2*pi*t);
+            % y = sin(2*pi*t);
+            % trajectory = TrajectorySpline.fromData(t, x, y, S=3);
             % ```
             %
             % - Topic: Create a trajectory spline
-            % - Declaration: self = fromComponentSplines(t,xSpline,ySpline)
-            % - Parameter t: numeric vector of shared trajectory parameter samples
-            % - Parameter xSpline: one-dimensional spline for the x-coordinate
-            % - Parameter ySpline: one-dimensional spline for the y-coordinate
+            % - Declaration: self = fromData(t,x,y,options)
+            % - Parameter t: strictly increasing shared trajectory parameter vector
+            % - Parameter x: x-coordinate samples evaluated at `t`
+            % - Parameter y: y-coordinate samples evaluated at `t`
+            % - Parameter options.S: spline degree shared by both coordinate splines
             % - Returns self: TrajectorySpline instance
-            arguments (Input)
-                t {mustBeNumeric,mustBeReal,mustBeFinite,mustBeNonempty,mustBeVector}
-                xSpline (1,1) TensorSpline
-                ySpline (1,1) TensorSpline
-            end
-            arguments (Output)
-                self (1,1) TrajectorySpline
+            arguments
+                t (:,1) double {mustBeReal,mustBeFinite,mustBeNonempty}
+                x (:,1) double {mustBeReal,mustBeFinite,mustBeNonempty}
+                y (:,1) double {mustBeReal,mustBeFinite,mustBeNonempty}
+                options.S (1,1) double {mustBeReal,mustBeFinite,mustBeInteger,mustBeNonnegative} = 3
             end
 
-            t = TrajectorySpline.normalizeParameter(t, shouldRequireMonotonic=true);
-            if xSpline.numDimensions ~= 1 || ySpline.numDimensions ~= 1
-                error('TrajectorySpline:InvalidComponentSpline', 'xSpline and ySpline must be one-dimensional splines.');
+            if numel(t) ~= numel(x) || numel(t) ~= numel(y)
+                error('TrajectorySpline:SizeMismatch', 't, x, and y must have the same number of elements.');
             end
 
-            self = TrajectorySpline(t, xSpline, ySpline);
+            if any(diff(t) <= 0)
+                error('TrajectorySpline:NonmonotonicParameter', 't must be strictly increasing.');
+            end
+
+            xSpline = ConstrainedSpline.fromGriddedValues(t, x, S=options.S);
+            ySpline = ConstrainedSpline.fromGriddedValues(t, y, S=options.S);
+            self = TrajectorySpline(t=t, x=xSpline, y=ySpline);
         end
     end
 
@@ -250,31 +218,18 @@ classdef TrajectorySpline < CAAnnotatedClass
             vars = CAAnnotatedClass.propertyValuesFromGroup(group, {'t'});
             xSpline = TensorSpline.annotatedClassFromGroup(group.groupWithName('x'));
             ySpline = TensorSpline.annotatedClassFromGroup(group.groupWithName('y'));
-            self = TrajectorySpline(vars.t, xSpline, ySpline);
+            self = TrajectorySpline(t=vars.t, x=xSpline, y=ySpline);
         end
 
         function propertyAnnotations = classDefinedPropertyAnnotations()
             propertyAnnotations = CAPropertyAnnotation.empty(0,0);
             propertyAnnotations(end+1) = CADimensionProperty('t', '', 'Trajectory parameter samples.');
-            propertyAnnotations(end+1) = CAObjectProperty('x', 'Spline model for the x-coordinate trajectory component.');
-            propertyAnnotations(end+1) = CAObjectProperty('y', 'Spline model for the y-coordinate trajectory component.');
+            propertyAnnotations(end+1) = CAObjectProperty('x', 'One-dimensional spline model for the x-coordinate trajectory component.');
+            propertyAnnotations(end+1) = CAObjectProperty('y', 'One-dimensional spline model for the y-coordinate trajectory component.');
         end
 
         function names = classRequiredPropertyNames()
             names = {'t', 'x', 'y'};
-        end
-    end
-
-    methods (Static, Access = private)
-        function t = normalizeParameter(t, options)
-            arguments
-                t
-                options.shouldRequireMonotonic (1,1) logical = true
-            end
-            t = reshape(t, [], 1);
-            if options.shouldRequireMonotonic && any(diff(t) <= 0)
-                error('TrajectorySpline:NonmonotonicParameter', 't must be strictly increasing.');
-            end
         end
     end
 end
