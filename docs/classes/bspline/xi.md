@@ -14,6 +14,9 @@ Spline coefficients as an Mx1 vector.
 
 ---
 
+## Description
+Real valued property with dimension $$coefficientIndex$$ and no units.
+
 ## Discussion
 
   The coefficient vector weights the terminated B-spline basis in

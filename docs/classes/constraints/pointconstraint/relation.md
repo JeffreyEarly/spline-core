@@ -14,6 +14,9 @@ Constraint relation: "==", ">=", or "<=".
 
 ---
 
+## Type
++ Class: `string`
+
 ## Discussion
 
 

@@ -14,6 +14,9 @@ Constraint locations as an N-by-D point matrix.
 
 ---
 
+## Description
+Real valued property with dimensions $$(constraintIndex,constraintDimension)$$ and no units.
+
 ## Discussion
 
 

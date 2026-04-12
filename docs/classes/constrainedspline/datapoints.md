@@ -14,6 +14,9 @@ Observation locations as an N-by-D point matrix.
 
 ---
 
+## Description
+Real valued property with dimensions $$(dataPointIndex,dataDimension)$$ and no units.
+
 ## Discussion
 
   Each row is one observation location in physical coordinates. For

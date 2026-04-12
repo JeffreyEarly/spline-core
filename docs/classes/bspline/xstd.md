@@ -14,6 +14,13 @@ Multiplicative scale applied to spline evaluations.
 
 ---
 
+## Type
++ Class: `double`
++ Size: `(1,1)`
+
+## Description
+Real valued property with no dimensions and no units.
+
 ## Discussion
 
   `xStd` is the multiplicative scaling in

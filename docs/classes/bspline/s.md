@@ -14,6 +14,9 @@ Polynomial degree S = K - 1.
 
 ---
 
+## Description
+Real valued property with no dimensions and no units.
+
 ## Discussion
 
   The degree is the highest power that appears in each local

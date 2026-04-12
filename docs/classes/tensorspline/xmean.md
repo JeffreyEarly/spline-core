@@ -14,6 +14,13 @@ Mean added back to zero-order evaluations.
 
 ---
 
+## Type
++ Class: `double`
++ Size: `(1,1)`
+
+## Description
+Real valued property with no dimensions and no units.
+
 ## Discussion
 
   `xMean` is the additive term in the stored tensor-product model

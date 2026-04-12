@@ -14,6 +14,10 @@ constraint kind.
 
 ---
 
+## Type
++ Class: `string`
++ Size: `(1,1)`
+
 ## Discussion
 
 

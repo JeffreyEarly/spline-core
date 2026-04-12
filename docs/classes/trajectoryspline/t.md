@@ -14,6 +14,10 @@ Parameter samples shared by both component splines.
 
 ---
 
+## Type
++ Class: `double`
++ Size: `(:,1)`
+
 ## Discussion
 
   `t` is stored as a column vector and provides the shared

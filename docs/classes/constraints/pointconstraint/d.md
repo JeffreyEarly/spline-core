@@ -14,6 +14,9 @@ Derivative orders as an N-by-D matrix.
 
 ---
 
+## Description
+Real valued property with dimensions $$(constraintIndex,constraintDimension)$$ and no units.
+
 ## Discussion
 
 

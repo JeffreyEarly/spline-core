@@ -14,6 +14,9 @@ Observation values as an N-by-1 vector.
 
 ---
 
+## Description
+Real valued property with dimension $$dataPointIndex$$ and no units.
+
 ## Discussion
 
   This is the flattened data vector `y` that appears in the

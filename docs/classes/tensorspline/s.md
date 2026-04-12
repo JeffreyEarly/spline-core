@@ -14,6 +14,9 @@ Polynomial degree in each tensor dimension.
 
 ---
 
+## Description
+Real valued property with dimension $$splineDimension$$ and no units.
+
 ## Discussion
 
   `S(k)` is the polynomial degree along tensor dimension `k`. So

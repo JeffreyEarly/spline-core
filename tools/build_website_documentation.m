@@ -1,34 +1,12 @@
 function build_website_documentation(options)
 arguments
     options.rootDir = ".."
+    options.rebuildTutorials (1,1) logical = false
 end
 rootDir = char(java.io.File(char(options.rootDir)).getCanonicalPath());
-buildFolder = fullfile(rootDir,"docs");
-sourceFolder = fullfile(rootDir,"Documentation","WebsiteDocumentation");
+buildFolder = fullfile(rootDir, "docs");
+sourceFolder = fullfile(rootDir, "Documentation", "WebsiteDocumentation");
 previousBuildFolder = "";
-
-if isfolder(fullfile(buildFolder, "tutorials"))
-    previousBuildFolder = tempname();
-    mkdir(previousBuildFolder);
-    copyfile(fullfile(buildFolder, "tutorials"), fullfile(previousBuildFolder, "tutorials"));
-end
-
-if isfolder(buildFolder)
-    rmdir(buildFolder, "s");
-end
-copyfile(sourceFolder,buildFolder);
-
-changelogPath = fullfile(rootDir, "CHANGELOG.md");
-if isfile(changelogPath)
-    header = "---" + newline +  "layout: default" + newline +  "title: Version History" + newline +  "nav_order: 100" + newline +  "---" + newline + newline;
-    versionHistoryText = header + fileread(changelogPath);
-    versionHistoryFilePath = fullfile(rootDir,"docs","version-history.md");
-    fid = fopen(versionHistoryFilePath, "w");
-    assert(fid ~= -1, "Could not open CHANGELOG.md for writing");
-    fwrite(fid, versionHistoryText);
-    fclose(fid);
-end
-
 tutorialSources = {
     fullfile(rootDir, "Examples", "Tutorials", "InterpolationOnGrids.m")
     fullfile(rootDir, "Examples", "Tutorials", "FittingNoisyData.m")
@@ -39,7 +17,41 @@ tutorialSources = {
     fullfile(rootDir, "Examples", "Tutorials", "BSplineFoundations.m")
     fullfile(rootDir, "Examples", "Tutorials", "TensorSplineFoundations.m")
 };
-tutorialDocumentation = TutorialDocumentation.documentationFromSourceFiles(tutorialSources,  buildFolder=buildFolder,  websiteRootURL="spline-core/",  websiteFolder="tutorials",  sourceRoot=rootDir,  previousBuildFolder=previousBuildFolder,  executionPaths=string(rootDir));
+
+if isfolder(fullfile(buildFolder, "tutorials"))
+    previousBuildFolder = tempname();
+    mkdir(previousBuildFolder);
+    copyfile(fullfile(buildFolder, "tutorials"), fullfile(previousBuildFolder, "tutorials"));
+end
+
+tutorialDocumentation = TutorialDocumentation.documentationFromSourceFiles( ...
+    tutorialSources, ...
+    buildFolder=buildFolder, ...
+    websiteRootURL="spline-core/", ...
+    websiteFolder="tutorials", ...
+    sourceRoot=rootDir, ...
+    previousBuildFolder=previousBuildFolder, ...
+    executionPaths=string(rootDir), ...
+    rebuildTutorials=options.rebuildTutorials);
+preservedTutorialDirectories = unique(string({tutorialDocumentation.preservedAssetDirectoryRelativeToBuildFolder}))';
+
+rebuildWebsiteDocumentationFromSource( ...
+    sourceFolder, ...
+    buildFolder, ...
+    string.empty(0, 1), ...
+    preservedRelativeDirectories=preservedTutorialDirectories);
+
+changelogPath = fullfile(rootDir, "CHANGELOG.md");
+if isfile(changelogPath)
+    header = "---" + newline +  "layout: default" + newline +  "title: Version History" + newline +  "nav_order: 100" + newline +  "---" + newline + newline;
+    versionHistoryText = header + fileread(changelogPath);
+    versionHistoryFilePath = fullfile(rootDir, "docs", "version-history.md");
+    fid = fopen(versionHistoryFilePath, "w");
+    assert(fid ~= -1, "Could not open CHANGELOG.md for writing");
+    fwrite(fid, versionHistoryText);
+    fclose(fid);
+end
+
 TutorialDocumentation.writeMarkdownIndex( ...
     tutorialDocumentation, ...
     buildFolder=buildFolder, ...

@@ -14,6 +14,13 @@ Mean added back to zero-order spline evaluations.
 
 ---
 
+## Type
++ Class: `double`
++ Size: `(1,1)`
+
+## Description
+Real valued property with no dimensions and no units.
+
 ## Discussion
 
   `xMean` is an output offset used in the stored spline model
